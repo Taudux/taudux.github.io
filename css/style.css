@@ -34,9 +34,9 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(180deg, #0000008c 0%, #0000008c 100%), url('../images/computer.jpg');
+    background-image: linear-gradient(180deg, #0000008c 0%, #0000008c 100%), url('../images/ales-nesetril-Im7lZjxeLhg-unsplash.jpg');
     background-size: cover;
-    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 95%, 0 80%);
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
     z-index: -1;
 }
 
@@ -54,6 +54,11 @@ body {
     grid-auto-flow: column;
     grid-auto-columns: max-content;
     gap: 2em;
+    transition: color 0.3s ease;
+}
+
+.navLinks:hover {
+    color: #ff5e17;
 }
 
 .navTitle{
@@ -106,12 +111,13 @@ body {
 
 .cta{
     display: inline-block;
-    background-color: #2091f9;
+    background: linear-gradient(79deg, #ff8d1c, #ff5e17 50%, #ff3414);
     justify-self: center;
     color: #fff;
     text-decoration: none;
     padding: 13px 30px;
     border-radius: 33px;
+    box-shadow: 0rem 0 1rem #fff;
 }
 
 /* seccion about us */
@@ -212,6 +218,7 @@ body {
     --bg-cta: #fff;
     --color-cta: #5454d4;
     --color-items: #696871;
+    min-height: 20px;
 }
 
 .priceElement--best{
@@ -230,8 +237,12 @@ body {
 }
 
 .pricePrice{
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     color: var(--color--price);
+}
+
+.priceFeatures{
+    font-size: 1rem;
 }
 
 .priceItem{
@@ -469,7 +480,7 @@ text-align: center;
 }
 
 .footerCopyrigh{
-    font-weight: 300;
+    font-weight: 200;
 }
 
 .footerIcons{
@@ -477,7 +488,7 @@ text-align: center;
 }
 
 .footer.img{
-    width: 30px;
+    width: 50px;
 }
 
 /* Media queries section */

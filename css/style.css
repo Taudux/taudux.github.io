@@ -256,3 +256,60 @@ body {
 
 /* team presentacion testimonial*/
 
+.testimony{
+    background-color: #e5e5f7;
+}
+
+.testimonyContainer{
+    display: grid;
+    grid-template-columns: 50px 1fr 50px;
+    gap: 1em;
+    align-items: center;
+}
+
+.testimonyBody{
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2em;
+    grid-column: 2/3;
+    grid-row: 1/2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;
+}
+
+.testimonyBody--Show{
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.testimonyBody:hover {
+    opacity: 0.6; /* Cambia la opacidad al hacer hover */
+}
+
+.testimonyCourse{
+    background-color: royalblue;
+    color: #fff;
+    display: inline-block;
+    padding: 5px;
+
+}
+
+.testimonyImg{
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: 50% 30%;
+}
+
+.testimonyText{
+    max-width: 700px;
+}
+
+.testimonyArrow{
+    width: 90%;
+    cursor: pointer;
+}

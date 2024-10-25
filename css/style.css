@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900?display=swap');
+
+:root{
+    --padding-container: 100px 0px;
+    --color-title: #001A49;
+}
+body { 
+    font-family: 'Poppins', sans-serif;
+}
+
+.container{
+    width: 90%;
+    max-width: 1200px;
+    margin: 0px auto;
+    overflow: hidden;
+    padding: var(--padding-container);
+}
+
+.hero{
+   width: 100%;
+   height: 100vh;
+   min-height: 600px;
+   max-height: 800px;
+   position: relative;
+   display: grid;
+   grid-template-rows: 100px 1fr;
+   color: aliceblue;
+}
+
+.hero::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(180deg, #0000008c 0%, #0000008c 100%), url('../images/computer.jpg');
+    background-size: cover;
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 95%, 0 80%);
+    z-index: -1;
+}
+
+.nav {
+    --padding-container: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.navLink{
+    margin-left: auto;
+    padding: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    gap: 2em;
+}
+
+.navTitle{
+    font-weight: 300;
+}
+
+.navItems{
+    list-style: none;
+}
+
+.navLinks{
+    color: aliceblue;
+    text-decoration: none;
+}
+
+.navMenu{
+    margin-left: auto;
+    cursor: pointer;
+    display: none;
+}
+
+.navHamburguer{
+    display: block;
+    width: 30px;
+}
+
+.navClose{
+    display: var(--show, none);
+}
+
+/* hero container */
+.heroContainer{
+    max-width: 800px;
+    display: grid;
+    --padding-container:0;
+    grid-auto-rows: max-content;
+    align-content: center;
+    gap: 1em;
+    padding-bottom: 100px;
+    text-align: center;
+}
+
+.heroTitle{
+    font-size: 3rem;
+}
+
+.heroParagraph{
+    margin-bottom: 20px;
+}
+
+.cta{
+    display: inline-block;
+    background-color: #2091f9;
+    justify-self: center;
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 30px;
+    border-radius: 33px;
+}
+
+/* seccion about us */
+
+.about{
+    text-align: center;
+}
+
+.subTitle{
+    color: var(--color-title);
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+
+.aboutParagraph{
+    line-height: 1.7;
+}
+
+.aboutIcons{
+    display:grid;
+    gap: 1em;
+    justify-items: center;
+    width: 260px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.aboutIcon{
+    width: 40px;
+}
+
+.aboutMain{
+    padding-top: 80px;
+    display: grid;
+    width: 90%;
+    margin: 0 auto;
+    gap: 1em;
+    overflow: hidden;
+    grid-template-columns: repeat(auto-fit, minmax(260px, auto));
+}
+
+/* sección de knowledge */
+
+.knowledge{
+    background-color: #e5e5f7;
+    opacity: 0.9;
+    background-image:  radial-gradient(#444cf7 0.5px, transparent 0.5px), radial-gradient(#444cf7 0.5px, #e5e5f7 0.5px);
+    background-size: 20px 20px;
+    background-position: 0 0,10px 10px;
+    overflow: hidden;
+}
+
+.knowledgeContainer{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+    align-items: center;
+}
+
+.knowledgePicture{
+    max-width: 500px;
+}
+
+.knowledgeImg{
+    width: 100%;
+    display: block;
+}
+
+.knowledgeParagraph{
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+/* Nuestro Enfoque y Proceso de Trabajo */
+
+.price{
+    text-align: center;
+}
+
+.priceTable{
+    padding-top: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5em;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.priceElement{
+    background-color: #e5e5f7;
+    text-align: center;
+    border-radius: 10px;
+    width: 330px;
+    padding: 40px;
+    --color--plan: #696871;
+    --color--price: #1D293f;
+    --bg-cta: #fff;
+    --color-cta: #5454d4;
+    --color-items: #696871;
+}
+
+.priceElement--best{
+    background-color:darkorange;
+    --color--plan: rgb(255 255 255 / 75%);
+    --color--price: #ffffff;
+    --bg-cta: #9f3919;
+    --color-cta: #ffffff;
+    --color-items: #ffffff;
+}
+
+.priceName{
+    color: var(--color--plan);
+    margin-bottom: 15px;
+    font-weight: 300;
+}
+
+.pricePrice{
+    font-size: 2.5rem;
+    color: var(--color--price);
+}
+
+.priceItem{
+    margin-top: 35px;
+    display: grid;
+    gap: 1em;
+    font-weight: 300;
+    font-size: 1.3rem;
+    margin-bottom: 50px;
+    color: var(--color-items);
+}
+
+.priceCta{
+    display: block;
+    padding: 20px 0;
+    border-radius: 10px;
+    text-decoration: none;
+    background-color: var(--bg-cta);
+    font-weight: 600;
+    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
+    color: var(--color-cta)
+}
+
+/* team presentacion testimonial*/
+

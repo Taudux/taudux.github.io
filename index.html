@@ -21,15 +21,18 @@
                     <a href="#" class="navLinks">Inicio</a>
                 </li>
                 <li class="navItems">
-                    <a href="#" class="navLinks">Acerca de</a>
+                    <a href="#about" class="navLinks">Acerca de</a>
                 </li>
                 <li class="navItems">
-                    <a href="#" class="navLinks">Contacto</a>
+                    <a href="#Enfoque" class="navLinks">Enfoque</a>
                 </li>
                 <li class="navItems">
-                    <a href="#" class="navLinks">Blog</a>
+                    <a href="#Team" class="navLinks">team</a>
                 </li>
-                <img src="./images/xCircle.svg" class="navClose" alt="x close">
+                <li class="navItems">
+                    <a href="#Question" class="navLinks">Preguntas frecuentes</a>
+                </li>
+                <img src="./images/" class="navClose" alt="x close">
             </ul>
             <div class="navMenu">
                 <img src="./images/menuAltRight.svg" class="navHamburguer" alt="hamburguer menu">
@@ -43,7 +46,7 @@
         </section>
     </header>
     <main>
-        <section class="container about">
+        <section class="container about" id="about">
             <h2 class="subTitle"> ¿cuál es nuestra pasión? </h2>
             <p class="aboutParagraph"> En [title it's comming...], somos un equipo apasionado de desarrolladores
                 comprometidos a transformar tus ideas en soluciones digitales innovadoras. Con un enfoque en la calidad
@@ -98,7 +101,7 @@
                 </figure>
             </div>
         </section>
-        <section class="price container">
+        <section class="price container" id="Enfoque">
             <h2 class="subTitle"> Nuestro Enfoque y Proceso de Trabajo </h2>
 
             <div class="priceTable">
@@ -116,7 +119,7 @@
 
                 <div class="priceElement priceElement--best">
                     <p class="priceName"> grid </p>
-                    <h3 class="pricePrice"> 30mes </h3>
+                    <h3 class="pricePrice"> titulo de cart </h3>
                     <div class="priceItem">
                         <p class="priceFeatures"> grid </p>
                         <p class="priceFeatures"> implicit </p>
@@ -139,7 +142,7 @@
                 </div>
             </div>
         </section>
-        <section class="testimony">
+        <section class="testimony" id="Team">
             <div class="testimonyContainer container">
                 <img src="./images/leftArrow.svg" alt="flecha a la izquierda" class="testimonyArrow" id="before">
                 <section class="testimonyBody testimonyBody--Show" data-id="1">
@@ -196,7 +199,7 @@
                 <img src="./images/rightArrow.svg" alt="flecha a la derecha" class="testimonyArrow" id="next">
             </div>
         </section>
-        <section class="questions container">
+        <section class="questions container" id="Question">
             <h2 class="subTitle"> Preguntas frecuentes</h2>
             <p class="questionParagraph">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis rem nesciunt deserunt placeat at
@@ -245,25 +248,28 @@
     <footer class="footer">
         <section class="footerContainer container">
             <nav class="nav nav--footer">
-                <h2 class="footerTitle"> Curso css </h2>
+                <h2 class="footerTitle"> footer title </h2>
                 <ul class="navLink navLink--footer">
                     <li class="navItems">
                         <a href="#" class="navLinks">Inicio</a>
                     </li>
                     <li class="navItems">
-                        <a href="#" class="navLinks">Acerca de</a>
+                        <a href="#about" class="navLinks">Acerca de</a>
                     </li>
                     <li class="navItems">
-                        <a href="#" class="navLinks">Contacto</a>
+                        <a href="#Enfoque" class="navLinks">Enfoque</a>
                     </li>
                     <li class="navItems">
-                        <a href="#" class="navLinks">Blog</a>
+                        <a href="#Team" class="navLinks">Team</a>
+                    </li>
+                    <li class="navItems">
+                        <a href="#Question" class="navLinks">Preguntas frecuentes</a>
                     </li>
                 </ul>
             </nav>
             <form action="" class="footerForm">
                 <h2 class="footerNewsletter"> suscribete a la news letter </h2>
-                <div class="footerInput">
+                <div class="footerInputs">
                     <input class="footerInput" type="email" placeholder="Email" id="">
                     <input type="submit" value="Registrate" class="footerSubmit">
                 </div>
@@ -280,6 +286,7 @@
     </footer>
     <script src="./Js/slider.js"></script>
     <script src="./Js/questions.js"></script>
+    <script src="./Js/menu.js"></script>
 </body>
 
 </html>

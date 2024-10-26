@@ -8,11 +8,10 @@
 
             addPadding.classList.toggle('questionsPadding--add')
             question.children[0].classList.toggle('questionsArrow--rotate')
-            // Alternar altura
             if (answer.style.height) {
-                answer.style.height = null; // Colapsa la respuesta
+                answer.style.height = null;
             } else {
-                answer.style.height = `${answer.scrollHeight}px`; // Expande la respuesta
+                answer.style.height = `${answer.scrollHeight}px`;
             }
         });
     });

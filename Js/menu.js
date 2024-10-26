@@ -3,7 +3,7 @@
     const menu = document.querySelector('.navLinkMenu');
     const closeMenu = document.querySelector('.navClose');
 
-    if (openButton && menu && closeMenu) {  // Asegurarse de que existen
+    if (openButton && menu && closeMenu) { 
         openButton.addEventListener('click', () => {
             menu.classList.add('navLinkMenu--show');
         });

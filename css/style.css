@@ -330,7 +330,7 @@ body {
     padding: 20px 0;
     border-radius: 10px;
     text-decoration: none;
-    background: linear-gradient(79deg, #ff8d1c, #ff5e17 50%, #ff3414); /* Usa 'background' en lugar de 'background-color' */
+    background: linear-gradient(79deg, #ff8d1c, #ff5e17 50%, #ff3414);
     font-weight: 600;
     box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -341,7 +341,7 @@ body {
     padding: 20px 0;
     border-radius: 10px;
     text-decoration: none;
-    background: linear-gradient(79deg, #0f0f0f, #adadad 50%, #0f0f0f); /* Usa 'background' en lugar de 'background-color' */
+    background: linear-gradient(79deg, #0f0f0f, #adadad 50%, #0f0f0f);
     font-weight: 600;
     box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -351,12 +351,12 @@ body {
 
 .testimony {
     background-color: #000000;
-    background-image: url('/images/Diseño\ sin\ título\ \(1\).jpg'); /* Agrega la imagen de fondo */
-    background-size: cover; /* Hace que la imagen cubra todo el área del elemento */
-    background-position: center; /* Centra la imagen en el elemento */
-    background-repeat: no-repeat; /* Evita que la imagen se repita */
-    padding: 20px; /* Espaciado interno opcional */
-    color: white; /* Color del texto para mayor contraste */
+    background-image: url('/images/Diseño\ sin\ título\ \(1\).jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    color: white;
 }
 
 .testimonyContainer {
@@ -428,8 +428,6 @@ body {
     display: grid;
     gap: 2em;
     padding-top: 50px;
-    /* arriba o abajo esto puede ser más corto */
-    /* padding-bottom: 100px; */
 }
 
 .questionsPadding {

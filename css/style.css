@@ -2,7 +2,7 @@
 
 :root {
     --padding-container: 100px 0px;
-    --color-title: #001A49;
+    --color-title: #0549a4;
 }
 
 body {
@@ -40,6 +40,11 @@ body {
     clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
     z-index: -1;
 }
+.logoImage {
+    width: 208px;
+    height: auto;
+    padding: 31px 0px 0px 0px;
+}
 
 /*Barra de navegacion externa*/
 .scroll-navbar {
@@ -68,7 +73,7 @@ body {
 }
 
 .scroll-navbar a:hover {
-    color: #ff5e17; 
+    color: #bd2828; 
 }
 
 .scroll-menu {
@@ -105,7 +110,7 @@ body {
 }
 
 .navLinks:hover {
-    color: #ff5e17;
+    color: #bd2828;
 }
 
 .navTitle {
@@ -172,7 +177,7 @@ body {
 
 .cta {
     display: inline-block;
-    background: linear-gradient(79deg, #ff8d1c, #ff5e17 50%, #ff3414);
+    background: linear-gradient(79deg, #0549a4, #2ca9f1, #0549a4);
     justify-self: center;
     margin: 0px 0px 0px 19px;
     color: #fff;
@@ -195,7 +200,7 @@ body {
 }
 
 .subTitle {
-    color: #ff5e17;
+    color: #0549a4;
     font-size: 2rem;
     margin-bottom: 25px;
 }
@@ -238,7 +243,8 @@ body {
 .knowledge {
     background-color: #e5e5f7;
     opacity: 0.9;
-    background-image: radial-gradient(#ff3414 0.5px, transparent 0.5px), radial-gradient(#ff8d1c 0.5px, #000000 1.5px);
+    background-image: radial-gradient(#0549a4 0.5px, transparent 0.5px), radial-gradient(#2ca9f1 0.5px, #000000 1.5px);
+    /*  background: linear-gradient(79deg, #0549a4, #2ca9f1, #0549a4);*/
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
     overflow: hidden;
@@ -330,7 +336,7 @@ body {
     padding: 20px 0;
     border-radius: 10px;
     text-decoration: none;
-    background: linear-gradient(79deg, #ff8d1c, #ff5e17 50%, #ff3414);
+    background: linear-gradient(79deg, #0549a4, #2ca9f1, #0549a4);
     font-weight: 600;
     box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -341,13 +347,18 @@ body {
     padding: 20px 0;
     border-radius: 10px;
     text-decoration: none;
-    background: linear-gradient(79deg, #0f0f0f, #adadad 50%, #0f0f0f);
+    background: linear-gradient(79deg, #bd2828, #6d1414 50%, #bd2828);
     font-weight: 600;
     box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
     color: #fff;
 }
 
 /* team presentacion testimonial*/
+.subTitleTestimony{
+    color: #2ca9f1;
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
 
 .testimony {
     background-color: #000000;
@@ -427,13 +438,13 @@ body {
 .questionsContainer {
     display: grid;
     gap: 2em;
-    padding-top: 50px;
+    padding-top: 20px;
 }
 
 .questionsPadding {
     padding: 0;
     transition: padding .2s;
-    border: 1px solid #5454d4;
+    border: 1px solid #2ca9f1;
     border-radius: 6px;
 }
 
@@ -580,6 +591,12 @@ body {
 
 .footer.img {
     width: 50px;
+}
+
+.footerImg {
+    width: 30px; 
+    height: 30px; 
+    object-fit: cover; 
 }
 
 /* Media queries section */

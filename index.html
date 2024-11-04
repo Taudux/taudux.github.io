@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Its comming.. </title>
-    <link rel="shortcut icon" href="./images/upArrow.svg" type="image/x-icon">
+    <title> Taudux </title>
+    <link rel="shortcut icon" href="./images/logo_tau.png" type="image/x-icon">
     <link rel="stylesheet" href="./css/normalize.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -14,16 +14,16 @@
     <header class="hero">
         <nav class="scroll-navbar">
             <ul class="scroll-menu">
-                <li class='scroll-menu-li'><a href="#inicio">Inicio</a></li>
+                <li class='scroll-menu-li'><a href="#">Inicio</a></li>
                 <li class='scroll-menu-li'><a href="#about">Acerca de</a></li>
-                <li class='scroll-menu-li'><a href="#contacto">Enfoque</a></li> <!-- Corregido aquí -->
+                <li class='scroll-menu-li'><a href="#Enfoque">Enfoque</a></li> 
                 <li class='scroll-menu-li'><a href="#blog">Team</a></li>
                 <li class='scroll-menu-li'><a href="#Question">Preguntas frecuentes</a></li>
             </ul>
         </nav>
         <nav class="nav container">
             <div class="navLogo">
-                <h2 class="navTitle">logo de pagina</h2>
+                <img src="./images/logo_tau.png" alt="Logo de la página" class="logoImage">
             </div>
             <ul class="navLink navLinkMenu">
                 <li class="navItems">
@@ -48,16 +48,17 @@
             </div>
         </nav>
         <section class="heroContainer container">
-            <h1 class="heroTitle"> aquí va el titulo de la pagina</h1>
-            <p class="heroParagraph"> Llevamos tus ideas al siguiente nivel. Creamos software que no solo funciona, sino
+            <h1 class="heroTitle"> Bienvenido a Taudux </h1>
+            <p class="heroParagraph"> Llevamos tus ideas al siguiente nivel. <br> Creamos software que no solo funciona,
+                sino
                 que sorprende y conecta.</p>
-            <a href="" class="cta"> ¡Creemos algo increíble juntos! </a>
+            <a href="#Question" class="cta"> ¡Creemos algo increíble juntos! </a>
         </section>
     </header>
     <main>
         <section class="container about" id="about">
-            <h2 class="subTitle"> ¿cuál es nuestra pasión? </h2>
-            <p class="aboutParagraph"> En [title it's comming...], somos un equipo apasionado de desarrolladores
+            <h2 class="subTitle"> ¿Cuál es nuestra pasión? </h2>
+            <p class="aboutParagraph"> En Taudux, somos un equipo apasionado de desarrolladores
                 comprometidos a transformar tus ideas en soluciones digitales innovadoras. Con un enfoque en la calidad
                 y la colaboración, trabajamos codo a codo contigo para crear software que no solo cumple, sino que
                 supera tus expectativas. ¡Juntos, construimos el futuro!</p>
@@ -100,9 +101,12 @@
                     <h2 class="subTitle">
                         Nuestro conocimiento
                     </h2>
-                    <p class="knowledgeParagraph"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis
-                        dolorum vero optio quidem saepe nobis eos. Aut, labore beatae quibusdam placeat velit enim error
-                        quos, consequatur, at nam deserunt repellendus?</p>
+                    <p class="knowledgeParagraph"> Combinamos experiencia en desarrollo de software con análisis de
+                        datos avanzados para brindar soluciones completas y personalizadas. Nuestro equipo de
+                        desarrolladores y analistas trabaja en conjunto para transformar datos en decisiones y convertir
+                        ideas en aplicaciones eficaces. Ya sea optimizando procesos, desarrollando aplicaciones
+                        intuitivas o extrayendo insights valiosos, estamos aquí para ayudarte a alcanzar tus objetivos.
+                    </p>
                     <a href="#" class="cta"> contactanos </a>
                 </div>
                 <figure class="knowledgePicture">
@@ -159,10 +163,13 @@
                 <img src="./images/leftArrow.svg" alt="flecha a la izquierda" class="testimonyArrow" id="before">
                 <section class="testimonyBody testimonyBody--Show" data-id="1">
                     <div class="testimonyText">
-                        <h2 class="subTitle"> Mi nombre es luis, <span class="testimonyCourse"> Data science</span></h2>
-                        <p class="testimonyReview"> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Inventore
-                            deleniti, ab quasi vitae officiis deserunt aspernatur minus nesciunt cum ut asperiores ad
-                            dolorum beatae pariatur, cupiditate aut dicta numquam tempora?</p>
+                        <h2 class="subTitleTestimony"> Mi nombre es Luis, <span class="testimonyCourse"> Data science</span></h2>
+                        <p class="testimonyReview"> Soy Licenciado en Física por la UAEH, con experiencia en
+                            investigación científica y especialización en Data Science. He trabajado en inteligencia
+                            artificial y automatización de procesos para mejorar escalabilidad y tiempos de
+                            procesamiento. Me enfoco en proyectos que aprovechen el poder de los datos y tecnología para
+                            la toma de decisiones estratégicas y la optimización empresarial.
+                        </p>
                     </div>
                     <figure class="testimonyPicture">
                         <img class="testimonyImg" src="./images/FOTOGRAFIA 1.jpg" alt="fotografia ing">
@@ -171,10 +178,15 @@
 
                 <section class="testimonyBody" data-id="2">
                     <div class="testimonyText">
-                        <h2 class="subTitle"> Mi nombre es samael, <span class="testimonyCourse"> Data science </span>
+                        <h2 class="subTitleTestimony"> Mi nombre es Samael, <span class="testimonyCourse"> Data science </span>
                         </h2>
-                        <p class="testimonyReview"> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Inventore
-                            deleniti,</p>
+                        <p class="testimonyReview"> Soy ingeniero en Física por la Universidad de Guanajuato y
+                            estudiante de una Maestría en Data Science en Tech España. Con experiencia en física teórica
+                            y óptica no lineal, inicié en programación con C y C++ y luego Python, aplicándolo en
+                            modelos caóticos y sistemas de control. Actualmente, como Ingeniero de Datos, trabajo con
+                            herramientas como Docker, Apache Airflow, y SQL para administrar Data Warehouses y Data
+                            Lakes, y aplico técnicas de machine learning y sistemas de recomendación en ciencia de
+                            datos.</p>
                     </div>
                     <figure class="testimonyPicture">
                         <img class="testimonyImg" src="./images/Samael.jpeg" alt="fotografia ing">
@@ -183,7 +195,7 @@
 
                 <section class="testimonyBody" data-id="3">
                     <div class="testimonyText">
-                        <h2 class="subTitle"> Mi nombre es paul, <span class="testimonyCourse"> developer Full
+                        <h2 class="subTitleTestimony"> Mi nombre es Paul, <span class="testimonyCourse"> developer Full
                                 stack </span></h2>
                         <p class="testimonyReview"> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Inventore
                             deleniti, ab quasi vitae offit cum ut asperiores ad
@@ -196,11 +208,14 @@
 
                 <section class="testimonyBody" data-id="4">
                     <div class="testimonyText">
-                        <h2 class="subTitle"> Mi nombre es pierre, <span class="testimonyCourse"> developer Full
+                        <h2 class="subTitleTestimony"> Mi nombre es Pierre, <span class="testimonyCourse"> developer Full
                                 stack </span></h2>
-                        <p class="testimonyReview">deleniti, ab quasi vitae officiis deserunt aspernatur minus nesciunt
-                            cum ut asperiores ad
-                            dolorum beatae pariatur, cupiditate aut dicta numquam tempora?</p>
+                        <p class="testimonyReview">Soy Comunicólogo y Desarrollador Full Stack con experiencia en más de
+                            40
+                            proyectos usando Ruby on Rails y React. Me destaco por mi resiliencia, enfoque en resultados
+                            y capacidad para trabajar en equipos remotos. He desarrollado proyectos web, participado en
+                            mentorías técnicas y optimizado procesos industriales. Además, cuento con formación
+                            profesional en desarrollo full-stack a través de Microverse.</p>
                     </div>
                     <figure class="testimonyPicture">
                         <img class="testimonyImg" src="./images/Foto pierre.png" alt="fotografia ing">
@@ -211,47 +226,50 @@
             </div>
         </section>
         <section class="questions container" id="Question">
-            <h2 class="subTitle"> Preguntas frecuentes</h2>
+            <h2 class="subTitle"> Preguntas frecuentes </h2>
             <p class="questionParagraph">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis rem nesciunt deserunt placeat at
-                excepturi repudiandae corrupti fuga illum sequi.
+                Encuentra aquí las respuestas a las preguntas más comunes sobre nuestros servicios y el valor que
+                aportamos a tu proyecto.
             </p>
             <section class="questionsContainer">
                 <article class="questionsPadding">
                     <div class="questionsAnswer">
-                        <h3 class="questionTitle"> que es (nombre de empresa) <span class="questionsArrow">
+                        <h3 class="questionTitle"> ¿Qué es Taudux <span class="questionsArrow">
                                 <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
                             </span></h3>
-                        <p class="questionsShow"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure quaerat
-                            doloremque neque assumenda nam voluptatum cupiditate iusto ullam, temporibus saepe.</p>
+                        <p class="questionsShow"> Taudux es una plataforma diseñada para optimizar tus procesos a través
+                            de soluciones de desarrollo y análisis de datos, ayudándote a tomar decisiones informadas y
+                            mejorar tu competitividad.</p>
                     </div>
                 </article>
             </section>
             <section class="questionsContainer">
                 <article class="questionsPadding">
                     <div class="questionsAnswer">
-                        <h3 class="questionTitle"> que es (nombre de empresa) <span class="questionsArrow">
+                        <h3 class="questionTitle"> ¿Qué hacemos? <span class="questionsArrow">
                                 <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
                             </span></h3>
-                        <p class="questionsShow"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure quaerat
-                            doloremque neque assumenda nam voluptatum cupiditate iusto ullam, temporibus saepe.</p>
+                        <p class="questionsShow"> Desarrollamos aplicaciones a medida y ofrecemos análisis de datos
+                            avanzados para mejorar la eficiencia operativa, apoyar decisiones estratégicas y maximizar
+                            el impacto de los proyectos empresariales.</p>
                     </div>
                 </article>
             </section>
             <section class="questionsContainer">
                 <article class="questionsPadding">
                     <div class="questionsAnswer">
-                        <h3 class="questionTitle"> que es (nombre de empresa) <span class="questionsArrow">
+                        <h3 class="questionTitle"> ¿Quiénes somos? <span class="questionsArrow">
                                 <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
                             </span></h3>
-                        <p class="questionsShow"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure quaerat
-                            doloremque neque assumenda nam voluptatum cupiditate iusto ullam, temporibus saepe.</p>
+                        <p class="questionsShow"> Somos un equipo de desarrolladores y analistas de datos dedicados a
+                            brindar servicios tecnológicos innovadores, enfocados en transformar datos en valor y ayudar
+                            a las empresas a alcanzar sus objetivos.</p>
                     </div>
                 </article>
             </section>
             <section class="questionOffer">
                 <h2 class="subTitle"> estas listo? </h2>
-                <p class="questionsCopy"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, iusto.</p>
+                <p class="questionsCopy"> Conocenos un poco y empecemos a crear cosas juntos </p>
                 <a class="cta" href="#"> click ahora </a>
             </section>
         </section>
@@ -288,11 +306,14 @@
         </section>
         <section class="footerCopy container">
             <div class="footerSocial">
-                <a href="#" class="footerIcons"><img src="./images/instagram.svg" alt="img icon instagram"
+                <a target="_blank" href="https://www.instagram.com/taudux_dev/profilecard/?igsh=MXcyejNidGNnN2Vpdg=="
+                    class="footerIcons"><img src="./images/instagram.svg" alt="img icon instagram"
                         class="footerImg"></a>
-                <a href="#" class="footerIcons"><img src="./images/faceBook.svg" alt="img icon instagram"
+                <a target="_blank" href="https://www.facebook.com/profile.php?id=61567603235399&mibextid=LQQJ4d"
+                    class="footerIcons"><img src="./images/faceBook.svg" alt="img icon instagram" class="footerImg"></a>
+                <a target="_blank" href="#" class="footerIcons"><img src="./images/tikTok.svg" alt="img icon instagram"
                         class="footerImg"></a>
-                <a href="#" class="footerIcons"><img src="./images/tikTok.svg" alt="img icon instagram"
+                <a target="_blank" href="https://www.linkedin.com/company/taudux/" class="footerIcons"><img src="./images/Linkedin.png" alt="img Linkedin"
                         class="footerImg"></a>
             </div>
             <h3 class="footerCopyrigh"> Derechos reservados &copy; Team(nombre de empresa)</h3>

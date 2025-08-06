@@ -1,328 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Taudux </title>
-    <link rel="shortcut icon" href="./images/logo_tau.png" type="image/x-icon">
-    <link rel="stylesheet" href="./css/normalize.css">
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
 
 <body>
-    <header class="hero">
-        <nav class="scroll-navbar">
-            <ul class="scroll-menu">
-                <li class='scroll-menu-li'><a href="#">Inicio</a></li>
-                <li class='scroll-menu-li'><a href="#about">Acerca de</a></li>
-                <li class='scroll-menu-li'><a href="#Enfoque">Enfoque</a></li> 
-                <li class='scroll-menu-li'><a href="#blog">Team</a></li>
-                <li class='scroll-menu-li'><a href="#Question">Preguntas frecuentes</a></li>
-            </ul>
-        </nav>
-        <nav class="nav container">
-            <div class="navLogo">
-                <img src="./images/logo_tau.png" alt="Logo de la página" class="logoImage">
-            </div>
-            <ul class="navLink navLinkMenu">
-                <li class="navItems">
-                    <a href="#" class="navLinks">Inicio</a>
-                </li>
-                <li class="navItems">
-                    <a href="#about" class="navLinks">Acerca de</a>
-                </li>
-                <li class="navItems">
-                    <a href="#Enfoque" class="navLinks">Enfoque</a>
-                </li>
-                <li class="navItems">
-                    <a href="#Team" class="navLinks">Team</a>
-                </li>
-                <li class="navItems">
-                    <a href="#Question" class="navLinks">Preguntas frecuentes</a>
-                </li>
-                <img src="./images/" class="navClose" alt="x close">
-            </ul>
-            <div class="navMenu">
-                <img src="./images/menuAltRight.svg" class="navHamburguer" alt="hamburguer menu">
-            </div>
-        </nav>
-        <section class="heroContainer container">
-            <h1 class="heroTitle"> Bienvenido a Taudux </h1>
-            <p class="heroParagraph"> Llevamos tus ideas al siguiente nivel. <br> Creamos software que no solo funciona,
-                sino
-                que sorprende y conecta.</p>
-            <a href="#Question" class="cta"> ¡Creemos algo increíble juntos! </a>
-        </section>
-    </header>
-    <main>
-        <section class="container about" id="about">
-            <h2 class="subTitle"> ¿Cuál es nuestra pasión? </h2>
-            <p class="aboutParagraph"> En Taudux, somos un equipo apasionado de desarrolladores
-                comprometidos a transformar tus ideas en soluciones digitales innovadoras. Con un enfoque en la calidad
-                y la colaboración, trabajamos codo a codo contigo para crear software que no solo cumple, sino que
-                supera tus expectativas. ¡Juntos, construimos el futuro!</p>
-            <div class="aboutMain">
-                <article class="aboutIcons">
-                    <img class="aboutIcon" src="./images/data.svg" alt="data icon">
-                    <h3 class="aboutTitle">Análisis de Datos y Optimización de Procesos
-                    </h3>
-                    <p class="aboutParagraph"> Aprovechamos el poder de los datos para identificar tendencias y áreas de
-                        mejora en nuestras aplicaciones. Nuestro equipo de analistas de datos trabaja en estrecha
-                        colaboración con los desarrolladores para implementar cambios informados que optimizan la
-                        eficiencia y mejoran la experiencia del usuario.
-                    </p>
-                </article>
-                <article class="aboutIcons">
-                    <img class="aboutIcon" src="./images/app.svg" alt="data icon">
-                    <h3 class="aboutTitle"> Desarrollo de Aplicaciones Web y Móviles
-                    </h3>
-                    <p class="aboutParagraph"> Creamos aplicaciones web y móviles personalizadas que combinan diseño
-                        atractivo y funcionalidad robusta. Nuestro equipo de desarrolladores se encarga de la
-                        arquitectura y el desarrollo, asegurando que cada solución sea intuitiva, escalable y alineada
-                        con las necesidades de nuestros usuarios.
-                    </p>
-                </article>
-                <article class="aboutIcons">
-                    <img class="aboutIcon" src="./images/dashboard.svg" alt="data icon">
-                    <h3 class="aboutTitle"> Desarrollo de Dashboards e Informes
-                    </h3>
-                    <p class="aboutParagraph"> Diseñamos dashboards interactivos y generamos informes automatizados que
-                        permiten a nuestros clientes visualizar datos en tiempo real. Estas herramientas no solo
-                        facilitan la comprensión del rendimiento de las aplicaciones, sino que también apoyan la toma de
-                        decisiones estratégicas para un crecimiento continuo.
-                    </p>
-                </article>
-            </div>
-        </section>
-        <section class="knowledge">
-            <div class="knowledgeContainer container">
-                <div class="knowledgeTexts">
-                    <h2 class="subTitle">
-                        Nuestro conocimiento
-                    </h2>
-                    <p class="knowledgeParagraph"> Combinamos experiencia en desarrollo de software con análisis de
-                        datos avanzados para brindar soluciones completas y personalizadas. Nuestro equipo de
-                        desarrolladores y analistas trabaja en conjunto para transformar datos en decisiones y convertir
-                        ideas en aplicaciones eficaces. Ya sea optimizando procesos, desarrollando aplicaciones
-                        intuitivas o extrayendo insights valiosos, estamos aquí para ayudarte a alcanzar tus objetivos.
-                    </p>
-                    <a href="#" class="cta"> contactanos </a>
-                </div>
-                <figure class="knowledgePicture">
-                    <img class="knowledgeImg" src="./images/computer.jpg" alt="foto que debo poner">
-                </figure>
-            </div>
-        </section>
-        <section class="price container" id="Enfoque">
-            <h2 class="subTitle"> Nuestro Enfoque y Proceso de Trabajo </h2>
+  <nav class="navbar" id="navbar">
+    <div class="logo-small" id="logoSmall">
+      <img src="images/logo-horizontal.png" alt="Taudux logo pequeño" class="logo-icon">
+    </div>
 
-            <div class="priceTable">
-                <div class="priceElement">
-                    <h3 class="pricePrice"> Conocimientos Especializados </h3>
-                    <div class="priceItem">
-                        <p class="priceFeatures"> Contamos con desarrolladores full-stack y analistas de datos
-                            especializados en tecnologías modernas como React, Node.js, y Python. Nuestro equipo tiene
-                            experiencia en la creación de soluciones personalizadas que optimizan flujos de trabajo y
-                            mejoran la eficiencia operativa, asegurando siempre una experiencia de usuario de alta
-                            calidad. </p>
-                    </div>
+    <!-- Mueve el botón AQUÍ, al lado derecho -->
+    <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+      &#9776;
+    </button>
 
-                    <a href="#" class="priceCta"> clic para saber más </a>
-                </div>
+    <div class="nav-buttons-wrapper"></div>
+    <div class="nav-buttons show">
+      <a href="#quienes-somos">¿Quiénes somos?</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#herramientas">Herramientas</a>
+      <a href="#contacto">Contáctanos</a>
+    </div>
+  </nav>
 
-                <div class="priceElement priceElement--best">
-                    <h3 class="pricePrice"> Innovación y Compromiso
-                    </h3>
-                    <div class="priceItem">
-                        <p class="priceFeatures"> Para nosotros, cada proyecto es una oportunidad para innovar. Nos
-                            enfocamos en entender las necesidades únicas de nuestros clientes y en brindar soluciones de
-                            software que realmente hagan la diferencia. Estamos comprometidos con la mejora continua y
-                            la entrega de resultados tangibles, siempre manteniendo una comunicación abierta y
-                            colaborativa. </p>
-                    </div>
+  <header class="hero">
+    <img src="images/01.png" alt="Taudux logo grande" class="logo-large" id="logoLarge">
+  </header>
 
-                    <a href="#" class="priceCta-best"> clic para saber más </a>
-                </div>
+  <section id="quienes-somos" class="highlighted-section scroll-fade">
+    <div id="particles-quienes"></div>
+    <div class="section-container framed-box">
+      <h2>Soluciones inteligentes para un mundo digital.</h2>
+      <p>
+         Somos un equipo multidisciplinario de profesionales apasionados por la
+        innovación, que combina experiencia en
+        desarrollo de software, análisis de procesos y soluciones con inteligencia artificial.
+      </p>
+      <p>
+        Acompañamos a nuestros clientes desde la idea hasta la implementación, construyendo soluciones a la medida que
+        impulsen sus objetivos de negocio. Trabajamos con compromiso, transparencia y visión a largo plazo.
+      </p>
+      <a href="nosotros.html" class="btn-quienes">¡Conoce más!</a>
+    </div>
+  </section>
 
-                <div class="priceElement">
-                    <h3 class="pricePrice"> Metodología Ágil en Acción </h3>
-                    <div class="priceItem">
-                        <p class="priceFeatures"> Nuestro proceso se basa en metodologías ágiles para asegurar
-                            flexibilidad y rapidez. Iniciamos cada proyecto con una planificación estratégica, seguida
-                            de un desarrollo iterativo y pruebas continuas, permitiendo ajustes rápidos y entregas
-                            frecuentes para que nuestros clientes vean avances reales en cada etapa. </p>
-                    </div>
+  <section id="servicios" class="section servicios-section">
+    <div class="section-container">
+      <h2 class="section-title">Tecnología a tu medida</h2>
+      <div class="servicios-grid">
+        <div class="servicio-item" style="--delay: 0s">
+          <img src="images/servicio1.jpg" alt="Analítica del dato">
+          <h3>Análisis de datos</h3>
+          <p>Te ayudamos a garantizar la calidad, seguridad y utilidad de tu información en todo su ciclo de vida. Desde la recolección hasta el análisis, te acompañamos en la toma de decisiones basadas en datos.</p>
+        </div>
+        <div class="servicio-item" style="--delay: 0.3s">
+          <img src="images/servicio2.jpg" alt="Desarrollo de software">
+          <h3>Desarrollo de software</h3>
+          <p>Creamos aplicaciones y plataformas personalizadas que se adaptan a tus necesidades. Ya sea escritorio, móvil o en la nube, desarrollamos tecnología que impulsa tu eficiencia y crecimiento.</p>
+        </div>
+        <div class="servicio-item" style="--delay: 0.6s">
+          <img src="images/servicio3.jpg" alt="Cursos y capacitaciones">
+          <h3>Cursos y capacitaciones</h3>
+          <p>Ofrecemos formación especializada para empresas y profesionales en programación, análisis de datos y herramientas clave para la transformación digital.</p>
+        </div>
+        <div class="servicio-item" style="--delay: 0.9s">
+          <img src="images/servicio4.jpg" alt="Modelos de IA">
+          <h3>Inteligencia Artificial</h3>
+          <p>Usamos modelos de datos para proyectar escenarios que te ayuden a tomar decisiones informadas sobre ventas, productos, tendencias y otros aspectos clave de tu negocio.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-                    <a href="#" class="priceCta"> clic para saber más </a>
-                </div>
-            </div>
-        </section>
-        <section class="testimony" id="Team">
-            <div class="testimonyContainer container">
-                <img src="./images/leftArrow.svg" alt="flecha a la izquierda" class="testimonyArrow" id="before">
-                <section class="testimonyBody testimonyBody--Show" data-id="1">
-                    <div class="testimonyText">
-                        <h2 class="subTitleTestimony"> Mi nombre es Luis, <span class="testimonyCourse"> Data science</span></h2>
-                        <p class="testimonyReview"> Soy Licenciado en Física por la UAEH, con experiencia en
-                            investigación científica y especialización en Data Science. He trabajado en inteligencia
-                            artificial y automatización de procesos para mejorar escalabilidad y tiempos de
-                            procesamiento. Me enfoco en proyectos que aprovechen el poder de los datos y tecnología para
-                            la toma de decisiones estratégicas y la optimización empresarial.
-                        </p>
-                    </div>
-                    <figure class="testimonyPicture">
-                        <img class="testimonyImg" src="./images/FOTOGRAFIA 1.jpg" alt="fotografia ing">
-                    </figure>
-                </section>
+  <section id="herramientas" class="herramientas-section">
+    <h2>Tecnología que potencia tus proyectos</h2>
+    <p>Dominamos una amplia gama de tecnologías que nos permiten diseñar, desarrollar y optimizar soluciones para cada cliente. Desde lenguajes de programación hasta plataformas de análisis, ponemos lo mejor de la tecnología a tu alcance.</p>
+    <div class="carousel-wrapper">
+      <div class="carousel fade-left pause-on-hover" id="carousel-top">
+        <div class="carousel-track">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"
+            alt="Python">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg"
+            alt="JavaScript">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original-wordmark.svg"
+            alt="NodeJs">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original-wordmark.svg"
+            alt="HTML">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original-wordmark.svg"
+            alt="Java">
 
-                <section class="testimonyBody" data-id="2">
-                    <div class="testimonyText">
-                        <h2 class="subTitleTestimony"> Mi nombre es Samael, <span class="testimonyCourse"> Data science </span>
-                        </h2>
-                        <p class="testimonyReview"> Soy ingeniero en Física por la Universidad de Guanajuato y
-                            estudiante de una Maestría en Data Science en Tech España. Con experiencia en física teórica
-                            y óptica no lineal, inicié en programación con C y C++ y luego Python, aplicándolo en
-                            modelos caóticos y sistemas de control. Actualmente, como Ingeniero de Datos, trabajo con
-                            herramientas como Docker, Apache Airflow, y SQL para administrar Data Warehouses y Data
-                            Lakes, y aplico técnicas de machine learning y sistemas de recomendación en ciencia de
-                            datos.</p>
-                    </div>
-                    <figure class="testimonyPicture">
-                        <img class="testimonyImg" src="./images/Samael.jpeg" alt="fotografia ing">
-                    </figure>
-                </section>
+          <!-- Duplicado -->
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"
+            alt="Python">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg"
+            alt="JavaScript">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original-wordmark.svg"
+            alt="NodeJs">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original-wordmark.svg"
+            alt="HTML">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original-wordmark.svg"
+            alt="Java">
+        </div>
+      </div>
+      <div class="carousel fade-right pause-on-hover" id="carousel-bottom">
+        <div class="carousel-track reverse">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-plain-wordmark.svg"
+            alt="postgresql">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original-wordmark.svg"
+            alt="mysql">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-plain-wordmark.svg"
+            alt="mongodb">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/googlecloud/googlecloud-original.svg"
+            alt="gcp">
+          <img
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"
+            alt="aws">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postman/postman-original.svg"
+            alt="Postman">
 
-                <section class="testimonyBody" data-id="3">
-                    <div class="testimonyText">
-                        <h2 class="subTitleTestimony"> Mi nombre es Paul, <span class="testimonyCourse"> developer Full
-                                stack </span></h2>
-                        <p class="testimonyReview"> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Inventore
-                            deleniti, ab quasi vitae offit cum ut asperiores ad
-                            dolorum beatae pariatur, cupiditate aut dicta numquam tempora?</p>
-                    </div>
-                    <figure class="testimonyPicture">
-                        <img class="testimonyImg" src="./images/Foto Paul.png" alt="fotografia ing">
-                    </figure>
-                </section>
+          <!-- Duplicado -->
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-plain-wordmark.svg"
+            alt="postgresql">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original-wordmark.svg"
+            alt="mysql">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-plain-wordmark.svg"
+            alt="mongodb">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/googlecloud/googlecloud-original.svg"
+            alt="gcp">
+          <img
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"
+            alt="aws">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postman/postman-original.svg"
+            alt="Postman">
+        </div>
+      </div>
+    </div>
+  </section>
 
-                <section class="testimonyBody" data-id="4">
-                    <div class="testimonyText">
-                        <h2 class="subTitleTestimony"> Mi nombre es Pierre, <span class="testimonyCourse"> developer Full
-                                stack </span></h2>
-                        <p class="testimonyReview">Soy Comunicólogo y Desarrollador Full Stack con experiencia en más de
-                            40
-                            proyectos usando Ruby on Rails y React. Me destaco por mi resiliencia, enfoque en resultados
-                            y capacidad para trabajar en equipos remotos. He desarrollado proyectos web, participado en
-                            mentorías técnicas y optimizado procesos industriales. Además, cuento con formación
-                            profesional en desarrollo full-stack a través de Microverse.</p>
-                    </div>
-                    <figure class="testimonyPicture">
-                        <img class="testimonyImg" src="./images/Foto pierre.png" alt="fotografia ing">
-                    </figure>
-                </section>
+  <section id="contacto" class="contact-section">
+    <div class="contact-box">
+      <div class="contact-info">
+        <h2>¿Listo para transformar tus ideas?</h2>
+        <p>Cuéntanos sobre tu proyecto y descubre cómo podemos ayudarte a hacerlo realidad. Nuestro equipo está listo
+          para escucharte.</p>
+        <a href="https://wa.me/524462549778" class="btn-whatsapp" target="_blank">
+          <img src="https://cdn.simpleicons.org/whatsapp/000000" alt="WhatsApp"> Escríbenos por WhatsApp
+        </a>
+      </div>
+      <form action="https://formsubmit.co/customerservice@taudux.com" method="POST" class="contact-form"
+        id="contactForm">
+        <div class="form-row">
+          <input type="text" id="nombre" name="nombre" placeholder="Nombre(s) *" required>
+          <input type="email" id="email" name="email" placeholder="Correo electrónico *" required>
+        </div>
+        <div class="form-row">
+          <input type="text" id="empresa" name="empresa" placeholder="Empresa *" required>
+          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono (opcional)">
+        </div>
+        <textarea id="mensaje" name="message" rows="4" placeholder="¿En qué servicio estás interesado? Cuéntanos más..."
+          required></textarea>
+        <!-- Evita captcha de confirmación y redireccionamiento -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_next" value="#">
+        <button type="submit" class="btn-animado">Enviar mensaje</button>
+        <!-- Mensaje de agradecimiento -->
+        <p id="thankYouMessage" style="display:none; margin-top: 1rem; color: #00e1ff;">Gracias por contactarnos. ¡Te
+          responderemos muy pronto!</p>
+      </form>
+    </div>
+  </section>
 
-                <img src="./images/rightArrow.svg" alt="flecha a la derecha" class="testimonyArrow" id="next">
-            </div>
-        </section>
-        <section class="questions container" id="Question">
-            <h2 class="subTitle"> Preguntas frecuentes </h2>
-            <p class="questionParagraph">
-                Encuentra aquí las respuestas a las preguntas más comunes sobre nuestros servicios y el valor que
-                aportamos a tu proyecto.
-            </p>
-            <section class="questionsContainer">
-                <article class="questionsPadding">
-                    <div class="questionsAnswer">
-                        <h3 class="questionTitle"> ¿Qué es Taudux <span class="questionsArrow">
-                                <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
-                            </span></h3>
-                        <p class="questionsShow"> Taudux es una plataforma diseñada para optimizar tus procesos a través
-                            de soluciones de desarrollo y análisis de datos, ayudándote a tomar decisiones informadas y
-                            mejorar tu competitividad.</p>
-                    </div>
-                </article>
-            </section>
-            <section class="questionsContainer">
-                <article class="questionsPadding">
-                    <div class="questionsAnswer">
-                        <h3 class="questionTitle"> ¿Qué hacemos? <span class="questionsArrow">
-                                <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
-                            </span></h3>
-                        <p class="questionsShow"> Desarrollamos aplicaciones a medida y ofrecemos análisis de datos
-                            avanzados para mejorar la eficiencia operativa, apoyar decisiones estratégicas y maximizar
-                            el impacto de los proyectos empresariales.</p>
-                    </div>
-                </article>
-            </section>
-            <section class="questionsContainer">
-                <article class="questionsPadding">
-                    <div class="questionsAnswer">
-                        <h3 class="questionTitle"> ¿Quiénes somos? <span class="questionsArrow">
-                                <img src="./images/chevronArrow.svg" alt="flecha hacia abajo" class="questionImg">
-                            </span></h3>
-                        <p class="questionsShow"> Somos un equipo de desarrolladores y analistas de datos dedicados a
-                            brindar servicios tecnológicos innovadores, enfocados en transformar datos en valor y ayudar
-                            a las empresas a alcanzar sus objetivos.</p>
-                    </div>
-                </article>
-            </section>
-            <section class="questionOffer">
-                <h2 class="subTitle"> estas listo? </h2>
-                <p class="questionsCopy"> Conocenos un poco y empecemos a crear cosas juntos </p>
-                <a class="cta" href="#"> click ahora </a>
-            </section>
-        </section>
-    </main>
-    <footer class="footer">
-        <section class="footerContainer container">
-            <nav class="nav nav--footer">
-                <h2 class="footerTitle"> Descubre más </h2>
-                <ul class="navLink navLink--footer">
-                    <li class="navItems">
-                        <a href="#" class="navLinks">Inicio</a>
-                    </li>
-                    <li class="navItems">
-                        <a href="#about" class="navLinks">Acerca de</a>
-                    </li>
-                    <li class="navItems">
-                        <a href="#Enfoque" class="navLinks">Enfoque</a>
-                    </li>
-                    <li class="navItems">
-                        <a href="#Team" class="navLinks">Team</a>
-                    </li>
-                    <li class="navItems">
-                        <a href="#Question" class="navLinks">Preguntas frecuentes</a>
-                    </li>
-                </ul>
-            </nav>
-            <form action="" class="footerForm">
-                <h2 class="footerNewsletter"> Hablemos de tus ideas </h2>
-                <div class="footerInputs">
-                    <input class="footerInput" type="email" placeholder="Email" id="">
-                    <input type="submit" value="Registrate" class="footerSubmit">
-                </div>
-            </form>
-        </section>
-        <section class="footerCopy container">
-            <div class="footerSocial">
-                <a target="_blank" href="https://www.instagram.com/taudux_dev/profilecard/?igsh=MXcyejNidGNnN2Vpdg=="
-                    class="footerIcons"><img src="./images/instagram.svg" alt="img icon instagram"
-                        class="footerImg"></a>
-                <a target="_blank" href="https://www.facebook.com/profile.php?id=61567603235399&mibextid=LQQJ4d"
-                    class="footerIcons"><img src="./images/faceBook.svg" alt="img icon instagram" class="footerImg"></a>
-                <a target="_blank" href="#" class="footerIcons"><img src="./images/tikTok.svg" alt="img icon instagram"
-                        class="footerImg"></a>
-                <a target="_blank" href="https://www.linkedin.com/company/taudux/" class="footerIcons"><img src="./images/Linkedin.png" alt="img Linkedin"
-                        class="footerImg"></a>
-            </div>
-            <h3 class="footerCopyrigh"> Derechos reservados &copy; Team(nombre de empresa)</h3>
-        </section>
-    </footer>
-    <script src="./Js/slider.js"></script>
-    <script src="./Js/questions.js"></script>
-    <script src="./Js/menu.js"></script>
-    <script src="./Js/scrollNav.js"></script>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img src="images/logo-horizontal.png" alt="Logo Taudux">
+      </div>
+      <div class="footer-info">
+        <p>&copy;<strong>Taudux</strong> | Desarrollo & Tecnología</p>
+        <p>Dirección: Villas del Cimatario, Universo 2000, 76085 Santiago de Querétaro, Qro.</p>
+        <p>Email: costumerservice@taudux.com</p>
+        <p>Teléfono: +52 446 254 9778</p>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.linkedin.com/company/taudux/" target="_blank">LinkedIn</a> |
+        <a href="https://www.instagram.com/taudux_dev/" target="_blank">Instagram</a> |
+        <a href="https://www.facebook.com/people/Taudux/61567603235399/#" target="_blank">Facebook</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
 </body>
 
 </html>

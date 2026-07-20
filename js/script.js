@@ -148,7 +148,9 @@ function smoothMouseScroll() {
 }
 
 // Animación personalizada de scroll al hacer clic en un enlace del navbar
-document.querySelectorAll('.nav-buttons a').forEach(link => {
+// (solo enlaces internos tipo #seccion; enlaces a otras páginas como
+// login.html se dejan navegar de forma normal)
+document.querySelectorAll('.nav-buttons a[href^="#"]').forEach(link => {
   link.addEventListener('click', function (e) {
     e.preventDefault();
 

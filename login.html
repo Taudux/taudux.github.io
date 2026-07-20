@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceder | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+  <nav class="navbar scrolled">
+    <a href="index.html" class="logo-small">
+      <img src="images/logo-horizontal.png" alt="Taudux logo" class="logo-icon">
+    </a>
+  </nav>
+
+  <main class="auth-page">
+    <div class="auth-card framed-box">
+      <h1>Bienvenido a Taudux</h1>
+      <p class="auth-subtitle" id="authSubtitle">Inicia sesión para continuar</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabLogin">Acceder</button>
+        <button type="button" class="auth-tab" id="tabSignup">Crear cuenta</button>
+      </div>
+
+      <!-- Formulario: Acceder -->
+      <form class="auth-form" id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password" required>
+        <button type="submit" class="btn-animado">Acceder</button>
+      </form>
+
+      <!-- Formulario: Crear cuenta -->
+      <form class="auth-form" id="signupForm" style="display:none;">
+        <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="password" id="signupPassword" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+        <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="6">
+        <button type="submit" class="btn-animado">Crear cuenta</button>
+      </form>
+
+      <!-- Formulario: nueva contraseña (solo tras abrir el enlace del correo) -->
+      <form class="auth-form" id="recoveryForm" style="display:none;">
+        <input type="password" id="recoveryPassword" placeholder="Nueva contraseña (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+        <input type="password" id="recoveryPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="6">
+        <button type="submit" class="btn-animado">Guardar contraseña</button>
+      </form>
+
+      <a href="#" class="auth-forgot" id="forgotLink">¿Olvidaste tu contraseña?</a>
+
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const recoveryForm = document.getElementById("recoveryForm");
+    const authTabs = document.querySelector(".auth-tabs");
+    const authSubtitle = document.getElementById("authSubtitle");
+    const forgotLink = document.getElementById("forgotLink");
+    const authMessage = document.getElementById("authMessage");
+
+    // Si la URL trae el enlace de recuperación de contraseña de Supabase
+    // (…#access_token=...&type=recovery), activamos el modo "nueva contraseña"
+    // y evitamos que la redirección automática mande al usuario al detector.
+    const enRecuperacion = window.location.hash.includes("type=recovery");
+
+    function mostrarMensaje(texto, tipo) {
+      authMessage.textContent = texto;
+      authMessage.className = "auth-message visible " + tipo;
+    }
+
+    function ocultarMensaje() {
+      authMessage.className = "auth-message";
+    }
+
+    function mostrarTab(tab) {
+      ocultarMensaje();
+      const esLogin = tab === "login";
+      tabLogin.classList.toggle("active", esLogin);
+      tabSignup.classList.toggle("active", !esLogin);
+      loginForm.style.display = esLogin ? "flex" : "none";
+      signupForm.style.display = esLogin ? "none" : "flex";
+      forgotLink.style.display = esLogin ? "inline-block" : "none";
+      authSubtitle.textContent = esLogin
+        ? "Inicia sesión para continuar"
+        : "Crea tu cuenta para acceder a la herramienta";
+    }
+
+    function mostrarModoRecuperacion() {
+      ocultarMensaje();
+      authTabs.style.display = "none";
+      loginForm.style.display = "none";
+      signupForm.style.display = "none";
+      forgotLink.style.display = "none";
+      recoveryForm.style.display = "flex";
+      authSubtitle.textContent = "Escribe tu nueva contraseña";
+    }
+
+    tabLogin.addEventListener("click", () => mostrarTab("login"));
+    tabSignup.addEventListener("click", () => mostrarTab("signup"));
+
+    if (enRecuperacion) {
+      // No redirigimos al detector: hay que dejar que el usuario cambie su contraseña.
+      mostrarModoRecuperacion();
+    } else {
+      // Si el usuario ya tiene sesión activa, lo mandamos directo al detector
+      obtenerSesion().then((session) => {
+        if (session) window.location.href = "detector.html";
+      });
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      ocultarMensaje();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      const resultado = await iniciarSesion(email, password);
+      if (resultado.ok) {
+        window.location.href = "detector.html";
+      } else {
+        mostrarMensaje(resultado.mensaje, "error");
+      }
+    });
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      ocultarMensaje();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+      const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
+
+      if (password !== passwordConfirm) {
+        mostrarMensaje("Las contraseñas no coinciden.", "error");
+        return;
+      }
+
+      const resultado = await registrarUsuario(email, password);
+      if (resultado.ok) {
+        mostrarMensaje("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
+        signupForm.reset();
+      } else {
+        mostrarMensaje(resultado.mensaje, "error");
+      }
+    });
+
+    forgotLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      ocultarMensaje();
+      const email = document.getElementById("loginEmail").value.trim();
+      if (!email) {
+        mostrarMensaje("Escribe tu correo arriba y vuelve a intentarlo.", "error");
+        return;
+      }
+      const resultado = await recuperarContrasena(email);
+      if (resultado.ok) {
+        mostrarMensaje("Te enviamos un correo para restablecer tu contraseña.", "success");
+      } else {
+        mostrarMensaje(resultado.mensaje, "error");
+      }
+    });
+
+    recoveryForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      ocultarMensaje();
+      const password = document.getElementById("recoveryPassword").value;
+      const passwordConfirm = document.getElementById("recoveryPasswordConfirm").value;
+
+      if (password !== passwordConfirm) {
+        mostrarMensaje("Las contraseñas no coinciden.", "error");
+        return;
+      }
+
+      const resultado = await cambiarContrasena(password);
+      if (!resultado.ok) {
+        mostrarMensaje(resultado.mensaje, "error");
+        return;
+      }
+
+      // Cerramos la sesión temporal de recuperación y limpiamos la URL
+      await cerrarSesion();
+      history.replaceState(null, "", window.location.pathname);
+
+      authTabs.style.display = "flex";
+      recoveryForm.style.display = "none";
+      recoveryForm.reset();
+      mostrarTab("login");
+      mostrarMensaje("Contraseña actualizada. Inicia sesión con tu nueva contraseña.", "success");
+    });
+  </script>
+</body>
+
+</html>

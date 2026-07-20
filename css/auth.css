@@ -1,0 +1,189 @@
+/*
+  Estilos para login.html y detector.html.
+  Reutiliza a propósito lo ya definido en styles.css (paleta, tipografías,
+  .framed-box, inputs de .contact-form, .btn-animado): aquí solo se agrega
+  lo que falta: el layout de página completa, el toggle Acceder/Crear cuenta,
+  los mensajes de error/éxito y el botón de acceso del navbar.
+*/
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem 3rem;
+  background-color: #0d0f11;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.auth-card h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #aaa, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-card .auth-subtitle {
+  color: #ccc;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+/* Toggle Acceder / Crear cuenta */
+.auth-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  padding: 5px;
+  margin-bottom: 2rem;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: #ccc;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.auth-tab.active {
+  background-color: #fff;
+  color: #1a1a1a;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form input {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+  color: white;
+  font-size: 1rem;
+  width: 100%;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.auth-form input:focus {
+  border-color: #00e1ff;
+  outline: none;
+}
+
+.auth-form button[type="submit"] {
+  margin-top: 0.5rem;
+  align-self: center;
+  padding: 0.9rem 2.5rem;
+}
+
+.auth-forgot {
+  display: inline-block;
+  margin-top: 1.25rem;
+  color: #00e1ff;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.auth-forgot:hover {
+  text-decoration: underline;
+}
+
+.auth-message {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.auth-message.visible {
+  display: block;
+}
+
+.auth-message.error {
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: #ff8a8a;
+}
+
+.auth-message.success {
+  background: rgba(0, 225, 255, 0.1);
+  border: 1px solid rgba(0, 225, 255, 0.4);
+  color: #00e1ff;
+}
+
+/* Botón de acceso en el navbar */
+.btn-acceso {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: #0d0f11 !important;
+  background-color: #00e1ff;
+  padding: 8px 20px !important;
+  border-radius: 20px;
+  font-weight: 700;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.btn-acceso:hover {
+  background-color: #00e1ff !important;
+  color: #0d0f11 !important;
+  box-shadow: 0 0 15px rgba(0, 225, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Página del detector (área privada) */
+.detector-page {
+  min-height: 100vh;
+  padding: 8rem 2rem 4rem;
+  background-color: #0d0f11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detector-card {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.detector-card h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin-bottom: 1rem;
+}
+
+.detector-card .detector-email {
+  color: #00e1ff;
+}
+
+.detector-card p {
+  color: #ccc;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.detector-placeholder {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 3rem 1.5rem;
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}

@@ -115,6 +115,7 @@
       </form>
 
       <a href="#" class="auth-forgot" id="forgotLink">¿Olvidaste tu contraseña?</a>
+      <a href="#" class="auth-forgot" id="reenviarLink" style="display:none;">Reenviar correo de confirmación</a>
     </div>
   </main>
 
@@ -132,6 +133,7 @@
     const authTabs = document.querySelector(".auth-tabs");
     const authSubtitle = document.getElementById("authSubtitle");
     const forgotLink = document.getElementById("forgotLink");
+    const reenviarLink = document.getElementById("reenviarLink");
     const signupPais = document.getElementById("signupPais");
     const signupPrefijo = document.getElementById("signupPrefijo");
     const signupTelefono = document.getElementById("signupTelefono");
@@ -204,6 +206,7 @@
       loginForm.style.display = esLogin ? "flex" : "none";
       signupForm.style.display = esLogin ? "none" : "flex";
       forgotLink.style.display = esLogin ? "inline-block" : "none";
+      reenviarLink.style.display = "none";
       authSubtitle.textContent = esLogin
         ? "Inicia sesión para continuar"
         : "Crea tu cuenta para acceder a la herramienta";
@@ -214,6 +217,7 @@
       loginForm.style.display = "none";
       signupForm.style.display = "none";
       forgotLink.style.display = "none";
+      reenviarLink.style.display = "none";
       recoveryForm.style.display = "flex";
       authSubtitle.textContent = "Escribe tu nueva contraseña";
     }
@@ -241,7 +245,22 @@
         window.location.href = "/src/app/features/explore/explorar.html";
       } else {
         mostrarToast(resultado.mensaje, "error");
+        reenviarLink.style.display = resultado.noConfirmado ? "inline-block" : "none";
       }
+    });
+
+    reenviarLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      if (!email) {
+        mostrarToast("Escribe tu correo arriba y vuelve a intentarlo.", "error");
+        return;
+      }
+      const resultado = await reenviarConfirmacion(email);
+      mostrarToast(
+        resultado.ok ? "Te reenviamos el correo de confirmación. Revisa tu bandeja." : resultado.mensaje,
+        resultado.ok ? "success" : "error"
+      );
     });
 
     signupForm.addEventListener("submit", async (e) => {

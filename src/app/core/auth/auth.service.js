@@ -46,7 +46,8 @@ async function registrarUsuario(email, password, nombre, apellidos, telefono) {
 async function iniciarSesion(email, password) {
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
-    return { ok: false, mensaje: traducirErrorAuth(error.message) };
+    const noConfirmado = error.message.toLowerCase().includes("email not confirmed");
+    return { ok: false, mensaje: traducirErrorAuth(error.message), noConfirmado };
   }
   return { ok: true, data };
 }
@@ -63,6 +64,15 @@ async function recuperarContrasena(email) {
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + "/src/app/features/auth/login.html",
   });
+  if (error) {
+    return { ok: false, mensaje: traducirErrorAuth(error.message) };
+  }
+  return { ok: true };
+}
+
+// Reenvía el correo de confirmación de registro
+async function reenviarConfirmacion(email) {
+  const { error } = await supabaseClient.auth.resend({ type: "signup", email });
   if (error) {
     return { ok: false, mensaje: traducirErrorAuth(error.message) };
   }

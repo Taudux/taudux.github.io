@@ -79,6 +79,7 @@
   font-size: 1rem;
   width: 100%;
   font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
 }
 
 .auth-form input:focus {
@@ -102,30 +103,6 @@
 
 .auth-forgot:hover {
   text-decoration: underline;
-}
-
-.auth-message {
-  margin-top: 1.25rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  display: none;
-}
-
-.auth-message.visible {
-  display: block;
-}
-
-.auth-message.error {
-  background: rgba(255, 80, 80, 0.12);
-  border: 1px solid rgba(255, 80, 80, 0.4);
-  color: #ff8a8a;
-}
-
-.auth-message.success {
-  background: rgba(0, 225, 255, 0.1);
-  border: 1px solid rgba(0, 225, 255, 0.4);
-  color: #00e1ff;
 }
 
 /* Botón de acceso en el navbar */

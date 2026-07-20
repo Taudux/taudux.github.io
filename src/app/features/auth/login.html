@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
   <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+  <link rel="stylesheet" href="/src/app/shared/components/toast.css">
 </head>
 
 <body>
@@ -39,21 +40,19 @@
         <input type="text" id="signupName" placeholder="Nombre(s)" autocomplete="given-name" required>
         <input type="text" id="signupApellidos" placeholder="Apellidos" autocomplete="family-name" required>
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
-        <input type="password" id="signupPassword" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+        <input type="password" id="signupPassword" placeholder="Contraseña" autocomplete="new-password" required minlength="6">
         <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="6">
         <button type="submit" class="btn-animado">Crear cuenta</button>
       </form>
 
       <!-- Formulario: nueva contraseña (solo tras abrir el enlace del correo) -->
       <form class="auth-form" id="recoveryForm" style="display:none;">
-        <input type="password" id="recoveryPassword" placeholder="Nueva contraseña (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
+        <input type="password" id="recoveryPassword" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="6">
         <input type="password" id="recoveryPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="6">
         <button type="submit" class="btn-animado">Guardar contraseña</button>
       </form>
 
       <a href="#" class="auth-forgot" id="forgotLink">¿Olvidaste tu contraseña?</a>
-
-      <div class="auth-message" id="authMessage"></div>
     </div>
   </main>
 
@@ -61,6 +60,7 @@
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
   <script src="/src/app/shared/components/navbar.js"></script>
+  <script src="/src/app/shared/components/toast.js"></script>
   <script>
     const tabLogin = document.getElementById("tabLogin");
     const tabSignup = document.getElementById("tabSignup");
@@ -70,24 +70,13 @@
     const authTabs = document.querySelector(".auth-tabs");
     const authSubtitle = document.getElementById("authSubtitle");
     const forgotLink = document.getElementById("forgotLink");
-    const authMessage = document.getElementById("authMessage");
 
     // Si la URL trae el enlace de recuperación de contraseña de Supabase
     // (…#access_token=...&type=recovery), activamos el modo "nueva contraseña"
     // y evitamos que la redirección automática mande al usuario al detector.
     const enRecuperacion = window.location.hash.includes("type=recovery");
 
-    function mostrarMensaje(texto, tipo) {
-      authMessage.textContent = texto;
-      authMessage.className = "auth-message visible " + tipo;
-    }
-
-    function ocultarMensaje() {
-      authMessage.className = "auth-message";
-    }
-
     function mostrarTab(tab) {
-      ocultarMensaje();
       const esLogin = tab === "login";
       tabLogin.classList.toggle("active", esLogin);
       tabSignup.classList.toggle("active", !esLogin);
@@ -100,7 +89,6 @@
     }
 
     function mostrarModoRecuperacion() {
-      ocultarMensaje();
       authTabs.style.display = "none";
       loginForm.style.display = "none";
       signupForm.style.display = "none";
@@ -124,7 +112,6 @@
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      ocultarMensaje();
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
 
@@ -132,13 +119,12 @@
       if (resultado.ok) {
         window.location.href = "/src/app/features/explore/explorar.html";
       } else {
-        mostrarMensaje(resultado.mensaje, "error");
+        mostrarToast(resultado.mensaje, "error");
       }
     });
 
     signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      ocultarMensaje();
       const nombre = document.getElementById("signupName").value.trim();
       const apellidos = document.getElementById("signupApellidos").value.trim();
       const email = document.getElementById("signupEmail").value.trim();
@@ -146,49 +132,47 @@
       const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
 
       if (password !== passwordConfirm) {
-        mostrarMensaje("Las contraseñas no coinciden.", "error");
+        mostrarToast("Las contraseñas no coinciden.", "error");
         return;
       }
 
       const resultado = await registrarUsuario(email, password, nombre, apellidos);
       if (resultado.ok) {
-        mostrarMensaje("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
+        mostrarToast("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
         signupForm.reset();
       } else {
-        mostrarMensaje(resultado.mensaje, "error");
+        mostrarToast(resultado.mensaje, "error");
       }
     });
 
     forgotLink.addEventListener("click", async (e) => {
       e.preventDefault();
-      ocultarMensaje();
       const email = document.getElementById("loginEmail").value.trim();
       if (!email) {
-        mostrarMensaje("Escribe tu correo arriba y vuelve a intentarlo.", "error");
+        mostrarToast("Escribe tu correo arriba y vuelve a intentarlo.", "error");
         return;
       }
       const resultado = await recuperarContrasena(email);
       if (resultado.ok) {
-        mostrarMensaje("Te enviamos un correo para restablecer tu contraseña.", "success");
+        mostrarToast("Te enviamos un correo para restablecer tu contraseña.", "success");
       } else {
-        mostrarMensaje(resultado.mensaje, "error");
+        mostrarToast(resultado.mensaje, "error");
       }
     });
 
     recoveryForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      ocultarMensaje();
       const password = document.getElementById("recoveryPassword").value;
       const passwordConfirm = document.getElementById("recoveryPasswordConfirm").value;
 
       if (password !== passwordConfirm) {
-        mostrarMensaje("Las contraseñas no coinciden.", "error");
+        mostrarToast("Las contraseñas no coinciden.", "error");
         return;
       }
 
       const resultado = await cambiarContrasena(password);
       if (!resultado.ok) {
-        mostrarMensaje(resultado.mensaje, "error");
+        mostrarToast(resultado.mensaje, "error");
         return;
       }
 
@@ -200,7 +184,7 @@
       recoveryForm.style.display = "none";
       recoveryForm.reset();
       mostrarTab("login");
-      mostrarMensaje("Contraseña actualizada. Inicia sesión con tu nueva contraseña.", "success");
+      mostrarToast("Contraseña actualizada. Inicia sesión con tu nueva contraseña.", "success");
     });
   </script>
 </body>

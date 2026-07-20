@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
   <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+  <link rel="stylesheet" href="/src/app/shared/components/toast.css">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
@@ -191,9 +192,6 @@
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_next" value="#">
         <button type="submit" class="btn-animado">Enviar mensaje</button>
-        <!-- Mensaje de agradecimiento -->
-        <p id="thankYouMessage" style="display:none; margin-top: 1rem; color: #00e1ff;">Gracias por contactarnos. ¡Te
-          responderemos muy pronto!</p>
       </form>
     </div>
   </section>
@@ -221,6 +219,7 @@
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
   <script src="/src/app/shared/components/navbar.js"></script>
+  <script src="/src/app/shared/components/toast.js"></script>
   <script src="/src/app/features/home/home.js"></script>
 </body>
 

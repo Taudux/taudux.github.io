@@ -376,7 +376,6 @@ pauseCarouselOnHover('#carousel-bottom');
 
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("contactForm");
-  const thankYouMessage = document.getElementById("thankYouMessage");
 
   form.addEventListener("submit", function (event) {
     event.preventDefault(); // Evita recargar la página
@@ -392,19 +391,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }).then(response => {
       if (response.ok) {
         form.reset();
-        thankYouMessage.style.display = "block";
+        mostrarToast("Gracias por contactarnos. ¡Te responderemos muy pronto!", "success");
       } else {
-        alert("Ocurrió un error al enviar el mensaje.");
+        mostrarToast("Ocurrió un error al enviar el mensaje.", "error");
       }
     }).catch(error => {
-      alert("Ocurrió un error al conectar con el servidor.");
+      mostrarToast("Ocurrió un error al conectar con el servidor.", "error");
     });
   });
 });
 
+// Este manejador está duplicado con el de arriba: ambos escuchan el submit de
+// #contactForm, así que cada envío hace dos POST. Los textos se mantienen
+// idénticos a los del primero para que mostrarToast los deduplique y solo se
+// vea un aviso.
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('contactForm');
-  const thankYouMessage = document.getElementById('thankYouMessage');
 
   form.addEventListener('submit', function (e) {
     e.preventDefault(); // Evita envío inmediato
@@ -422,13 +424,13 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(response => {
         if (response.ok) {
           form.reset(); // Limpia los campos
-          thankYouMessage.style.display = 'block'; // Muestra mensaje
+          mostrarToast("Gracias por contactarnos. ¡Te responderemos muy pronto!", "success");
         } else {
-          alert("Ocurrió un error. Intenta de nuevo más tarde.");
+          mostrarToast("Ocurrió un error al enviar el mensaje.", "error");
         }
       })
       .catch(error => {
-        alert("No se pudo enviar el mensaje. Verifica tu conexión.");
+        mostrarToast("Ocurrió un error al conectar con el servidor.", "error");
       });
   });
 });

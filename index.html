@@ -8,8 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
+  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
@@ -17,7 +17,7 @@
 <body>
   <nav class="navbar" id="navbar">
     <div class="logo-small" id="logoSmall">
-      <img src="images/logo-horizontal.png" alt="Taudux logo pequeño" class="logo-icon">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo pequeño" class="logo-icon">
     </div>
 
     <!-- Mueve el botón AQUÍ, al lado derecho -->
@@ -34,16 +34,16 @@
       <div class="nav-dropdown" id="explorarDropdown">
         <button type="button" class="nav-dropdown-toggle" id="explorarToggle">Explorar ▾</button>
         <div class="nav-dropdown-menu" id="explorarMenu">
-          <a href="cursos.html">Cursos</a>
-          <a href="detector.html">Detector IA</a>
+          <a href="/src/app/features/courses/cursos.html">Cursos</a>
+          <a href="/src/app/features/detector/detector.html">Detector IA</a>
         </div>
       </div>
-      <a href="login.html" id="accessBtn" class="btn-acceso">Acceder</a>
+      <a href="/src/app/features/auth/login.html" id="accessBtn" class="btn-acceso">Acceder</a>
     </div>
   </nav>
 
   <header class="hero">
-    <img src="images/01.png" alt="Taudux logo grande" class="logo-large" id="logoLarge">
+    <img src="/src/assets/images/01.png" alt="Taudux logo grande" class="logo-large" id="logoLarge">
   </header>
 
   <section id="quienes-somos" class="highlighted-section scroll-fade">
@@ -68,22 +68,22 @@
       <h2 class="section-title">Tecnología a tu medida</h2>
       <div class="servicios-grid">
         <div class="servicio-item" style="--delay: 0s">
-          <img src="images/servicio1.jpg" alt="Analítica del dato">
+          <img src="/src/assets/images/servicio1.jpg" alt="Analítica del dato">
           <h3>Análisis de datos</h3>
           <p>Te ayudamos a garantizar la calidad, seguridad y utilidad de tu información en todo su ciclo de vida. Desde la recolección hasta el análisis, te acompañamos en la toma de decisiones basadas en datos.</p>
         </div>
         <div class="servicio-item" style="--delay: 0.3s">
-          <img src="images/servicio2.jpg" alt="Desarrollo de software">
+          <img src="/src/assets/images/servicio2.jpg" alt="Desarrollo de software">
           <h3>Desarrollo de software</h3>
           <p>Creamos aplicaciones y plataformas personalizadas que se adaptan a tus necesidades. Ya sea escritorio, móvil o en la nube, desarrollamos tecnología que impulsa tu eficiencia y crecimiento.</p>
         </div>
         <div class="servicio-item" style="--delay: 0.6s">
-          <img src="images/servicio3.jpg" alt="Cursos y capacitaciones">
+          <img src="/src/assets/images/servicio3.jpg" alt="Cursos y capacitaciones">
           <h3>Cursos y capacitaciones</h3>
           <p>Ofrecemos formación especializada para empresas y profesionales en programación, análisis de datos y herramientas clave para la transformación digital.</p>
         </div>
         <div class="servicio-item" style="--delay: 0.9s">
-          <img src="images/servicio4.jpg" alt="Modelos de IA">
+          <img src="/src/assets/images/servicio4.jpg" alt="Modelos de IA">
           <h3>Inteligencia Artificial</h3>
           <p>Usamos modelos de datos para proyectar escenarios que te ayuden a tomar decisiones informadas sobre ventas, productos, tendencias y otros aspectos clave de tu negocio.</p>
         </div>
@@ -201,7 +201,7 @@
   <footer class="site-footer">
     <div class="footer-container">
       <div class="footer-logo">
-        <img src="images/logo-horizontal.png" alt="Logo Taudux">
+        <img src="/src/assets/images/logo-horizontal.png" alt="Logo Taudux">
       </div>
       <div class="footer-info">
         <p>&copy;<strong>Taudux</strong> | Desarrollo & Tecnología</p>
@@ -218,8 +218,10 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/script.js"></script>
+  <script src="/src/app/core/supabase/supabase-client.js"></script>
+  <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/shared/components/navbar.js"></script>
+  <script src="/src/app/features/home/home.js"></script>
 </body>
 
 </html>

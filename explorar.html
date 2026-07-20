@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explorar | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <style>
+    /* Oculta el contenido hasta confirmar que hay sesión activa,
+       para no mostrar el área privada por un instante a quien no ha iniciado sesión */
+    body { visibility: hidden; }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar scrolled">
+    <a href="index.html" class="logo-small">
+      <img src="images/logo-horizontal.png" alt="Taudux logo" class="logo-icon">
+    </a>
+    <div class="nav-buttons show nav-simple">
+      <a href="#" id="accessBtn" class="btn-acceso">Salir</a>
+    </div>
+  </nav>
+
+  <main class="explorar-page">
+    <div class="explorar-container">
+      <header class="explorar-header">
+        <h1 id="explorarTitulo">¡Qué gusto verte!</h1>
+        <div class="explorar-bienvenida">
+          Estamos en proceso de darte el mejor servicio. Muy pronto tendrás acceso a nuevas
+          actualizaciones, cursos y capacitaciones. ¡Gracias por acompañarnos!
+        </div>
+      </header>
+
+      <h2 class="explorar-seccion-titulo">Explora</h2>
+      <div class="explorar-grid">
+        <a href="cursos.html" class="explorar-card framed-box">
+          <h3>Cursos</h3>
+          <p>Formación en programación, datos e IA.</p>
+          <span class="explorar-badge">Próximamente</span>
+        </a>
+        <a href="detector.html" class="explorar-card framed-box">
+          <h3>Detector IA</h3>
+          <p>Descubre si una imagen fue creada con IA.</p>
+          <span class="explorar-badge">Próximamente</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    (async () => {
+      const session = await requerirSesion();
+      if (!session) return; // requerirSesion ya redirige a login.html
+
+      const nombre = nombreUsuario(session);
+      document.getElementById("explorarTitulo").textContent =
+        nombre ? `¡Qué gusto verte, ${nombre}!` : "¡Qué gusto verte!";
+      document.body.style.visibility = "visible";
+    })();
+  </script>
+</body>
+
+</html>

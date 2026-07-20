@@ -41,9 +41,13 @@ function traducirErrorAuth(mensaje) {
   return "Ocurrió un error. Intenta de nuevo en unos momentos.";
 }
 
-// Registrar un usuario nuevo
-async function registrarUsuario(email, password) {
-  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+// Registrar un usuario nuevo (nombre y apellidos se guardan en user_metadata)
+async function registrarUsuario(email, password, nombre, apellidos) {
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { nombre, apellidos } },
+  });
   if (error) {
     return { ok: false, mensaje: traducirErrorAuth(error.message) };
   }
@@ -100,25 +104,97 @@ async function requerirSesion() {
   return session;
 }
 
-// Actualiza el botón "Acceder"/"Salir" del navbar según el estado de sesión
+// Devuelve el nombre del usuario (de user_metadata) o null si no tiene.
+// No se usa la parte del correo como respaldo (se vería a basura).
+function nombreUsuario(session) {
+  const meta = session.user.user_metadata || {};
+  return meta.nombre || null;
+}
+
+// Cierra sesión y vuelve al inicio
+async function salirYVolver(e) {
+  if (e) e.preventDefault();
+  await cerrarSesion();
+  window.location.href = "index.html";
+}
+
+// Actualiza el área de acceso del navbar según el estado de sesión
 async function actualizarBotonAcceso() {
   const boton = document.getElementById("accessBtn");
   if (!boton) return;
 
   const session = await obtenerSesion();
-  if (session) {
-    boton.textContent = "Salir";
-    boton.href = "#";
-    boton.onclick = async (e) => {
-      e.preventDefault();
-      await cerrarSesion();
-      window.location.href = "index.html";
-    };
-  } else {
+
+  if (!session) {
+    // Sin sesión: botón "Acceder"
     boton.textContent = "Acceder";
     boton.href = "login.html";
     boton.onclick = null;
+    return;
   }
+
+  const nombre = nombreUsuario(session);
+
+  if (!nombre) {
+    // Con sesión pero sin nombre (cuentas viejas): botón "Salir" simple
+    boton.textContent = "Salir";
+    boton.href = "#";
+    boton.onclick = salirYVolver;
+    return;
+  }
+
+  // Con sesión y con nombre: menú de cuenta "nombre ▾" → Salir
+  const menu = document.createElement("div");
+  menu.className = "user-menu";
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "btn-acceso user-menu-toggle";
+  toggle.textContent = nombre + " ▾"; // textContent evita inyección de HTML
+
+  const lista = document.createElement("div");
+  lista.className = "user-menu-list";
+
+  const salir = document.createElement("a");
+  salir.href = "#";
+  salir.textContent = "Salir";
+  salir.addEventListener("click", salirYVolver);
+
+  lista.appendChild(salir);
+  menu.appendChild(toggle);
+  menu.appendChild(lista);
+  boton.replaceWith(menu);
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    if (!menu.contains(e.target)) menu.classList.remove("open");
+  });
 }
 
 document.addEventListener("DOMContentLoaded", actualizarBotonAcceso);
+
+// Cuando hay sesión, agrega "Mi espacio" (→ hub) al inicio del desplegable "Explorar"
+async function agregarMiEspacio() {
+  const menu = document.getElementById("explorarMenu");
+  if (!menu) return; // solo existe en index.html
+  if (menu.querySelector(".explorar-mi-espacio")) return; // evita duplicar
+
+  const session = await obtenerSesion();
+  if (!session) return; // sin sesión no se muestra
+
+  const link = document.createElement("a");
+  link.href = "explorar.html";
+  link.className = "explorar-mi-espacio";
+  link.textContent = "Mi espacio";
+
+  const sep = document.createElement("div");
+  sep.className = "nav-dropdown-sep";
+
+  menu.prepend(sep);
+  menu.prepend(link);
+}
+
+document.addEventListener("DOMContentLoaded", agregarMiEspacio);

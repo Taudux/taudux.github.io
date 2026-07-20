@@ -36,6 +36,8 @@
 
       <!-- Formulario: Crear cuenta -->
       <form class="auth-form" id="signupForm" style="display:none;">
+        <input type="text" id="signupName" placeholder="Nombre(s)" autocomplete="given-name" required>
+        <input type="text" id="signupApellidos" placeholder="Apellidos" autocomplete="family-name" required>
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
         <input type="password" id="signupPassword" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" required minlength="6">
         <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="6">
@@ -112,9 +114,9 @@
       // No redirigimos al detector: hay que dejar que el usuario cambie su contraseña.
       mostrarModoRecuperacion();
     } else {
-      // Si el usuario ya tiene sesión activa, lo mandamos directo al detector
+      // Si el usuario ya tiene sesión activa, lo mandamos al hub
       obtenerSesion().then((session) => {
-        if (session) window.location.href = "detector.html";
+        if (session) window.location.href = "explorar.html";
       });
     }
 
@@ -126,7 +128,7 @@
 
       const resultado = await iniciarSesion(email, password);
       if (resultado.ok) {
-        window.location.href = "detector.html";
+        window.location.href = "explorar.html";
       } else {
         mostrarMensaje(resultado.mensaje, "error");
       }
@@ -135,6 +137,8 @@
     signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       ocultarMensaje();
+      const nombre = document.getElementById("signupName").value.trim();
+      const apellidos = document.getElementById("signupApellidos").value.trim();
       const email = document.getElementById("signupEmail").value.trim();
       const password = document.getElementById("signupPassword").value;
       const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
@@ -144,7 +148,7 @@
         return;
       }
 
-      const resultado = await registrarUsuario(email, password);
+      const resultado = await registrarUsuario(email, password, nombre, apellidos);
       if (resultado.ok) {
         mostrarMensaje("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
         signupForm.reset();

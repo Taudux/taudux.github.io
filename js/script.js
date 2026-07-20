@@ -99,6 +99,27 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+// Menú desplegable "Explorar": el clic siempre abre/cierra el submenú
+// (con o sin sesión). En escritorio también se abre al pasar el cursor (CSS).
+document.addEventListener("DOMContentLoaded", function () {
+  const dropdown = document.getElementById("explorarDropdown");
+  const toggle = document.getElementById("explorarToggle");
+  if (!dropdown || !toggle) return;
+
+  // Abrir/cerrar al hacer clic en el botón
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("open");
+  });
+
+  // Cerrar al hacer clic fuera del menú
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.classList.remove("open");
+    }
+  });
+});
+
 // Efecto de fade al hacer scroll
 const handleScrollFade = () => {
   const triggerBottom = window.innerHeight * 0.85;

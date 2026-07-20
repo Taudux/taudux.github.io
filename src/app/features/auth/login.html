@@ -31,7 +31,13 @@
       <!-- Formulario: Acceder -->
       <form class="auth-form" id="loginForm">
         <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email" required>
-        <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password" required>
+        <div class="password-field">
+          <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password" required>
+          <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Mostrar contraseña">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          </button>
+        </div>
         <button type="submit" class="btn-animado">Acceder</button>
       </form>
 
@@ -39,16 +45,72 @@
       <form class="auth-form" id="signupForm" style="display:none;">
         <input type="text" id="signupName" placeholder="Nombre(s)" autocomplete="given-name" required>
         <input type="text" id="signupApellidos" placeholder="Apellidos" autocomplete="family-name" required>
+        <select id="signupPais" class="auth-select">
+          <option value="+52" selected>🇲🇽 México (+52)</option>
+          <option value="+54">🇦🇷 Argentina (+54)</option>
+          <option value="+591">🇧🇴 Bolivia (+591)</option>
+          <option value="+55">🇧🇷 Brasil (+55)</option>
+          <option value="+56">🇨🇱 Chile (+56)</option>
+          <option value="+57">🇨🇴 Colombia (+57)</option>
+          <option value="+506">🇨🇷 Costa Rica (+506)</option>
+          <option value="+53">🇨🇺 Cuba (+53)</option>
+          <option value="+593">🇪🇨 Ecuador (+593)</option>
+          <option value="+503">🇸🇻 El Salvador (+503)</option>
+          <option value="+34">🇪🇸 España (+34)</option>
+          <option value="+1">🇺🇸 Estados Unidos (+1)</option>
+          <option value="+502">🇬🇹 Guatemala (+502)</option>
+          <option value="+504">🇭🇳 Honduras (+504)</option>
+          <option value="+505">🇳🇮 Nicaragua (+505)</option>
+          <option value="+507">🇵🇦 Panamá (+507)</option>
+          <option value="+595">🇵🇾 Paraguay (+595)</option>
+          <option value="+51">🇵🇪 Perú (+51)</option>
+          <option value="+598">🇺🇾 Uruguay (+598)</option>
+          <option value="+58">🇻🇪 Venezuela (+58)</option>
+        </select>
+        <div class="auth-phone-row">
+          <span id="signupPrefijo" class="auth-phone-prefix">+52</span>
+          <input type="tel" id="signupTelefono" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
+        </div>
         <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
-        <input type="password" id="signupPassword" placeholder="Contraseña" autocomplete="new-password" required minlength="6">
-        <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="6">
+        <div class="password-field">
+          <input type="password" id="signupPassword" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Mostrar contraseña">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          </button>
+        </div>
+        <ul class="password-reqs" id="passwordReqs">
+          <li data-req="longitud">Al menos 8 caracteres</li>
+          <li data-req="mayuscula">Una letra mayúscula</li>
+          <li data-req="minuscula">Una letra minúscula</li>
+          <li data-req="digito">Un número</li>
+        </ul>
+        <div class="password-field">
+          <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          </button>
+        </div>
         <button type="submit" class="btn-animado">Crear cuenta</button>
       </form>
 
       <!-- Formulario: nueva contraseña (solo tras abrir el enlace del correo) -->
       <form class="auth-form" id="recoveryForm" style="display:none;">
-        <input type="password" id="recoveryPassword" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="6">
-        <input type="password" id="recoveryPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="6">
+        <div class="password-field">
+          <input type="password" id="recoveryPassword" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="6">
+          <button type="button" class="password-toggle" data-target="recoveryPassword" aria-label="Mostrar contraseña">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          </button>
+        </div>
+        <div class="password-field">
+          <input type="password" id="recoveryPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="6">
+          <button type="button" class="password-toggle" data-target="recoveryPasswordConfirm" aria-label="Mostrar contraseña">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          </button>
+        </div>
         <button type="submit" class="btn-animado">Guardar contraseña</button>
       </form>
 
@@ -70,6 +132,65 @@
     const authTabs = document.querySelector(".auth-tabs");
     const authSubtitle = document.getElementById("authSubtitle");
     const forgotLink = document.getElementById("forgotLink");
+    const signupPais = document.getElementById("signupPais");
+    const signupPrefijo = document.getElementById("signupPrefijo");
+    const signupTelefono = document.getElementById("signupTelefono");
+    const signupPassword = document.getElementById("signupPassword");
+    const passwordReqs = document.getElementById("passwordReqs");
+
+    // Reglas de contraseña: cada una devuelve true si se cumple
+    const requisitosPassword = {
+      longitud: (p) => p.length >= 8,
+      mayuscula: (p) => /[A-Z]/.test(p),
+      minuscula: (p) => /[a-z]/.test(p),
+      digito: (p) => /\d/.test(p),
+    };
+
+    const passwordValida = (p) => Object.values(requisitosPassword).every((fn) => fn(p));
+
+    // Pinta cada requisito: verde si se cumple, rojo si no, neutro si el campo está vacío
+    function evaluarPassword() {
+      const p = signupPassword.value;
+      passwordReqs.querySelectorAll("li").forEach((li) => {
+        const cumple = requisitosPassword[li.dataset.req](p);
+        li.classList.toggle("cumple", p.length > 0 && cumple);
+        li.classList.toggle("no-cumple", p.length > 0 && !cumple);
+      });
+    }
+
+    signupPassword.addEventListener("input", evaluarPassword);
+
+    // Botón de ojo: alterna mostrar/ocultar el texto de cada campo de contraseña
+    document.querySelectorAll(".password-toggle").forEach((boton) => {
+      const input = document.getElementById(boton.dataset.target);
+      boton.addEventListener("click", () => {
+        const mostrando = input.type === "text";
+        input.type = mostrando ? "password" : "text";
+        boton.classList.toggle("showing", !mostrando);
+        boton.setAttribute("aria-label", mostrando ? "Mostrar contraseña" : "Ocultar contraseña");
+      });
+    });
+
+    // Mantiene el prefijo visible (+52, +57, …) sincronizado con el país elegido
+    signupPais.addEventListener("change", () => {
+      signupPrefijo.textContent = signupPais.value;
+    });
+
+    // Agrupa hasta 10 dígitos como 2-4-4 con guiones (ej. 55-1234-5678).
+    // Formatea progresivamente, así funciona mientras se escribe.
+    function formatearTelefono(valor) {
+      const d = valor.replace(/\D/g, "").slice(0, 10);
+      const partes = [];
+      partes.push(d.slice(0, 3));
+      if (d.length > 3) partes.push(d.slice(3, 6));
+      if (d.length > 6) partes.push(d.slice(6, 10));
+      return partes.filter(Boolean).join("-");
+    }
+
+    // Reformatea el campo en vivo a medida que el usuario teclea
+    signupTelefono.addEventListener("input", () => {
+      signupTelefono.value = formatearTelefono(signupTelefono.value);
+    });
 
     // Si la URL trae el enlace de recuperación de contraseña de Supabase
     // (…#access_token=...&type=recovery), activamos el modo "nueva contraseña"
@@ -127,19 +248,33 @@
       e.preventDefault();
       const nombre = document.getElementById("signupName").value.trim();
       const apellidos = document.getElementById("signupApellidos").value.trim();
+      const prefijo = signupPais.value;
+      const numeroTelefono = signupTelefono.value.replace(/[\s-]/g, "");
       const email = document.getElementById("signupEmail").value.trim();
       const password = document.getElementById("signupPassword").value;
       const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
+
+      if (!passwordValida(password)) {
+        mostrarToast("La contraseña no cumple los requisitos.", "error");
+        return;
+      }
 
       if (password !== passwordConfirm) {
         mostrarToast("Las contraseñas no coinciden.", "error");
         return;
       }
 
-      const resultado = await registrarUsuario(email, password, nombre, apellidos);
+      if (!/^\d{10}$/.test(numeroTelefono)) {
+        mostrarToast("Ingresa un número de teléfono válido.", "error");
+        return;
+      }
+      const telefono = `${prefijo} ${numeroTelefono}`;
+
+      const resultado = await registrarUsuario(email, password, nombre, apellidos, telefono);
       if (resultado.ok) {
         mostrarToast("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
         signupForm.reset();
+        evaluarPassword();
       } else {
         mostrarToast(resultado.mensaje, "error");
       }

@@ -29,12 +29,12 @@ function traducirErrorAuth(mensaje) {
   return "Ocurrió un error. Intenta de nuevo en unos momentos.";
 }
 
-// Registrar un usuario nuevo (nombre y apellidos se guardan en user_metadata)
-async function registrarUsuario(email, password, nombre, apellidos) {
+// Registrar un usuario nuevo (nombre, apellidos y teléfono se guardan en user_metadata)
+async function registrarUsuario(email, password, nombre, apellidos, telefono) {
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
-    options: { data: { nombre, apellidos } },
+    options: { data: { nombre, apellidos, telefono } },
   });
   if (error) {
     return { ok: false, mensaje: traducirErrorAuth(error.message) };
@@ -94,9 +94,23 @@ async function requerirSesion() {
   return session;
 }
 
-// Devuelve el nombre del usuario (de user_metadata) o null si no tiene.
+// Devuelve la fila de perfil del usuario (o null si no existe / falla la consulta).
+async function obtenerPerfil(session) {
+  const { data, error } = await supabaseClient
+    .from("perfiles")
+    .select("nombre, apellidos, telefono, rol")
+    .eq("id", session.user.id)
+    .single();
+  if (error) return null;
+  return data;
+}
+
+// Devuelve el nombre del usuario, leído de la tabla perfiles.
+// Respaldo: user_metadata (cuentas previas a la tabla o si falla la consulta).
 // No se usa la parte del correo como respaldo (se vería a basura).
-function nombreUsuario(session) {
+async function nombreUsuario(session) {
+  const perfil = await obtenerPerfil(session);
+  if (perfil && perfil.nombre) return perfil.nombre;
   const meta = session.user.user_metadata || {};
   return meta.nombre || null;
 }

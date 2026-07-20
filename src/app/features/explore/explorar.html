@@ -60,7 +60,7 @@
       const session = await requerirSesion();
       if (!session) return; // requerirSesion ya redirige a login.html
 
-      const nombre = nombreUsuario(session);
+      const nombre = await nombreUsuario(session);
       document.getElementById("explorarTitulo").textContent =
         nombre ? `¡Qué gusto verte, ${nombre}!` : "¡Qué gusto verte!";
       document.body.style.visibility = "visible";

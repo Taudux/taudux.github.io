@@ -26,7 +26,7 @@ async function actualizarBotonAcceso() {
     return;
   }
 
-  const nombre = nombreUsuario(session);
+  const nombre = await nombreUsuario(session);
 
   if (!nombre) {
     // Con sesión pero sin nombre (cuentas viejas): botón "Salir" simple

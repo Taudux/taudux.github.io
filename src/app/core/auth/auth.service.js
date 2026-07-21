@@ -115,6 +115,13 @@ async function obtenerPerfil(session) {
   return data;
 }
 
+// Indica si el usuario de la sesión tiene rol de administrador.
+// El gate real de datos es la RLS de Postgres; esto solo decide qué UI mostrar.
+async function esAdmin(session) {
+  const perfil = await obtenerPerfil(session);
+  return perfil?.rol === "admin";
+}
+
 // Devuelve el nombre del usuario, leído de la tabla perfiles.
 // Respaldo: user_metadata (cuentas previas a la tabla o si falla la consulta).
 // No se usa la parte del correo como respaldo (se vería a basura).

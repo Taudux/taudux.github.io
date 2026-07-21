@@ -1,0 +1,55 @@
+/*
+  Estilos globales mínimos. Las reglas de componentes y features viven junto
+  al concepto que representan dentro de src/app/.
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: "Mokoto";
+  src: url("./assets/fonts/mokoto-mokoto-regular-400.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  background-color: #0d0f11;
+  color: #fff;
+}
+
+button,
+.button {
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 0.5px;
+}
+
+input,
+textarea,
+select {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1rem;
+  color: #ccc;
+}

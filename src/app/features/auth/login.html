@@ -4,48 +4,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
   <title>Acceder | Taudux</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
-  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
-  <link rel="stylesheet" href="/src/app/shared/components/toast.css">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
+  <link rel="stylesheet" href="/src/app/features/auth/login.css">
 </head>
 
 <body>
-  <nav class="navbar scrolled">
-    <a href="/index.html" class="logo-small">
-      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="logo-icon">
+  <nav class="navbar navbar--scrolled">
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
   </nav>
 
-  <main class="auth-page">
-    <div class="auth-card framed-box">
-      <h1>Bienvenido a Taudux</h1>
-      <p class="auth-subtitle" id="authSubtitle">Inicia sesión para continuar</p>
+  <main class="auth">
+    <div class="auth__card panel">
+      <h1 class="auth__title">Bienvenido a Taudux</h1>
+      <p class="auth__subtitle" id="authSubtitle">Inicia sesión para continuar</p>
 
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab active" id="tabLogin">Acceder</button>
-        <button type="button" class="auth-tab" id="tabSignup">Crear cuenta</button>
+      <div class="auth__tabs">
+        <button type="button" class="auth__tab auth__tab--active" id="tabLogin">Acceder</button>
+        <button type="button" class="auth__tab" id="tabSignup">Crear cuenta</button>
       </div>
 
-      <!-- Formulario: Acceder -->
-      <form class="auth-form" id="loginForm">
-        <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email" required>
+      <form class="auth__form" id="loginForm">
+        <input type="email" id="loginEmail" class="auth__input" placeholder="Correo electrónico" autocomplete="email" required>
         <div class="password-field">
-          <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password" required>
-          <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Mostrar contraseña">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          <input type="password" id="loginPassword" class="auth__input password-field__input" placeholder="Contraseña" autocomplete="current-password" required>
+          <button type="button" class="password-field__toggle" data-target="loginPassword" aria-label="Mostrar contraseña">
+            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
-        <button type="submit" class="btn-animado">Acceder</button>
+        <button type="submit" class="auth__submit button button--glow">Acceder</button>
       </form>
 
-      <!-- Formulario: Crear cuenta -->
-      <form class="auth-form" id="signupForm" style="display:none;">
-        <input type="text" id="signupName" placeholder="Nombre(s)" autocomplete="given-name" required>
-        <input type="text" id="signupApellidos" placeholder="Apellidos" autocomplete="family-name" required>
-        <select id="signupPais" class="auth-select">
+      <form class="auth__form auth__form--hidden" id="signupForm">
+        <input type="text" id="signupName" class="auth__input" placeholder="Nombre(s)" autocomplete="given-name" required>
+        <input type="text" id="signupApellidos" class="auth__input" placeholder="Apellidos" autocomplete="family-name" required>
+        <select id="signupPais" class="auth__select">
           <option value="+52" selected>🇲🇽 México (+52)</option>
           <option value="+54">🇦🇷 Argentina (+54)</option>
           <option value="+591">🇧🇴 Bolivia (+591)</option>
@@ -67,280 +69,63 @@
           <option value="+598">🇺🇾 Uruguay (+598)</option>
           <option value="+58">🇻🇪 Venezuela (+58)</option>
         </select>
-        <div class="auth-phone-row">
-          <span id="signupPrefijo" class="auth-phone-prefix">+52</span>
-          <input type="tel" id="signupTelefono" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
+        <div class="auth__phone-row">
+          <span id="signupPrefijo" class="auth__phone-prefix">+52</span>
+          <input type="tel" id="signupTelefono" class="auth__input auth__phone-input" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
         </div>
-        <input type="email" id="signupEmail" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="email" id="signupEmail" class="auth__input" placeholder="Correo electrónico" autocomplete="email" required>
         <div class="password-field">
-          <input type="password" id="signupPassword" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Mostrar contraseña">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          <input type="password" id="signupPassword" class="auth__input password-field__input" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-field__toggle" data-target="signupPassword" aria-label="Mostrar contraseña">
+            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
-        <ul class="password-reqs" id="passwordReqs">
-          <li data-req="longitud">Al menos 8 caracteres</li>
-          <li data-req="mayuscula">Una letra mayúscula</li>
-          <li data-req="minuscula">Una letra minúscula</li>
-          <li data-req="digito">Un número</li>
+        <ul class="password-requirements" id="passwordReqs">
+          <li class="password-requirements__item" data-req="longitud">Al menos 8 caracteres</li>
+          <li class="password-requirements__item" data-req="mayuscula">Una letra mayúscula</li>
+          <li class="password-requirements__item" data-req="minuscula">Una letra minúscula</li>
+          <li class="password-requirements__item" data-req="digito">Un número</li>
         </ul>
         <div class="password-field">
-          <input type="password" id="signupPasswordConfirm" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          <input type="password" id="signupPasswordConfirm" class="auth__input password-field__input" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-field__toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña">
+            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
-        <button type="submit" class="btn-animado">Crear cuenta</button>
+        <button type="submit" class="auth__submit button button--glow">Crear cuenta</button>
       </form>
 
-      <!-- Formulario: nueva contraseña (solo tras abrir el enlace del correo) -->
-      <form class="auth-form" id="recoveryForm" style="display:none;">
+      <form class="auth__form auth__form--hidden" id="recoveryForm">
         <div class="password-field">
-          <input type="password" id="recoveryPassword" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="6">
-          <button type="button" class="password-toggle" data-target="recoveryPassword" aria-label="Mostrar contraseña">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          <input type="password" id="recoveryPassword" class="auth__input password-field__input" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-field__toggle" data-target="recoveryPassword" aria-label="Mostrar contraseña">
+            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
         <div class="password-field">
-          <input type="password" id="recoveryPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="6">
-          <button type="button" class="password-toggle" data-target="recoveryPasswordConfirm" aria-label="Mostrar contraseña">
-            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
+          <input type="password" id="recoveryPasswordConfirm" class="auth__input password-field__input" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-field__toggle" data-target="recoveryPasswordConfirm" aria-label="Mostrar contraseña">
+            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
+            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1-2.16 3.19M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
-        <button type="submit" class="btn-animado">Guardar contraseña</button>
+        <button type="submit" class="auth__submit button button--glow">Guardar contraseña</button>
       </form>
 
-      <a href="#" class="auth-forgot" id="forgotLink">¿Olvidaste tu contraseña?</a>
-      <a href="#" class="auth-forgot" id="reenviarLink" style="display:none;">Reenviar correo de confirmación</a>
+      <a href="#" class="auth__link" id="forgotLink">¿Olvidaste tu contraseña?</a>
+      <a href="#" class="auth__link auth__link--hidden" id="reenviarLink">Reenviar correo de confirmación</a>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/shared/components/navbar.js"></script>
-  <script src="/src/app/shared/components/toast.js"></script>
-  <script>
-    const tabLogin = document.getElementById("tabLogin");
-    const tabSignup = document.getElementById("tabSignup");
-    const loginForm = document.getElementById("loginForm");
-    const signupForm = document.getElementById("signupForm");
-    const recoveryForm = document.getElementById("recoveryForm");
-    const authTabs = document.querySelector(".auth-tabs");
-    const authSubtitle = document.getElementById("authSubtitle");
-    const forgotLink = document.getElementById("forgotLink");
-    const reenviarLink = document.getElementById("reenviarLink");
-    const signupPais = document.getElementById("signupPais");
-    const signupPrefijo = document.getElementById("signupPrefijo");
-    const signupTelefono = document.getElementById("signupTelefono");
-    const signupPassword = document.getElementById("signupPassword");
-    const passwordReqs = document.getElementById("passwordReqs");
-
-    // Reglas de contraseña: cada una devuelve true si se cumple
-    const requisitosPassword = {
-      longitud: (p) => p.length >= 8,
-      mayuscula: (p) => /[A-Z]/.test(p),
-      minuscula: (p) => /[a-z]/.test(p),
-      digito: (p) => /\d/.test(p),
-    };
-
-    const passwordValida = (p) => Object.values(requisitosPassword).every((fn) => fn(p));
-
-    // Pinta cada requisito: verde si se cumple, rojo si no, neutro si el campo está vacío
-    function evaluarPassword() {
-      const p = signupPassword.value;
-      passwordReqs.querySelectorAll("li").forEach((li) => {
-        const cumple = requisitosPassword[li.dataset.req](p);
-        li.classList.toggle("cumple", p.length > 0 && cumple);
-        li.classList.toggle("no-cumple", p.length > 0 && !cumple);
-      });
-    }
-
-    signupPassword.addEventListener("input", evaluarPassword);
-
-    // Botón de ojo: alterna mostrar/ocultar el texto de cada campo de contraseña
-    document.querySelectorAll(".password-toggle").forEach((boton) => {
-      const input = document.getElementById(boton.dataset.target);
-      boton.addEventListener("click", () => {
-        const mostrando = input.type === "text";
-        input.type = mostrando ? "password" : "text";
-        boton.classList.toggle("showing", !mostrando);
-        boton.setAttribute("aria-label", mostrando ? "Mostrar contraseña" : "Ocultar contraseña");
-      });
-    });
-
-    // Mantiene el prefijo visible (+52, +57, …) sincronizado con el país elegido
-    signupPais.addEventListener("change", () => {
-      signupPrefijo.textContent = signupPais.value;
-    });
-
-    // Agrupa hasta 10 dígitos como 2-4-4 con guiones (ej. 55-1234-5678).
-    // Formatea progresivamente, así funciona mientras se escribe.
-    function formatearTelefono(valor) {
-      const d = valor.replace(/\D/g, "").slice(0, 10);
-      const partes = [];
-      partes.push(d.slice(0, 3));
-      if (d.length > 3) partes.push(d.slice(3, 6));
-      if (d.length > 6) partes.push(d.slice(6, 10));
-      return partes.filter(Boolean).join("-");
-    }
-
-    // Reformatea el campo en vivo a medida que el usuario teclea
-    signupTelefono.addEventListener("input", () => {
-      signupTelefono.value = formatearTelefono(signupTelefono.value);
-    });
-
-    // Si la URL trae el enlace de recuperación de contraseña de Supabase
-    // (…#access_token=...&type=recovery), activamos el modo "nueva contraseña"
-    // y evitamos que la redirección automática mande al usuario al detector.
-    const enRecuperacion = window.location.hash.includes("type=recovery");
-
-    function mostrarTab(tab) {
-      const esLogin = tab === "login";
-      tabLogin.classList.toggle("active", esLogin);
-      tabSignup.classList.toggle("active", !esLogin);
-      loginForm.style.display = esLogin ? "flex" : "none";
-      signupForm.style.display = esLogin ? "none" : "flex";
-      forgotLink.style.display = esLogin ? "inline-block" : "none";
-      reenviarLink.style.display = "none";
-      authSubtitle.textContent = esLogin
-        ? "Inicia sesión para continuar"
-        : "Crea tu cuenta para acceder a la herramienta";
-    }
-
-    function mostrarModoRecuperacion() {
-      authTabs.style.display = "none";
-      loginForm.style.display = "none";
-      signupForm.style.display = "none";
-      forgotLink.style.display = "none";
-      reenviarLink.style.display = "none";
-      recoveryForm.style.display = "flex";
-      authSubtitle.textContent = "Escribe tu nueva contraseña";
-    }
-
-    tabLogin.addEventListener("click", () => mostrarTab("login"));
-    tabSignup.addEventListener("click", () => mostrarTab("signup"));
-
-    if (enRecuperacion) {
-      // No redirigimos al detector: hay que dejar que el usuario cambie su contraseña.
-      mostrarModoRecuperacion();
-    } else {
-      // Si el usuario ya tiene sesión activa, lo mandamos al hub
-      obtenerSesion().then((session) => {
-        if (session) window.location.href = "/src/app/features/explore/explorar.html";
-      });
-    }
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
-
-      const resultado = await iniciarSesion(email, password);
-      if (resultado.ok) {
-        window.location.href = "/src/app/features/explore/explorar.html";
-      } else {
-        mostrarToast(resultado.mensaje, "error");
-        reenviarLink.style.display = resultado.noConfirmado ? "inline-block" : "none";
-      }
-    });
-
-    reenviarLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      if (!email) {
-        mostrarToast("Escribe tu correo arriba y vuelve a intentarlo.", "error");
-        return;
-      }
-      const resultado = await reenviarConfirmacion(email);
-      mostrarToast(
-        resultado.ok ? "Te reenviamos el correo de confirmación. Revisa tu bandeja." : resultado.mensaje,
-        resultado.ok ? "success" : "error"
-      );
-    });
-
-    signupForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nombre = document.getElementById("signupName").value.trim();
-      const apellidos = document.getElementById("signupApellidos").value.trim();
-      const prefijo = signupPais.value;
-      const numeroTelefono = signupTelefono.value.replace(/[\s-]/g, "");
-      const email = document.getElementById("signupEmail").value.trim();
-      const password = document.getElementById("signupPassword").value;
-      const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
-
-      if (!passwordValida(password)) {
-        mostrarToast("La contraseña no cumple los requisitos.", "error");
-        return;
-      }
-
-      if (password !== passwordConfirm) {
-        mostrarToast("Las contraseñas no coinciden.", "error");
-        return;
-      }
-
-      if (!/^\d{10}$/.test(numeroTelefono)) {
-        mostrarToast("Ingresa un número de teléfono válido.", "error");
-        return;
-      }
-      const telefono = `${prefijo} ${numeroTelefono}`;
-
-      const resultado = await registrarUsuario(email, password, nombre, apellidos, telefono);
-      if (resultado.ok) {
-        mostrarToast("¡Cuenta creada! Revisa tu correo para confirmarla antes de acceder.", "success");
-        signupForm.reset();
-        evaluarPassword();
-      } else {
-        mostrarToast(resultado.mensaje, "error");
-      }
-    });
-
-    forgotLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      if (!email) {
-        mostrarToast("Escribe tu correo arriba y vuelve a intentarlo.", "error");
-        return;
-      }
-      const resultado = await recuperarContrasena(email);
-      if (resultado.ok) {
-        mostrarToast("Te enviamos un correo para restablecer tu contraseña.", "success");
-      } else {
-        mostrarToast(resultado.mensaje, "error");
-      }
-    });
-
-    recoveryForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const password = document.getElementById("recoveryPassword").value;
-      const passwordConfirm = document.getElementById("recoveryPasswordConfirm").value;
-
-      if (password !== passwordConfirm) {
-        mostrarToast("Las contraseñas no coinciden.", "error");
-        return;
-      }
-
-      const resultado = await cambiarContrasena(password);
-      if (!resultado.ok) {
-        mostrarToast(resultado.mensaje, "error");
-        return;
-      }
-
-      // Cerramos la sesión temporal de recuperación y limpiamos la URL
-      await cerrarSesion();
-      history.replaceState(null, "", window.location.pathname);
-
-      authTabs.style.display = "flex";
-      recoveryForm.style.display = "none";
-      recoveryForm.reset();
-      mostrarTab("login");
-      mostrarToast("Contraseña actualizada. Inicia sesión con tu nueva contraseña.", "success");
-    });
-  </script>
+  <script src="/src/app/shared/navbar/navbar.js"></script>
+  <script src="/src/app/shared/toast/toast.js"></script>
+  <script src="/src/app/features/auth/login.js"></script>
 </body>
 
 </html>

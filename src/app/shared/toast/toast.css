@@ -1,6 +1,6 @@
-/* Notificaciones toast — ver shared/components/toast.js */
+/* Notificaciones toast; requiere toast.js. */
 
-.toast-container {
+.toast-stack {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
@@ -13,7 +13,7 @@
 }
 
 .toast {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   font-size: 0.9rem;
   line-height: 1.4;
   padding: 0.85rem 1.15rem;
@@ -22,33 +22,30 @@
   backdrop-filter: blur(6px);
   background: rgba(13, 15, 17, 0.92);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-
-  /* Estado inicial: fuera de pantalla, a la derecha */
   transform: translateX(120%);
   opacity: 0;
   transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
-.toast.visible {
+.toast--visible {
   transform: translateX(0);
   opacity: 1;
 }
 
-.toast-success {
+.toast--success {
   background: rgba(0, 225, 255, 0.1);
   border: 1px solid rgba(0, 225, 255, 0.4);
   color: #00e1ff;
 }
 
-.toast-error {
+.toast--error {
   background: rgba(255, 80, 80, 0.12);
   border: 1px solid rgba(255, 80, 80, 0.4);
   color: #ff8a8a;
 }
 
-/* En móvil ocupa el ancho disponible, siempre abajo */
 @media (max-width: 768px) {
-  .toast-container {
+  .toast-stack {
     bottom: 1rem;
     left: 1rem;
     right: 1rem;
@@ -66,7 +63,7 @@
     transition: opacity 0.2s ease;
   }
 
-  .toast.visible {
+  .toast--visible {
     transform: none;
   }
 }

@@ -1,0 +1,89 @@
+/* Estilos del hub privado de exploración. */
+
+.explore--auth-pending {
+  visibility: hidden;
+}
+
+.explore__main {
+  min-height: 100vh;
+  padding: 8rem 2rem 4rem;
+  background-color: #0d0f11;
+}
+
+.explore__container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.explore__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.explore__title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #aaa, #fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.explore__welcome {
+  margin: 1.5rem auto 0;
+  max-width: 600px;
+  color: #ddd;
+  line-height: 1.7;
+  background: rgba(0, 225, 255, 0.06);
+  border: 1px solid rgba(0, 225, 255, 0.25);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+}
+
+.explore__section-title {
+  font-size: 1.3rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+}
+
+.explore__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.explore__card {
+  display: block;
+  text-decoration: none;
+  padding: 1.75rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.explore__card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 25px rgba(0, 225, 255, 0.2);
+}
+
+.explore__card-title {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.explore__card-description {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.explore__badge {
+  display: inline-block;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  color: #00e1ff;
+  border: 1px solid rgba(0, 225, 255, 0.4);
+  border-radius: 20px;
+  padding: 4px 12px;
+}

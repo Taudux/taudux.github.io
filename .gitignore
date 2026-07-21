@@ -1,3 +1,5 @@
 # Configuración del editor
 .vscode/
 .kiro/
+.claude/
+CLAUDE.md

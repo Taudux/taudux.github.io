@@ -1,0 +1,36 @@
+/* Página reutilizable para features todavía no disponibles. */
+
+.coming-soon {
+  min-height: 100vh;
+  padding: 8rem 2rem 4rem;
+  background-color: #0d0f11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon__card {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.coming-soon__title {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin-bottom: 1rem;
+}
+
+.coming-soon__description {
+  color: #ccc;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.coming-soon__placeholder {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 3rem 1.5rem;
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}

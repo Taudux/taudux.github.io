@@ -4,213 +4,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
   <title>Taudux</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
-  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
-  <link rel="stylesheet" href="/src/app/shared/components/toast.css">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
+  <link rel="stylesheet" href="/src/app/features/home/home.css">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
 
 <body>
   <nav class="navbar" id="navbar">
-    <div class="logo-small" id="logoSmall">
-      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo pequeño" class="logo-icon">
+    <div class="navbar__brand" id="logoSmall">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo pequeño" class="navbar__logo">
     </div>
 
     <!-- Mueve el botón AQUÍ, al lado derecho -->
-    <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+    <button class="navbar__toggle" id="menuToggle" aria-label="Menú">
       &#9776;
     </button>
 
-    <div class="nav-buttons-wrapper"></div>
-    <div class="nav-buttons show">
-      <a href="#quienes-somos">¿Quiénes somos?</a>
-      <a href="#servicios">Servicios</a>
-      <a href="#herramientas">Herramientas</a>
-      <a href="#contacto">Contáctanos</a>
+    <div class="navbar__links">
+      <a href="#quienes-somos" class="navbar__link">¿Quiénes somos?</a>
+      <a href="#servicios" class="navbar__link">Servicios</a>
+      <a href="#herramientas" class="navbar__link">Herramientas</a>
+      <a href="#contacto" class="navbar__link">Contáctanos</a>
       <div class="nav-dropdown" id="explorarDropdown">
-        <button type="button" class="nav-dropdown-toggle" id="explorarToggle">Explorar ▾</button>
-        <div class="nav-dropdown-menu" id="explorarMenu">
-          <a href="/src/app/features/courses/cursos.html">Cursos</a>
-          <a href="/src/app/features/detector/detector.html">Detector IA</a>
+        <button type="button" class="nav-dropdown__toggle" id="explorarToggle">Explorar ▾</button>
+        <div class="nav-dropdown__menu" id="explorarMenu">
+          <a href="/src/app/features/courses/cursos.html" class="nav-dropdown__link">Cursos</a>
+          <a href="/src/app/features/detector/detector.html" class="nav-dropdown__link">Detector IA</a>
         </div>
       </div>
-      <a href="/src/app/features/auth/login.html" id="accessBtn" class="btn-acceso">Acceder</a>
+      <a href="/src/app/features/auth/login.html" id="accessBtn" class="navbar__link button button--access">Acceder</a>
     </div>
   </nav>
 
   <header class="hero">
-    <img src="/src/assets/images/01.png" alt="Taudux logo grande" class="logo-large" id="logoLarge">
+    <img src="/src/assets/images/01.png" alt="Taudux logo grande" class="hero__logo" id="logoLarge">
   </header>
 
-  <section id="quienes-somos" class="highlighted-section scroll-fade">
-    <div id="particles-quienes"></div>
-    <div class="section-container framed-box">
-      <h2>Soluciones inteligentes para un mundo digital</h2>
-      <p>
+  <section id="quienes-somos" class="about">
+    <div id="particles-quienes" class="about__particles"></div>
+    <div class="about__content panel">
+      <h2 class="about__title">Soluciones inteligentes para un mundo digital</h2>
+      <p class="about__description">
          Somos un equipo multidisciplinario de profesionales apasionados por la
         innovación, que combina experiencia en
         desarrollo de software, análisis de procesos y soluciones con inteligencia artificial.
       </p>
-      <p>
+      <p class="about__description">
         Acompañamos a nuestros clientes desde la idea hasta la implementación, construyendo soluciones a la medida que
         impulsen sus objetivos de negocio. Trabajamos con compromiso, transparencia y visión a largo plazo.
       </p>
-      <a href="nosotros.html" class="btn-quienes">¡Conoce más!</a>
     </div>
   </section>
 
-  <section id="servicios" class="section servicios-section">
-    <div class="section-container">
-      <h2 class="section-title">Tecnología a tu medida</h2>
-      <div class="servicios-grid">
-        <div class="servicio-item" style="--delay: 0s">
-          <img src="/src/assets/images/servicio1.jpg" alt="Analítica del dato">
-          <h3>Análisis de datos</h3>
-          <p>Te ayudamos a garantizar la calidad, seguridad y utilidad de tu información en todo su ciclo de vida. Desde la recolección hasta el análisis, te acompañamos en la toma de decisiones basadas en datos.</p>
+  <section id="servicios" class="services">
+    <div class="services__container">
+      <h2 class="services__title">Tecnología a tu medida</h2>
+      <div class="services__grid">
+        <div class="services__card">
+          <img src="/src/assets/images/servicio1.jpg" alt="Analítica del dato" class="services__image">
+          <h3 class="services__heading">Análisis de datos</h3>
+          <p class="services__description">Te ayudamos a garantizar la calidad, seguridad y utilidad de tu información en todo su ciclo de vida. Desde la recolección hasta el análisis, te acompañamos en la toma de decisiones basadas en datos.</p>
         </div>
-        <div class="servicio-item" style="--delay: 0.3s">
-          <img src="/src/assets/images/servicio2.jpg" alt="Desarrollo de software">
-          <h3>Desarrollo de software</h3>
-          <p>Creamos aplicaciones y plataformas personalizadas que se adaptan a tus necesidades. Ya sea escritorio, móvil o en la nube, desarrollamos tecnología que impulsa tu eficiencia y crecimiento.</p>
+        <div class="services__card">
+          <img src="/src/assets/images/servicio2.jpg" alt="Desarrollo de software" class="services__image">
+          <h3 class="services__heading">Desarrollo de software</h3>
+          <p class="services__description">Creamos aplicaciones y plataformas personalizadas que se adaptan a tus necesidades. Ya sea escritorio, móvil o en la nube, desarrollamos tecnología que impulsa tu eficiencia y crecimiento.</p>
         </div>
-        <div class="servicio-item" style="--delay: 0.6s">
-          <img src="/src/assets/images/servicio3.jpg" alt="Cursos y capacitaciones">
-          <h3>Cursos y capacitaciones</h3>
-          <p>Ofrecemos formación especializada para empresas y profesionales en programación, análisis de datos y herramientas clave para la transformación digital.</p>
+        <div class="services__card">
+          <img src="/src/assets/images/servicio3.jpg" alt="Cursos y capacitaciones" class="services__image">
+          <h3 class="services__heading">Cursos y capacitaciones</h3>
+          <p class="services__description">Ofrecemos formación especializada para empresas y profesionales en programación, análisis de datos y herramientas clave para la transformación digital.</p>
         </div>
-        <div class="servicio-item" style="--delay: 0.9s">
-          <img src="/src/assets/images/servicio4.jpg" alt="Modelos de IA">
-          <h3>Inteligencia Artificial</h3>
-          <p>Usamos modelos de datos para proyectar escenarios que te ayuden a tomar decisiones informadas sobre ventas, productos, tendencias y otros aspectos clave de tu negocio.</p>
+        <div class="services__card">
+          <img src="/src/assets/images/servicio4.jpg" alt="Modelos de IA" class="services__image">
+          <h3 class="services__heading">Inteligencia Artificial</h3>
+          <p class="services__description">Usamos modelos de datos para proyectar escenarios que te ayuden a tomar decisiones informadas sobre ventas, productos, tendencias y otros aspectos clave de tu negocio.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="herramientas" class="herramientas-section">
-    <h2>Tecnología que potencia tus proyectos</h2>
-    <p>Dominamos una amplia gama de tecnologías que nos permiten diseñar, desarrollar y optimizar soluciones para cada cliente. Desde lenguajes de programación hasta plataformas de análisis, ponemos lo mejor de la tecnología a tu alcance.</p>
-    <div class="carousel-wrapper">
-      <div class="carousel fade-left pause-on-hover" id="carousel-top">
-        <div class="carousel-track">
+  <section id="herramientas" class="technology">
+    <h2 class="technology__title">Tecnología que potencia tus proyectos</h2>
+    <p class="technology__description">Dominamos una amplia gama de tecnologías que nos permiten diseñar, desarrollar y optimizar soluciones para cada cliente. Desde lenguajes de programación hasta plataformas de análisis, ponemos lo mejor de la tecnología a tu alcance.</p>
+    <div class="technology__carousels">
+      <div class="carousel" id="carousel-top">
+        <div class="carousel__track">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"
-            alt="Python">
+            alt="Python" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg"
-            alt="JavaScript">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R">
+            alt="JavaScript" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original-wordmark.svg"
-            alt="NodeJs">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP">
+            alt="NodeJs" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original-wordmark.svg"
-            alt="HTML">
+            alt="HTML" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original-wordmark.svg"
-            alt="Java">
+            alt="Java" class="carousel__item">
 
           <!-- Duplicado -->
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original-wordmark.svg"
-            alt="Python">
+            alt="Python" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg"
-            alt="JavaScript">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R">
+            alt="JavaScript" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg" alt="R" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original-wordmark.svg"
-            alt="NodeJs">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP">
+            alt="NodeJs" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-plain.svg" alt="CPP" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original-wordmark.svg"
-            alt="HTML">
+            alt="HTML" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original-wordmark.svg"
-            alt="Java">
+            alt="Java" class="carousel__item">
         </div>
       </div>
-      <div class="carousel fade-right pause-on-hover" id="carousel-bottom">
-        <div class="carousel-track reverse">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git">
+      <div class="carousel" id="carousel-bottom">
+        <div class="carousel__track carousel__track--reverse">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-plain-wordmark.svg"
-            alt="postgresql">
+            alt="postgresql" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original-wordmark.svg"
-            alt="mysql">
+            alt="mysql" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-plain-wordmark.svg"
-            alt="mongodb">
+            alt="mongodb" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/googlecloud/googlecloud-original.svg"
-            alt="gcp">
+            alt="gcp" class="carousel__item">
           <img
             src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"
-            alt="aws">
+            alt="aws" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postman/postman-original.svg"
-            alt="Postman">
+            alt="Postman" class="carousel__item">
 
           <!-- Duplicado -->
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker">
-          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" class="carousel__item">
+          <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg" alt="Git" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-plain-wordmark.svg"
-            alt="postgresql">
+            alt="postgresql" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original-wordmark.svg"
-            alt="mysql">
+            alt="mysql" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-plain-wordmark.svg"
-            alt="mongodb">
+            alt="mongodb" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/googlecloud/googlecloud-original.svg"
-            alt="gcp">
+            alt="gcp" class="carousel__item">
           <img
             src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"
-            alt="aws">
+            alt="aws" class="carousel__item">
           <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postman/postman-original.svg"
-            alt="Postman">
+            alt="Postman" class="carousel__item">
         </div>
       </div>
     </div>
   </section>
 
-  <section id="contacto" class="contact-section">
-    <div class="contact-box">
-      <div class="contact-info">
-        <h2>¿Listo para transformar tus ideas?</h2>
-        <p>Cuéntanos sobre tu proyecto y descubre cómo podemos ayudarte a hacerlo realidad. Nuestro equipo está listo
+  <section id="contacto" class="contact">
+    <div class="contact__panel panel">
+      <div class="contact__info">
+        <h2 class="contact__title">¿Listo para transformar tus ideas?</h2>
+        <p class="contact__description">Cuéntanos sobre tu proyecto y descubre cómo podemos ayudarte a hacerlo realidad. Nuestro equipo está listo
           para escucharte.</p>
-        <a href="https://wa.me/524462549778" class="btn-whatsapp" target="_blank">
-          <img src="https://cdn.simpleicons.org/whatsapp/000000" alt="WhatsApp"> Escríbenos por WhatsApp
+        <a href="https://wa.me/524462549778" class="button button--whatsapp" target="_blank">
+          <img src="https://cdn.simpleicons.org/whatsapp/000000" alt="WhatsApp" class="button__icon"> Escríbenos por WhatsApp
         </a>
       </div>
-      <form action="https://formsubmit.co/customerservice@taudux.com" method="POST" class="contact-form"
+      <form action="https://formsubmit.co/customerservice@taudux.com" method="POST" class="contact__form"
         id="contactForm">
-        <div class="form-row">
-          <input type="text" id="nombre" name="nombre" placeholder="Nombre(s) *" required>
-          <input type="email" id="email" name="email" placeholder="Correo electrónico *" required>
+        <div class="contact__row">
+          <input type="text" id="nombre" name="nombre" placeholder="Nombre(s) *" class="contact__field" required>
+          <input type="email" id="email" name="email" placeholder="Correo electrónico *" class="contact__field" required>
         </div>
-        <div class="form-row">
-          <input type="text" id="empresa" name="empresa" placeholder="Empresa *" required>
-          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono (opcional)">
+        <div class="contact__row">
+          <input type="text" id="empresa" name="empresa" placeholder="Empresa *" class="contact__field" required>
+          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono (opcional)" class="contact__field">
         </div>
-        <textarea id="mensaje" name="message" rows="4" placeholder="¿En qué servicio estás interesado? Cuéntanos más..."
+        <textarea id="mensaje" name="message" rows="4" class="contact__field contact__field--message" placeholder="¿En qué servicio estás interesado? Cuéntanos más..."
           required></textarea>
         <!-- Evita captcha de confirmación y redireccionamiento -->
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_next" value="#">
-        <button type="submit" class="btn-animado">Enviar mensaje</button>
+        <button type="submit" class="contact__submit button button--glow">Enviar mensaje</button>
       </form>
     </div>
   </section>
 
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-logo">
-        <img src="/src/assets/images/logo-horizontal.png" alt="Logo Taudux">
+  <footer class="footer">
+    <div class="footer__container">
+      <div>
+        <img src="/src/assets/images/logo-horizontal.png" alt="Logo Taudux" class="footer__logo">
       </div>
-      <div class="footer-info">
-        <p>&copy;<strong>Taudux</strong> | Desarrollo & Tecnología</p>
-        <p>Dirección: Villas del Cimatario, Universo 2000, 76085 Santiago de Querétaro, Qro.</p>
-        <p>Email: costumerservice@taudux.com</p>
-        <p>Teléfono: +52 446 254 9778</p>
+      <div>
+        <p class="footer__detail">&copy;<strong>Taudux</strong> | Desarrollo & Tecnología</p>
+        <p class="footer__detail">Dirección: Villas del Cimatario, Universo 2000, 76085 Santiago de Querétaro, Qro.</p>
+        <p class="footer__detail">Email: costumerservice@taudux.com</p>
+        <p class="footer__detail">Teléfono: +52 446 254 9778</p>
       </div>
-      <div class="footer-social">
-        <a href="https://www.linkedin.com/company/taudux/" target="_blank">LinkedIn</a> |
-        <a href="https://www.instagram.com/taudux_dev/" target="_blank">Instagram</a> |
-        <a href="https://www.facebook.com/people/Taudux/61567603235399/#" target="_blank">Facebook</a>
+      <div>
+        <a href="https://www.linkedin.com/company/taudux/" target="_blank" class="footer__link">LinkedIn</a> |
+        <a href="https://www.instagram.com/taudux_dev/" target="_blank" class="footer__link">Instagram</a> |
+        <a href="https://www.facebook.com/people/Taudux/61567603235399/#" target="_blank" class="footer__link">Facebook</a>
       </div>
     </div>
   </footer>
@@ -218,8 +218,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/shared/components/navbar.js"></script>
-  <script src="/src/app/shared/components/toast.js"></script>
+  <script src="/src/app/shared/navbar/navbar.js"></script>
+  <script src="/src/app/shared/toast/toast.js"></script>
   <script src="/src/app/features/home/home.js"></script>
 </body>
 

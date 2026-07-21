@@ -4,39 +4,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
   <title>Cursos | Taudux</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/app/shared/styles/styles.css">
-  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/coming-soon/coming-soon.css">
 </head>
 
 <body>
-  <nav class="navbar scrolled">
-    <a href="/index.html" class="logo-small">
-      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="logo-icon">
+  <nav class="navbar navbar--scrolled">
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
-    <div class="nav-buttons show nav-simple">
-      <a href="#" id="accessBtn" class="btn-acceso">Acceder</a>
+    <div class="navbar__links navbar__links--visible navbar__links--simple">
+      <a href="#" id="accessBtn" class="navbar__link button button--access">Acceder</a>
     </div>
   </nav>
 
-  <main class="detector-page">
-    <div class="detector-card framed-box">
-      <h1>Cursos y capacitaciones</h1>
-      <p>
+  <main class="coming-soon">
+    <div class="coming-soon__card panel">
+      <h1 class="coming-soon__title">Cursos y capacitaciones</h1>
+      <p class="coming-soon__description">
         Estamos preparando cursos y capacitaciones en programación, análisis de datos e
         inteligencia artificial. Muy pronto podrás inscribirte y empezar a aprender con Taudux.
       </p>
-      <div class="detector-placeholder">
-        Próximamente.
-      </div>
+      <div class="coming-soon__placeholder">Próximamente.</div>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/shared/components/navbar.js"></script>
+  <script src="/src/app/shared/navbar/navbar.js"></script>
 </body>
 
 </html>

@@ -79,6 +79,74 @@ function configurarNavegacionInterna() {
   });
 }
 
+function cargarParticulasHero() {
+  if (!window.tsParticles) return;
+
+  tsParticles.load("particles-hero", {
+    fpsLimit: 60,
+    fullScreen: {
+      enable: false,
+      zIndex: 0,
+    },
+    background: {
+      color: { value: "transparent" },
+    },
+    particles: {
+      number: {
+        value: 120,
+        density: {
+          enable: true,
+          width: 1920,
+          height: 1080,
+        },
+      },
+      color: {
+        value: ["#00d7ff", "#1d63ff", "#c8f7ff"],
+      },
+      links: {
+        enable: false,
+      },
+      move: {
+        enable: true,
+        speed: { min: 0.12, max: 0.55 },
+        direction: "none",
+        random: true,
+        straight: false,
+        outModes: { default: "out" },
+      },
+      shape: {
+        type: "circle",
+      },
+      opacity: {
+        value: { min: 0.12, max: 0.72 },
+        animation: {
+          enable: true,
+          speed: 0.45,
+          minimumValue: 0.08,
+          sync: false,
+        },
+      },
+      size: {
+        value: { min: 0.5, max: 2.1 },
+        animation: {
+          enable: true,
+          speed: 0.8,
+          minimumValue: 0.35,
+          sync: false,
+        },
+      },
+    },
+    interactivity: {
+      events: {
+        onHover: { enable: false },
+        onClick: { enable: false },
+        resize: true,
+      },
+    },
+    detectRetina: true,
+  });
+}
+
 function cargarParticulas() {
   if (!window.tsParticles) return;
 
@@ -234,6 +302,7 @@ function configurarFormularioContacto() {
 document.addEventListener("DOMContentLoaded", () => {
   actualizarAparicionAbout();
   configurarNavegacionInterna();
+  cargarParticulasHero();
   cargarParticulas();
   observarServicios();
   completarCarruselInfinito();

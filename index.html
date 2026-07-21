@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="/src/app/shared/button/button.css">
   <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
-  <link rel="stylesheet" href="/src/app/features/home/home.css">
+  <link rel="stylesheet" href="/src/app/features/home/home.css?v=18">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
@@ -45,7 +45,35 @@
   </nav>
 
   <header class="hero">
-    <img src="/src/assets/images/01.png" alt="Taudux logo grande" class="hero__logo" id="logoLarge">
+    <div id="particles-hero" class="hero__particles" aria-hidden="true"></div>
+    <div class="hero__logo-stage">
+      <img src="/src/assets/images/01.png" alt="Taudux logo grande" class="hero__logo" id="logoLarge">
+      <svg class="hero__logo-edge-light" viewBox="0 0 1432 872" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="logo-edge-beam-gradient" gradientUnits="userSpaceOnUse" x1="430" y1="279" x2="1100" y2="279">
+            <stop offset="0" stop-color="#1852c8" />
+            <stop offset="0.34" stop-color="#5894ff" />
+            <stop offset="0.5" stop-color="#ffffff" />
+            <stop offset="0.68" stop-color="#62f2ff" />
+            <stop offset="1" stop-color="#00e1ff" />
+          </linearGradient>
+
+          <filter id="logo-edge-glow" filterUnits="userSpaceOnUse" x="350" y="-40" width="850" height="650" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="8" result="edge-blur" />
+            <feMerge>
+              <feMergeNode in="edge-blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <g filter="url(#logo-edge-glow)">
+          <path class="hero__logo-edge-trace hero__logo-edge-trace--core" pathLength="100" d="M767 142 L904 279 L767 416 L629 279 Z" />
+          <path class="hero__logo-edge-trace hero__logo-edge-trace--left" pathLength="100" d="M710 3 L710 119 L551 279 L710 440 L710 556 L434 279 Z" />
+          <path class="hero__logo-edge-trace hero__logo-edge-trace--right" pathLength="100" d="M818 3 L1098 279 L818 556 L818 440 L978 279 L818 119 Z" />
+        </g>
+      </svg>
+    </div>
   </header>
 
   <section id="quienes-somos" class="about">

@@ -12,6 +12,7 @@ async function salirYVolver(evento) {
 function actualizarEstadoVisualNavbar() {
   const navbar = document.getElementById("navbar");
   const logoPrincipal = document.getElementById("logoLarge");
+  const escenarioLogo = logoPrincipal?.closest(".hero__logo-stage");
   const enlaces = document.querySelector(".navbar__links");
 
   if (!navbar || !logoPrincipal) return;
@@ -19,6 +20,7 @@ function actualizarEstadoVisualNavbar() {
   const desplazado = window.scrollY > 60;
   navbar.classList.toggle("navbar--scrolled", desplazado);
   logoPrincipal.classList.toggle("hero__logo--hidden", desplazado);
+  escenarioLogo?.classList.toggle("hero__logo-stage--hidden", desplazado);
 
   if (enlaces && !enlaces.classList.contains("navbar__links--simple")) {
     enlaces.classList.add("navbar__links--visible");

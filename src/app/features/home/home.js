@@ -187,11 +187,21 @@ function configurarPausaCarrusel(selector) {
   });
 }
 
-function duplicarElementosCarrusel() {
+function completarCarruselInfinito() {
   document.querySelectorAll(".carousel__track").forEach((pista) => {
-    [...pista.children].forEach((elemento) => {
-      pista.appendChild(elemento.cloneNode(true));
-    });
+    const grupoOriginal = pista.querySelector(".carousel__group");
+    if (!grupoOriginal) return;
+
+    for (let repeticion = 0; repeticion < 3; repeticion += 1) {
+      const copia = grupoOriginal.cloneNode(true);
+      copia.setAttribute("aria-hidden", "true");
+
+      copia.querySelectorAll(".carousel__item").forEach((icono) => {
+        icono.alt = "";
+      });
+
+      pista.appendChild(copia);
+    }
   });
 }
 
@@ -226,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
   configurarNavegacionInterna();
   cargarParticulas();
   observarServicios();
-  duplicarElementosCarrusel();
+  completarCarruselInfinito();
   configurarPausaCarrusel("#carousel-top");
   configurarPausaCarrusel("#carousel-bottom");
   configurarFormularioContacto();

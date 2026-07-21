@@ -1,10 +1,11 @@
 /* Notificaciones toast; requiere toast.js. */
 
+@layer components {
 .toast-stack {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  z-index: 1000;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -13,14 +14,18 @@
 }
 
 .toast {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   line-height: 1.4;
   padding: 0.85rem 1.15rem;
-  border-radius: 8px;
+  border-radius: var(--radius-field);
   max-width: 22rem;
   backdrop-filter: blur(6px);
-  background: rgba(13, 15, 17, 0.92);
+  background: color-mix(
+    in srgb,
+    var(--color-background) 92%,
+    transparent
+  );
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   transform: translateX(120%);
   opacity: 0;
@@ -33,9 +38,10 @@
 }
 
 .toast--success {
-  background: rgba(0, 225, 255, 0.1);
-  border: 1px solid rgba(0, 225, 255, 0.4);
-  color: #00e1ff;
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--color-accent) 40%, transparent);
+  color: var(--color-accent);
 }
 
 .toast--error {
@@ -66,4 +72,5 @@
   .toast--visible {
     transform: none;
   }
+}
 }

@@ -1,9 +1,10 @@
 /* Página reutilizable para features todavía no disponibles. */
 
+@layer components {
 .coming-soon {
   min-height: 100vh;
   padding: 8rem 2rem 4rem;
-  background-color: #0d0f11;
+  background-color: var(--color-background);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +22,7 @@
 }
 
 .coming-soon__description {
-  color: #ccc;
+  color: var(--color-text-muted);
   line-height: 1.7;
   margin-bottom: 2rem;
 }
@@ -33,4 +34,5 @@
   color: #777;
   font-size: 0.95rem;
   margin-bottom: 2rem;
+}
 }

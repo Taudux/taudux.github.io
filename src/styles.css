@@ -1,55 +1,93 @@
 /*
-  Estilos globales mínimos. Las reglas de componentes y features viven junto
-  al concepto que representan dentro de src/app/.
+  Base global de la MPA. El orden de capas mantiene predecible la cascada
+  aunque cada documento cargue hojas de componentes y features distintas.
 */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer reset, base, components, features;
+
+@layer reset {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
-@font-face {
-  font-family: "Mokoto";
-  src: url("./assets/fonts/mokoto-mokoto-regular-400.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
+@layer base {
+  :root {
+    --font-body: "Space Grotesk", sans-serif;
+    --font-display: "Orbitron", sans-serif;
 
-body {
-  font-family: "Space Grotesk", sans-serif;
-  background-color: #0d0f11;
-  color: #fff;
-}
+    --color-background: #0d0f11;
+    --color-background-deep: #0b0d0f;
+    --color-text: #fff;
+    --color-text-inverse: #1a1a1a;
+    --color-text-muted: #ccc;
+    --color-text-subtle: #aaa;
+    --color-accent: #00e1ff;
+    --color-accent-dark: #1249a4;
+    --color-success: #25d366;
+    --color-field: #1e1e1e;
+    --color-border: #333;
 
-button,
-.button {
-  font-family: "Orbitron", sans-serif;
-  letter-spacing: 0.5px;
-  font-weight: 500;
-}
+    --gradient-heading: linear-gradient(90deg, var(--color-text-subtle), var(--color-text));
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: "Orbitron", sans-serif;
-  letter-spacing: 0.5px;
-}
+    --radius-field: 8px;
+    --radius-button: 10px;
+    --radius-panel: 20px;
+    --radius-pill: 999px;
 
-input,
-textarea,
-select {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.3px;
-}
+    --border-subtle: 1px solid rgba(255, 255, 255, 0.1);
+    --shadow-panel: 0 0 20px rgba(255, 255, 255, 0.05);
 
-input::placeholder,
-textarea::placeholder {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 1rem;
-  color: #ccc;
+    --z-behind: -1;
+    --z-base: 0;
+    --z-content: 1;
+    --z-elevated: 2;
+    --z-highlight: 3;
+    --z-hover: 10;
+    --z-mobile-menu: 999;
+    --z-navbar: 1000;
+    --z-mobile-toggle: 1100;
+    --z-dropdown: 1200;
+    --z-toast: 1300;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+    color: var(--color-text);
+  }
+
+  button,
+  .button {
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text-muted);
+  }
 }

@@ -1,0 +1,30 @@
+/* Campos de formulario compartidos. */
+
+@layer components {
+  .field {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-field);
+    background: var(--color-field);
+    color: var(--color-text);
+  }
+
+  .field:focus {
+    border-color: var(--color-accent);
+    outline: none;
+  }
+
+  .field--centered {
+    text-align: center;
+  }
+
+  select.field--centered {
+    text-align-last: center;
+  }
+
+  .field--textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+}

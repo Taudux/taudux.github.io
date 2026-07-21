@@ -11,20 +11,10 @@ async function salirYVolver(evento) {
 
 function actualizarEstadoVisualNavbar() {
   const navbar = document.getElementById("navbar");
-  const logoPrincipal = document.getElementById("logoLarge");
-  const escenarioLogo = logoPrincipal?.closest(".hero__logo-stage");
-  const enlaces = document.querySelector(".navbar__links");
-
-  if (!navbar || !logoPrincipal) return;
+  if (!navbar) return;
 
   const desplazado = window.scrollY > 60;
   navbar.classList.toggle("navbar--scrolled", desplazado);
-  logoPrincipal.classList.toggle("hero__logo--hidden", desplazado);
-  escenarioLogo?.classList.toggle("hero__logo-stage--hidden", desplazado);
-
-  if (enlaces && !enlaces.classList.contains("navbar__links--simple")) {
-    enlaces.classList.add("navbar__links--visible");
-  }
 }
 
 function actualizarEnlaceActivo() {
@@ -110,11 +100,11 @@ async function actualizarBotonAcceso() {
   toggle.textContent = `${nombre} ▾`;
 
   const lista = document.createElement("div");
-  lista.className = "user-menu__list";
+  lista.className = "user-menu__list floating-menu";
 
   const salir = document.createElement("a");
   salir.href = "#";
-  salir.className = "user-menu__link";
+  salir.className = "user-menu__link floating-menu__link";
   salir.textContent = "Salir";
   salir.addEventListener("click", salirYVolver);
 
@@ -144,11 +134,13 @@ async function agregarMiEspacio() {
 
   const enlace = document.createElement("a");
   enlace.href = "/src/app/features/explore/explorar.html";
-  enlace.className = "nav-dropdown__link nav-dropdown__link--workspace";
+  enlace.className =
+    "nav-dropdown__link nav-dropdown__link--workspace floating-menu__link";
   enlace.textContent = "Mi espacio";
 
   const separador = document.createElement("div");
-  separador.className = "nav-dropdown__separator";
+  separador.className =
+    "nav-dropdown__separator floating-menu__separator";
 
   menu.prepend(separador);
   menu.prepend(enlace);

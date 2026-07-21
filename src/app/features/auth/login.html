@@ -8,9 +8,11 @@
   <title>Acceder | Taudux</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/floating-menu/floating-menu.css">
   <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
   <link rel="stylesheet" href="/src/app/shared/button/button.css">
   <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
   <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
   <link rel="stylesheet" href="/src/app/features/auth/login.css">
 </head>
@@ -23,7 +25,7 @@
   </nav>
 
   <main class="auth">
-    <div class="auth__card panel">
+    <div class="auth__card panel panel--spacious">
       <h1 class="auth__title">Bienvenido a Taudux</h1>
       <p class="auth__subtitle" id="authSubtitle">Inicia sesión para continuar</p>
 
@@ -33,9 +35,9 @@
       </div>
 
       <form class="auth__form" id="loginForm">
-        <input type="email" id="loginEmail" class="auth__input" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="email" id="loginEmail" class="auth__input field field--centered" placeholder="Correo electrónico" autocomplete="email" required>
         <div class="password-field">
-          <input type="password" id="loginPassword" class="auth__input password-field__input" placeholder="Contraseña" autocomplete="current-password" required>
+          <input type="password" id="loginPassword" class="auth__input password-field__input field field--centered" placeholder="Contraseña" autocomplete="current-password" required>
           <button type="button" class="password-field__toggle" data-target="loginPassword" aria-label="Mostrar contraseña">
             <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
             <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
@@ -45,9 +47,9 @@
       </form>
 
       <form class="auth__form auth__form--hidden" id="signupForm">
-        <input type="text" id="signupName" class="auth__input" placeholder="Nombre(s)" autocomplete="given-name" required>
-        <input type="text" id="signupApellidos" class="auth__input" placeholder="Apellidos" autocomplete="family-name" required>
-        <select id="signupPais" class="auth__select">
+        <input type="text" id="signupName" class="auth__input field field--centered" placeholder="Nombre(s)" autocomplete="given-name" required>
+        <input type="text" id="signupApellidos" class="auth__input field field--centered" placeholder="Apellidos" autocomplete="family-name" required>
+        <select id="signupPais" class="auth__select field field--centered">
           <option value="+52" selected>🇲🇽 México (+52)</option>
           <option value="+54">🇦🇷 Argentina (+54)</option>
           <option value="+591">🇧🇴 Bolivia (+591)</option>
@@ -71,11 +73,11 @@
         </select>
         <div class="auth__phone-row">
           <span id="signupPrefijo" class="auth__phone-prefix">+52</span>
-          <input type="tel" id="signupTelefono" class="auth__input auth__phone-input" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
+          <input type="tel" id="signupTelefono" class="auth__input auth__phone-input field field--centered" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
         </div>
-        <input type="email" id="signupEmail" class="auth__input" placeholder="Correo electrónico" autocomplete="email" required>
+        <input type="email" id="signupEmail" class="auth__input field field--centered" placeholder="Correo electrónico" autocomplete="email" required>
         <div class="password-field">
-          <input type="password" id="signupPassword" class="auth__input password-field__input" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
+          <input type="password" id="signupPassword" class="auth__input password-field__input field field--centered" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
           <button type="button" class="password-field__toggle" data-target="signupPassword" aria-label="Mostrar contraseña">
             <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
             <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
@@ -88,7 +90,7 @@
           <li class="password-requirements__item" data-req="digito">Un número</li>
         </ul>
         <div class="password-field">
-          <input type="password" id="signupPasswordConfirm" class="auth__input password-field__input" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
+          <input type="password" id="signupPasswordConfirm" class="auth__input password-field__input field field--centered" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
           <button type="button" class="password-field__toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña">
             <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
             <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
@@ -99,14 +101,14 @@
 
       <form class="auth__form auth__form--hidden" id="recoveryForm">
         <div class="password-field">
-          <input type="password" id="recoveryPassword" class="auth__input password-field__input" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="8">
+          <input type="password" id="recoveryPassword" class="auth__input password-field__input field field--centered" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="8">
           <button type="button" class="password-field__toggle" data-target="recoveryPassword" aria-label="Mostrar contraseña">
             <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
             <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
           </button>
         </div>
         <div class="password-field">
-          <input type="password" id="recoveryPasswordConfirm" class="auth__input password-field__input" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="8">
+          <input type="password" id="recoveryPasswordConfirm" class="auth__input password-field__input field field--centered" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="8">
           <button type="button" class="password-field__toggle" data-target="recoveryPasswordConfirm" aria-label="Mostrar contraseña">
             <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
             <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1-2.16 3.19M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>

@@ -1,10 +1,15 @@
 /* Superficie reutilizable para tarjetas con marco translúcido. */
 
-.panel {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 4rem 3rem;
-  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-  backdrop-filter: blur(2px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+@layer components {
+  .panel {
+    border: var(--border-subtle);
+    border-radius: var(--radius-panel);
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    backdrop-filter: blur(2px);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .panel--spacious {
+    padding: 4rem 3rem;
+  }
 }

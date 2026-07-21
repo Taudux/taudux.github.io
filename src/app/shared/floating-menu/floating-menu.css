@@ -1,0 +1,43 @@
+/* Superficie compartida por menús flotantes y sus elementos interactivos. */
+
+@layer components {
+  .floating-menu {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+    background-color: color-mix(
+      in srgb,
+      var(--color-background) 98%,
+      transparent
+    );
+    border: var(--border-subtle);
+    border-radius: var(--radius-button);
+    box-shadow: 0 8px 24px
+      color-mix(in srgb, var(--color-background) 60%, transparent);
+    z-index: var(--z-dropdown);
+  }
+
+  .floating-menu__link {
+    padding: 10px 14px;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-field);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .floating-menu__link:hover {
+    color: var(--color-accent);
+    background-color: color-mix(
+      in srgb,
+      var(--color-accent) 12%,
+      transparent
+    );
+  }
+
+  .floating-menu__separator {
+    margin: 2px 4px 4px;
+    border-top: var(--border-subtle);
+  }
+}

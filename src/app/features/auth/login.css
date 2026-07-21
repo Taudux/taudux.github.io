@@ -1,12 +1,13 @@
 /* Estilos exclusivos de login, registro y recuperación de contraseña. */
 
+@layer features {
 .auth {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6rem 1.5rem 3rem;
-  background-color: #0d0f11;
+  background-color: var(--color-background);
 }
 
 .auth__card {
@@ -18,14 +19,14 @@
 .auth__title {
   font-size: clamp(1.5rem, 4vw, 2rem);
   margin-bottom: 0.5rem;
-  background: linear-gradient(90deg, #aaa, #fff);
+  background: var(--gradient-heading);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .auth__subtitle {
-  color: #ccc;
+  color: var(--color-text-muted);
   font-size: 0.95rem;
   margin-bottom: 2rem;
 }
@@ -34,7 +35,7 @@
   display: flex;
   gap: 0.5rem;
   background-color: rgba(255, 255, 255, 0.06);
-  border-radius: 30px;
+  border-radius: var(--radius-pill);
   padding: 5px;
   margin-bottom: 2rem;
 }
@@ -49,10 +50,10 @@
   flex: 1;
   padding: 0.6rem 1rem;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: #ccc;
-  font-family: "Orbitron", sans-serif;
+  color: var(--color-text-muted);
+  font-family: var(--font-display);
   font-size: 0.85rem;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -60,8 +61,8 @@
 }
 
 .auth__tab--active {
-  background-color: #fff;
-  color: #1a1a1a;
+  background-color: var(--color-text);
+  color: var(--color-text-inverse);
 }
 
 .auth__form {
@@ -71,29 +72,6 @@
 
 .auth__form:not(.auth__form--hidden) {
   display: flex;
-}
-
-.auth__input,
-.auth__select {
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 1rem;
-  color: white;
-  font-size: 1rem;
-  width: 100%;
-  font-family: "Space Grotesk", sans-serif;
-  text-align: center;
-}
-
-.auth__input:focus,
-.auth__select:focus {
-  border-color: #00e1ff;
-  outline: none;
-}
-
-.auth__select {
-  text-align-last: center;
 }
 
 .auth__phone-row {
@@ -107,11 +85,11 @@
   align-items: center;
   justify-content: center;
   min-width: 3.5rem;
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 8px;
+  background: var(--color-field);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-field);
   padding: 1rem 0.75rem;
-  color: #ccc;
+  color: var(--color-text-muted);
   font-size: 1rem;
 }
 
@@ -128,7 +106,7 @@
 
 .auth__link {
   margin-top: 1.25rem;
-  color: #00e1ff;
+  color: var(--color-accent);
   font-size: 0.85rem;
   text-decoration: none;
 }
@@ -167,7 +145,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #00e1ff;
+  color: var(--color-accent);
   cursor: pointer;
   opacity: 0.85;
   transition: opacity 0.2s ease;
@@ -229,4 +207,5 @@
 
 .password-requirements__item--invalid::before {
   content: "✕ ";
+}
 }

@@ -1,88 +1,30 @@
-/*
-  Comportamiento exclusivo del landing. Depende de navbar.js, toast.js y de
-  tsParticles, cargados antes de este archivo.
-*/
+/* Comportamiento exclusivo del landing. Depende de toast.js y tsParticles. */
 
-const about = document.querySelector(".about");
-let desplazamientoEnCurso = false;
-let desplazamientoObjetivo = window.scrollY;
+const hero = document.querySelector(".hero");
 
-function actualizarAparicionAbout() {
-  if (!about) return;
-  const limite = window.innerHeight * 0.85;
-  if (about.getBoundingClientRect().top < limite) {
-    about.classList.add("about--visible");
-  }
+function actualizarEstadoHero() {
+  hero?.classList.toggle("hero--logo-hidden", window.scrollY > 60);
 }
 
-function animarRueda() {
-  desplazamientoEnCurso = true;
-  const posicionActual = window.scrollY;
-  const diferencia = desplazamientoObjetivo - posicionActual;
-  const paso = diferencia * 0.03;
-  window.scrollTo(0, posicionActual + paso);
+function observarAparicion(selector, modificador, umbral) {
+  const elementos = document.querySelectorAll(selector);
+  if (!elementos.length) return;
 
-  if (Math.abs(diferencia) > 0.5) {
-    requestAnimationFrame(animarRueda);
-  } else {
-    desplazamientoEnCurso = false;
-  }
-}
-
-function controlarRueda(evento) {
-  evento.preventDefault();
-  desplazamientoObjetivo += evento.deltaY > 0 ? 80 : -80;
-  desplazamientoObjetivo = Math.max(
-    0,
-    Math.min(document.body.scrollHeight - window.innerHeight, desplazamientoObjetivo)
-  );
-
-  if (!desplazamientoEnCurso) animarRueda();
-}
-
-function configurarNavegacionInterna() {
-  document.querySelectorAll('.navbar__link[href^="#"]').forEach((enlace) => {
-    enlace.addEventListener("click", (evento) => {
-      evento.preventDefault();
-      window.removeEventListener("wheel", controlarRueda);
-
-      const destino = document.querySelector(enlace.getAttribute("href"));
-      if (!destino) return;
-
-      const inicio = window.scrollY;
-      const distancia = destino.offsetTop - inicio;
-      const duracion = 2000;
-      let marcaInicial = null;
-
-      function suavizar(progreso) {
-        return progreso < 0.5
-          ? 2 * progreso * progreso
-          : -1 + (4 - 2 * progreso) * progreso;
-      }
-
-      function avanzar(marcaActual) {
-        if (!marcaInicial) marcaInicial = marcaActual;
-        const progreso = Math.min((marcaActual - marcaInicial) / duracion, 1);
-        const nuevaPosicion = inicio + distancia * suavizar(progreso);
-        window.scrollTo(0, nuevaPosicion);
-        desplazamientoObjetivo = nuevaPosicion;
-
-        if (progreso < 1) {
-          requestAnimationFrame(avanzar);
-        } else {
-          window.addEventListener("wheel", controlarRueda, { passive: false });
-        }
-      }
-
-      requestAnimationFrame(avanzar);
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((entrada) => {
+      if (!entrada.isIntersecting) return;
+      entrada.target.classList.add(modificador);
+      observador.unobserve(entrada.target);
     });
-  });
+  }, { threshold: umbral });
+
+  elementos.forEach((elemento) => observador.observe(elemento));
 }
 
 function cargarParticulasHero() {
   if (!window.tsParticles) return;
 
-  tsParticles.load("particles-hero", {
+  window.tsParticles.load("particles-hero", {
     fpsLimit: 60,
     fullScreen: {
       enable: false,
@@ -147,10 +89,10 @@ function cargarParticulasHero() {
   });
 }
 
-function cargarParticulas() {
+function cargarParticulasAbout() {
   if (!window.tsParticles) return;
 
-  tsParticles.load("particles-quienes", {
+  window.tsParticles.load("particles-quienes", {
     fullScreen: {
       enable: false,
       zIndex: 0,
@@ -222,54 +164,31 @@ function cargarParticulas() {
   });
 }
 
-function observarServicios() {
-  const tarjetas = document.querySelectorAll(".services__card");
-  const observador = new IntersectionObserver((entradas, instancia) => {
-    entradas.forEach((entrada) => {
-      if (entrada.isIntersecting) {
-        entrada.target.classList.add("services__card--visible");
-        instancia.unobserve(entrada.target);
-      }
-    });
-  }, { threshold: 0.3 });
+function configurarCarruseles() {
+  document.querySelectorAll(".carousel").forEach((carrusel) => {
+    const pista = carrusel.querySelector(".carousel__track");
+    if (!pista) return;
 
-  tarjetas.forEach((tarjeta) => observador.observe(tarjeta));
-}
-
-function configurarPausaCarrusel(selector) {
-  const carrusel = document.querySelector(selector);
-  if (!carrusel) return;
-
-  const pista = carrusel.querySelector(".carousel__track");
-  let temporizador;
-
-  carrusel.addEventListener("mouseenter", () => {
-    temporizador = setTimeout(() => {
-      pista.classList.add("carousel__track--paused");
-    }, 2000);
-  });
-
-  carrusel.addEventListener("mouseleave", () => {
-    clearTimeout(temporizador);
-    pista.classList.remove("carousel__track--paused");
-  });
-}
-
-function completarCarruselInfinito() {
-  document.querySelectorAll(".carousel__track").forEach((pista) => {
     const grupoOriginal = pista.querySelector(".carousel__group");
     if (!grupoOriginal) return;
 
     for (let repeticion = 0; repeticion < 3; repeticion += 1) {
       const copia = grupoOriginal.cloneNode(true);
       copia.setAttribute("aria-hidden", "true");
-
-      copia.querySelectorAll(".carousel__item").forEach((icono) => {
-        icono.alt = "";
-      });
-
       pista.appendChild(copia);
     }
+
+    let temporizador;
+    carrusel.addEventListener("mouseenter", () => {
+      temporizador = setTimeout(() => {
+        pista.classList.add("carousel__track--paused");
+      }, 2000);
+    });
+
+    carrusel.addEventListener("mouseleave", () => {
+      clearTimeout(temporizador);
+      pista.classList.remove("carousel__track--paused");
+    });
   });
 }
 
@@ -300,16 +219,13 @@ function configurarFormularioContacto() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  actualizarAparicionAbout();
-  configurarNavegacionInterna();
+  actualizarEstadoHero();
+  observarAparicion(".about", "about--visible", 0.15);
+  observarAparicion(".services__card", "services__card--visible", 0.3);
   cargarParticulasHero();
-  cargarParticulas();
-  observarServicios();
-  completarCarruselInfinito();
-  configurarPausaCarrusel("#carousel-top");
-  configurarPausaCarrusel("#carousel-bottom");
+  cargarParticulasAbout();
+  configurarCarruseles();
   configurarFormularioContacto();
 });
 
-window.addEventListener("scroll", actualizarAparicionAbout);
-window.addEventListener("wheel", controlarRueda, { passive: false });
+window.addEventListener("scroll", actualizarEstadoHero, { passive: true });

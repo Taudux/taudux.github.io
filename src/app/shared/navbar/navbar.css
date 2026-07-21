@@ -260,7 +260,7 @@
     flex-wrap: wrap;
   }
 
-  .navbar--scrolled .navbar__toggle {
+  .navbar__toggle {
     display: block;
   }
 

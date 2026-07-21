@@ -21,7 +21,7 @@ function actualizarEstadoVisualNavbar() {
   logoPrincipal.classList.toggle("hero__logo--hidden", desplazado);
 
   if (enlaces && !enlaces.classList.contains("navbar__links--simple")) {
-    enlaces.classList.toggle("navbar__links--visible", window.scrollY > 100);
+    enlaces.classList.add("navbar__links--visible");
   }
 }
 

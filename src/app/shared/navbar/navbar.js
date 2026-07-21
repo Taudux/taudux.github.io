@@ -132,6 +132,9 @@ async function agregarMiEspacio() {
   const session = await obtenerSesion();
   if (!session) return;
 
+  // Mi espacio es solo para administradores; a los demás ni se les muestra.
+  if (!(await esAdmin(session))) return;
+
   const enlace = document.createElement("a");
   enlace.href = "/src/app/features/explore/explorar.html";
   enlace.className =

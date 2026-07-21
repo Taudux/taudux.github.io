@@ -100,12 +100,19 @@ signupTelefono.addEventListener("input", () => {
 tabLogin.addEventListener("click", () => mostrarTab("login"));
 tabSignup.addEventListener("click", () => mostrarTab("signup"));
 
+// Admin → Mi espacio (panel privado); cualquier otro usuario → home.
+async function destinoSegunRol(session) {
+  return (await esAdmin(session))
+    ? "/src/app/features/explore/explorar.html"
+    : "/index.html";
+}
+
 const enRecuperacion = window.location.hash.includes("type=recovery");
 if (enRecuperacion) {
   mostrarModoRecuperacion();
 } else {
-  obtenerSesion().then((session) => {
-    if (session) window.location.href = "/src/app/features/explore/explorar.html";
+  obtenerSesion().then(async (session) => {
+    if (session) window.location.href = await destinoSegunRol(session);
   });
 }
 
@@ -116,7 +123,8 @@ loginForm.addEventListener("submit", async (evento) => {
   const resultado = await iniciarSesion(email, password);
 
   if (resultado.ok) {
-    window.location.href = "/src/app/features/explore/explorar.html";
+    const session = await obtenerSesion();
+    window.location.href = await destinoSegunRol(session);
   } else {
     mostrarToast(resultado.mensaje, "error");
     alternarEnlaceOculto(reenviarLink, !resultado.noConfirmado);

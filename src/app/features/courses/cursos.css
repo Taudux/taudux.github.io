@@ -37,14 +37,9 @@
   line-height: 1.6;
 }
 
-/* El panel de alta solo se revela a administradores (modificador en el body). */
+/* Panel de alta: solo existe en gestionar-cursos.html (página admin-gated). */
 .courses__admin-panel {
-  display: none;
   margin-bottom: 3rem;
-}
-
-.courses--admin .courses__admin-panel {
-  display: block;
 }
 
 .courses__subtitle {
@@ -110,15 +105,11 @@
   text-decoration: underline;
 }
 
-/* Acciones de administrador por tarjeta. */
+/* Acciones de administrador por tarjeta (solo en gestionar-cursos.html). */
 .courses__card-admin {
-  display: none;
+  display: flex;
   gap: 0.75rem;
   margin-top: 0.75rem;
-}
-
-.courses--admin .courses__card-admin {
-  display: flex;
 }
 
 .courses__action {

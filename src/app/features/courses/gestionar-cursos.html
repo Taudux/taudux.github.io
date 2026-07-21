@@ -5,36 +5,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/src/assets/images/1.png">
-  <title>Cursos | Taudux</title>
+  <title>Gestionar cursos | Taudux</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles.css">
   <link rel="stylesheet" href="/src/app/shared/floating-menu/floating-menu.css">
   <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
   <link rel="stylesheet" href="/src/app/shared/button/button.css">
   <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
   <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
   <link rel="stylesheet" href="/src/app/features/courses/cursos.css">
 </head>
 
-<body class="courses">
+<body class="courses courses--auth-pending">
   <nav class="navbar navbar--scrolled">
     <a href="/index.html" class="navbar__brand">
       <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
     <div class="navbar__links navbar__links--visible navbar__links--simple">
-      <a href="#" id="accessBtn" class="navbar__link button button--access">Acceder</a>
+      <a href="#" id="accessBtn" class="navbar__link button button--access">Salir</a>
     </div>
   </nav>
 
   <main class="courses__main">
     <div class="courses__container">
       <header class="courses__header">
-        <h1 class="courses__title">Cursos disponibles</h1>
+        <h1 class="courses__title">Gestionar cursos</h1>
         <p class="courses__intro">
-          Formación en programación, análisis de datos e inteligencia artificial.
-          Elige un curso y empieza a aprender con Taudux.
+          Publica, edita o elimina los cursos que verán los usuarios.
         </p>
       </header>
+
+      <section class="courses__admin-panel panel panel--spacious">
+        <h2 class="courses__subtitle">Publicar un curso</h2>
+        <form class="courses__form" id="cursoForm">
+          <input class="field" id="cursoTitulo" type="text" placeholder="Título" required>
+          <textarea class="field field--textarea" id="cursoDescripcion" placeholder="Descripción"></textarea>
+          <input class="field" id="cursoEnlace" type="url" placeholder="Enlace al curso (https://...)" required>
+          <input class="field" id="cursoImagen" type="url" placeholder="URL de imagen (opcional, https://...)">
+          <button class="button button--glow" type="submit">Publicar curso</button>
+        </form>
+      </section>
 
       <section class="courses__list" id="cursosLista"></section>
     </div>
@@ -46,7 +57,7 @@
   <script src="/src/app/core/cursos/cursos.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>
-  <script src="/src/app/features/courses/cursos.js"></script>
+  <script src="/src/app/features/courses/gestionar-cursos.js"></script>
 </body>
 
 </html>

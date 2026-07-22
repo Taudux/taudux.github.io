@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <title>Crear cuenta | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
+  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+</head>
+
+<body>
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
+    </a>
+  </nav>
+
+  <main class="auth">
+    <section class="auth__card panel panel--spacious" aria-labelledby="authTitle">
+      <h1 class="auth__title" id="authTitle">Crear cuenta</h1>
+      <p class="auth__subtitle">Regístrate y confirma tu correo antes de iniciar sesión.</p>
+      <div class="auth__status" id="authStatus" tabindex="-1" hidden></div>
+
+      <form class="auth__form" id="signupForm" novalidate>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupName">Nombre(s)</label>
+          <input type="text" id="signupName" class="field" autocomplete="given-name" required>
+        </div>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupApellidos">Apellidos</label>
+          <input type="text" id="signupApellidos" class="field" autocomplete="family-name" required>
+        </div>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupPais">País o región</label>
+          <select id="signupPais" class="field" required>
+            <option value="+52" selected>🇲🇽 México (+52)</option>
+            <option value="+54">🇦🇷 Argentina (+54)</option>
+            <option value="+591">🇧🇴 Bolivia (+591)</option>
+            <option value="+55">🇧🇷 Brasil (+55)</option>
+            <option value="+56">🇨🇱 Chile (+56)</option>
+            <option value="+57">🇨🇴 Colombia (+57)</option>
+            <option value="+506">🇨🇷 Costa Rica (+506)</option>
+            <option value="+53">🇨🇺 Cuba (+53)</option>
+            <option value="+593">🇪🇨 Ecuador (+593)</option>
+            <option value="+503">🇸🇻 El Salvador (+503)</option>
+            <option value="+34">🇪🇸 España (+34)</option>
+            <option value="+1">🇺🇸 Estados Unidos (+1)</option>
+            <option value="+502">🇬🇹 Guatemala (+502)</option>
+            <option value="+504">🇭🇳 Honduras (+504)</option>
+            <option value="+505">🇳🇮 Nicaragua (+505)</option>
+            <option value="+507">🇵🇦 Panamá (+507)</option>
+            <option value="+595">🇵🇾 Paraguay (+595)</option>
+            <option value="+51">🇵🇪 Perú (+51)</option>
+            <option value="+598">🇺🇾 Uruguay (+598)</option>
+            <option value="+58">🇻🇪 Venezuela (+58)</option>
+          </select>
+        </div>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupTelefono">Número de teléfono</label>
+          <div class="auth__phone-row">
+            <span id="signupPrefijo" class="auth__phone-prefix" aria-hidden="true">+52</span>
+            <input type="tel" id="signupTelefono" class="auth__phone-input field" autocomplete="tel-national" inputmode="numeric" aria-describedby="telefonoAyuda" required>
+          </div>
+          <small id="telefonoAyuda" class="auth__label">Escribe únicamente los dígitos del número nacional.</small>
+        </div>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupEmail">Correo electrónico</label>
+          <input type="email" id="signupEmail" class="field" autocomplete="email" required>
+        </div>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupPassword">Contraseña</label>
+          <div class="password-field">
+            <input type="password" id="signupPassword" class="password-field__input field" autocomplete="new-password" minlength="8" aria-describedby="passwordReqs" required>
+            <button type="button" class="password-field__toggle" data-target="signupPassword" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+            </button>
+          </div>
+        </div>
+        <ul class="password-requirements" id="passwordReqs">
+          <li class="password-requirements__item" data-req="longitud">Al menos 8 caracteres</li>
+          <li class="password-requirements__item" data-req="mayuscula">Una letra mayúscula</li>
+          <li class="password-requirements__item" data-req="minuscula">Una letra minúscula</li>
+          <li class="password-requirements__item" data-req="digito">Un número</li>
+        </ul>
+        <div class="auth__field-group">
+          <label class="auth__label" for="signupPasswordConfirm">Confirmar contraseña</label>
+          <div class="password-field">
+            <input type="password" id="signupPasswordConfirm" class="password-field__input field" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="password-field__toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+            </button>
+          </div>
+        </div>
+        <label class="auth__consent">
+          <input type="checkbox" id="signupPrivacidad" class="auth__consent-check" required>
+          <span>Acepto el <a href="/src/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__link">Aviso de Privacidad</a>.</span>
+        </label>
+        <button type="submit" class="auth__submit button button--glow" data-loading-text="Creando cuenta…">Crear cuenta</button>
+      </form>
+
+      <div class="auth__actions">
+        <p>¿Ya tienes una cuenta? <a class="auth__link" data-preserve-next href="/src/app/features/auth/login/">Inicia sesión</a></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/src/app/core/supabase/supabase-client.js"></script>
+  <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/features/auth/auth-ui.js"></script>
+  <script src="/src/app/features/auth/signup/signup.js"></script>
+</body>
+
+</html>

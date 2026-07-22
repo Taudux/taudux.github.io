@@ -126,7 +126,8 @@ async function verMasInformacion() {
   const session = await obtenerSesion();
   if (!session) {
     mostrarToast("Inicia sesión para ver más información.", "error");
-    window.location.href = "/src/app/features/auth/login.html";
+    const destino = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    window.location.href = urlLoginConDestino(destino);
     return;
   }
   mostrarToast("El detalle del curso estará disponible pronto.");

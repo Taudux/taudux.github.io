@@ -5,7 +5,11 @@
 
 async function salirYVolver(evento) {
   if (evento) evento.preventDefault();
-  await cerrarSesion();
+  const resultado = await cerrarSesion();
+  if (!resultado.ok) {
+    if (typeof mostrarToast === "function") mostrarToast(resultado.mensaje, "error");
+    return;
+  }
   window.location.href = "/index.html";
 }
 
@@ -77,7 +81,7 @@ async function actualizarBotonAcceso() {
 
   if (!session) {
     boton.textContent = "Acceder";
-    boton.href = "/src/app/features/auth/login.html";
+    boton.href = RUTAS_AUTH.login;
     boton.onclick = null;
     return;
   }

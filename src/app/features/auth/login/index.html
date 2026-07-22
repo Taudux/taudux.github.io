@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <title>Iniciar sesión | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
+  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+</head>
+
+<body>
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
+    </a>
+  </nav>
+
+  <main class="auth">
+    <section class="auth__card panel panel--spacious" aria-labelledby="authTitle">
+      <h1 class="auth__title" id="authTitle">Iniciar sesión</h1>
+      <p class="auth__subtitle">Accede a tu cuenta para continuar.</p>
+      <div class="auth__status" id="authStatus" tabindex="-1" hidden></div>
+
+      <form class="auth__form" id="loginForm" novalidate>
+        <div class="auth__field-group">
+          <label class="auth__label" for="loginEmail">Correo electrónico</label>
+          <input type="email" id="loginEmail" class="field" autocomplete="email" required>
+        </div>
+
+        <div class="auth__field-group">
+          <label class="auth__label" for="loginPassword">Contraseña</label>
+          <div class="password-field">
+            <input type="password" id="loginPassword" class="password-field__input field" autocomplete="current-password" required>
+            <button type="button" class="password-field__toggle" data-target="loginPassword" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22"></path><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth__submit button button--glow" data-loading-text="Accediendo…">Iniciar sesión</button>
+      </form>
+
+      <div class="auth__actions">
+        <button type="button" class="auth__link-button" id="reenviarButton" hidden>Reenviar correo de confirmación</button>
+        <a class="auth__link" href="/src/app/features/auth/forgot-password/">¿Olvidaste tu contraseña?</a>
+        <p>¿Aún no tienes una cuenta? <a class="auth__link" data-preserve-next href="/src/app/features/auth/signup/">Crear cuenta</a></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/src/app/core/supabase/supabase-client.js"></script>
+  <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/features/auth/auth-ui.js"></script>
+  <script src="/src/app/features/auth/login/login.js"></script>
+</body>
+
+</html>

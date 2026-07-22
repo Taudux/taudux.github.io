@@ -2,139 +2,19 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://taudux.com/src/app/features/auth/login/">
   <title>Acceder | Taudux</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/styles.css">
-  <link rel="stylesheet" href="/src/app/shared/floating-menu/floating-menu.css">
-  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
-  <link rel="stylesheet" href="/src/app/shared/button/button.css">
-  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
-  <link rel="stylesheet" href="/src/app/shared/field/field.css">
-  <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
-  <link rel="stylesheet" href="/src/app/features/auth/login.css">
 </head>
 
 <body>
-  <nav class="navbar navbar--scrolled">
-    <a href="/index.html" class="navbar__brand">
-      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
-    </a>
-  </nav>
-
-  <main class="auth">
-    <div class="auth__card panel panel--spacious">
-      <h1 class="auth__title">Bienvenido a Taudux</h1>
-      <p class="auth__subtitle" id="authSubtitle">Inicia sesión para continuar</p>
-
-      <div class="auth__tabs">
-        <button type="button" class="auth__tab auth__tab--active" id="tabLogin">Acceder</button>
-        <button type="button" class="auth__tab" id="tabSignup">Crear cuenta</button>
-      </div>
-
-      <form class="auth__form" id="loginForm">
-        <input type="email" id="loginEmail" class="auth__input field field--centered" placeholder="Correo electrónico" autocomplete="email" required>
-        <div class="password-field">
-          <input type="password" id="loginPassword" class="auth__input password-field__input field field--centered" placeholder="Contraseña" autocomplete="current-password" required>
-          <button type="button" class="password-field__toggle" data-target="loginPassword" aria-label="Mostrar contraseña">
-            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
-          </button>
-        </div>
-        <button type="submit" class="auth__submit button button--glow">Acceder</button>
-      </form>
-
-      <form class="auth__form auth__form--hidden" id="signupForm">
-        <input type="text" id="signupName" class="auth__input field field--centered" placeholder="Nombre(s)" autocomplete="given-name" required>
-        <input type="text" id="signupApellidos" class="auth__input field field--centered" placeholder="Apellidos" autocomplete="family-name" required>
-        <select id="signupPais" class="auth__select field field--centered">
-          <option value="+52" selected>🇲🇽 México (+52)</option>
-          <option value="+54">🇦🇷 Argentina (+54)</option>
-          <option value="+591">🇧🇴 Bolivia (+591)</option>
-          <option value="+55">🇧🇷 Brasil (+55)</option>
-          <option value="+56">🇨🇱 Chile (+56)</option>
-          <option value="+57">🇨🇴 Colombia (+57)</option>
-          <option value="+506">🇨🇷 Costa Rica (+506)</option>
-          <option value="+53">🇨🇺 Cuba (+53)</option>
-          <option value="+593">🇪🇨 Ecuador (+593)</option>
-          <option value="+503">🇸🇻 El Salvador (+503)</option>
-          <option value="+34">🇪🇸 España (+34)</option>
-          <option value="+1">🇺🇸 Estados Unidos (+1)</option>
-          <option value="+502">🇬🇹 Guatemala (+502)</option>
-          <option value="+504">🇭🇳 Honduras (+504)</option>
-          <option value="+505">🇳🇮 Nicaragua (+505)</option>
-          <option value="+507">🇵🇦 Panamá (+507)</option>
-          <option value="+595">🇵🇾 Paraguay (+595)</option>
-          <option value="+51">🇵🇪 Perú (+51)</option>
-          <option value="+598">🇺🇾 Uruguay (+598)</option>
-          <option value="+58">🇻🇪 Venezuela (+58)</option>
-        </select>
-        <div class="auth__phone-row">
-          <span id="signupPrefijo" class="auth__phone-prefix">+52</span>
-          <input type="tel" id="signupTelefono" class="auth__input auth__phone-input field field--centered" placeholder="Número de teléfono" autocomplete="tel-national" inputmode="numeric" maxlength="12" required>
-        </div>
-        <input type="email" id="signupEmail" class="auth__input field field--centered" placeholder="Correo electrónico" autocomplete="email" required>
-        <div class="password-field">
-          <input type="password" id="signupPassword" class="auth__input password-field__input field field--centered" placeholder="Contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-field__toggle" data-target="signupPassword" aria-label="Mostrar contraseña">
-            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
-          </button>
-        </div>
-        <ul class="password-requirements" id="passwordReqs">
-          <li class="password-requirements__item" data-req="longitud">Al menos 8 caracteres</li>
-          <li class="password-requirements__item" data-req="mayuscula">Una letra mayúscula</li>
-          <li class="password-requirements__item" data-req="minuscula">Una letra minúscula</li>
-          <li class="password-requirements__item" data-req="digito">Un número</li>
-        </ul>
-        <div class="password-field">
-          <input type="password" id="signupPasswordConfirm" class="auth__input password-field__input field field--centered" placeholder="Confirmar contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-field__toggle" data-target="signupPasswordConfirm" aria-label="Mostrar contraseña">
-            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
-          </button>
-        </div>
-        <label class="auth__consent">
-          <input type="checkbox" id="signupPrivacidad" class="auth__consent-check" required>
-          <span class="auth__consent-text">
-            Acepto el
-            <a href="/src/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__consent-link">Aviso de Privacidad</a>.
-          </span>
-        </label>
-        <button type="submit" class="auth__submit button button--glow">Crear cuenta</button>
-      </form>
-
-      <form class="auth__form auth__form--hidden" id="recoveryForm">
-        <div class="password-field">
-          <input type="password" id="recoveryPassword" class="auth__input password-field__input field field--centered" placeholder="Nueva contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-field__toggle" data-target="recoveryPassword" aria-label="Mostrar contraseña">
-            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
-          </button>
-        </div>
-        <div class="password-field">
-          <input type="password" id="recoveryPasswordConfirm" class="auth__input password-field__input field field--centered" placeholder="Confirmar nueva contraseña" autocomplete="new-password" required minlength="8">
-          <button type="button" class="password-field__toggle" data-target="recoveryPasswordConfirm" aria-label="Mostrar contraseña">
-            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" /><circle cx="12" cy="12" r="3" /></svg>
-            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1-2.16 3.19M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M1 1l22 22" /><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88" /></svg>
-          </button>
-        </div>
-        <button type="submit" class="auth__submit button button--glow">Guardar contraseña</button>
-      </form>
-
-      <a href="#" class="auth__link" id="forgotLink">¿Olvidaste tu contraseña?</a>
-      <a href="#" class="auth__link auth__link--hidden" id="reenviarLink">Reenviar correo de confirmación</a>
-    </div>
+  <main>
+    <p>Redirigiendo al acceso de Taudux…</p>
+    <p><a href="/src/app/features/auth/login/">Continuar a iniciar sesión</a></p>
   </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/src/app/core/supabase/supabase-client.js"></script>
-  <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/shared/navbar/navbar.js"></script>
-  <script src="/src/app/shared/toast/toast.js"></script>
-  <script src="/src/app/features/auth/login.js"></script>
+  <script src="/src/app/features/auth/legacy-auth-redirect.js"></script>
 </body>
 
 </html>

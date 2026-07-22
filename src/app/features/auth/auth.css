@@ -1,0 +1,278 @@
+/* Estilos compartidos por login, signup, confirmación y recuperación. */
+
+@layer features {
+  .auth {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 1.5rem 3rem;
+    background-color: var(--color-background);
+  }
+
+  .auth__card {
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+  }
+
+  .auth__title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 0.5rem;
+    background: var(--gradient-heading);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .auth__subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .auth__status {
+    margin-bottom: 1.25rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-field);
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .auth__status[hidden] {
+    display: none;
+  }
+
+  .auth__status--error {
+    border-color: #ff5c5c;
+    color: #ffb4b4;
+  }
+
+  .auth__status--success {
+    border-color: var(--color-success);
+    color: #9ee8b9;
+  }
+
+  .auth__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .auth__form[hidden] {
+    display: none;
+  }
+
+  .auth__field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+  }
+
+  .auth__label {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .auth__phone-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .auth__phone-prefix {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.5rem;
+    padding: 1rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-field);
+    background: var(--color-field);
+    color: var(--color-text-muted);
+  }
+
+  .auth__phone-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .auth__submit {
+    align-self: center;
+    margin-top: 0.5rem;
+    padding: 0.9rem 2.5rem;
+  }
+
+  .auth__submit:disabled,
+  .auth__submit--loading {
+    cursor: wait;
+    opacity: 0.65;
+  }
+
+  .auth__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .auth__link,
+  .auth__link-button {
+    border: 0;
+    background: transparent;
+    color: var(--color-accent);
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .auth__link:hover,
+  .auth__link-button:hover {
+    text-decoration: underline;
+  }
+
+  .auth__link-button[hidden] {
+    display: none;
+  }
+
+  .auth__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .auth__consent-check {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+    accent-color: var(--color-accent);
+  }
+
+  .password-field {
+    position: relative;
+  }
+
+  .password-field__input {
+    padding-right: 2.75rem;
+  }
+
+  .password-field__input::-ms-reveal,
+  .password-field__input::-ms-clear {
+    display: none;
+  }
+
+  .password-field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-accent);
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+  }
+
+  .password-field__toggle:hover,
+  .password-field__toggle:focus-visible {
+    opacity: 1;
+  }
+
+  .password-field__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .password-field__icon--hide {
+    display: none;
+  }
+
+  .password-field__toggle--showing .password-field__icon--show {
+    display: none;
+  }
+
+  .password-field__toggle--showing .password-field__icon--hide {
+    display: block;
+  }
+
+  .password-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: -0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+  }
+
+  .password-requirements__item {
+    color: #888;
+    font-size: 0.8rem;
+    transition: color 0.2s ease;
+  }
+
+  .password-requirements__item::before {
+    content: "○ ";
+  }
+
+  .password-requirements__item--valid {
+    color: #2ecc71;
+  }
+
+  .password-requirements__item--valid::before {
+    content: "✓ ";
+  }
+
+  .password-requirements__item--invalid {
+    color: #ff5c5c;
+  }
+
+  .password-requirements__item--invalid::before {
+    content: "✕ ";
+  }
+
+  .auth__spinner {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 1rem;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: auth-spin 0.8s linear infinite;
+  }
+
+  .auth__section[hidden] {
+    display: none;
+  }
+
+  @keyframes auth-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth__spinner {
+      animation: none;
+    }
+  }
+}

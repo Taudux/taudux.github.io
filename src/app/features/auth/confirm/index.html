@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <title>Confirmar correo | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
+  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+</head>
+
+<body>
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
+    </a>
+  </nav>
+
+  <main class="auth">
+    <section class="auth__card panel panel--spacious">
+      <div class="auth__section" id="confirmLoading">
+        <div class="auth__spinner" aria-hidden="true"></div>
+        <h1 class="auth__title" id="authTitle">Confirmando correo</h1>
+        <p class="auth__subtitle">Espera mientras validamos el enlace.</p>
+      </div>
+
+      <div class="auth__section" id="confirmContent" hidden>
+        <h1 class="auth__title">Revisa tu correo</h1>
+        <p class="auth__subtitle">Te enviamos un enlace para confirmar tu cuenta. Después podrás iniciar sesión manualmente.</p>
+        <div class="auth__status" id="authStatus" tabindex="-1" hidden></div>
+
+        <form class="auth__form" id="resendForm" novalidate>
+          <div class="auth__field-group">
+            <label class="auth__label" for="confirmEmail">Correo electrónico</label>
+            <input type="email" id="confirmEmail" class="field" autocomplete="email" required>
+          </div>
+          <button type="submit" class="auth__submit button button--glow" data-loading-text="Reenviando…">Reenviar confirmación</button>
+        </form>
+
+        <div class="auth__actions">
+          <a class="auth__link" data-preserve-next href="/src/app/features/auth/login/">Volver a iniciar sesión</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/src/app/core/supabase/supabase-client.js"></script>
+  <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/features/auth/auth-ui.js"></script>
+  <script src="/src/app/features/auth/confirm/confirm.js"></script>
+</body>
+
+</html>

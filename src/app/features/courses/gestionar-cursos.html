@@ -39,11 +39,51 @@
       <section class="courses__admin-panel panel panel--spacious">
         <h2 class="courses__subtitle">Publicar un curso</h2>
         <form class="courses__form" id="cursoForm">
-          <input class="field" id="cursoTitulo" type="text" placeholder="Título" required>
+          <div class="courses__form-row">
+            <input class="field" id="cursoTitulo" type="text" placeholder="Título" required>
+            <select class="field" id="cursoCategoria" required>
+              <option value="" disabled selected>Categoría</option>
+              <option value="Inteligencia artificial">Inteligencia artificial</option>
+              <option value="Análisis de datos">Análisis de datos</option>
+            </select>
+          </div>
           <textarea class="field field--textarea" id="cursoDescripcion" placeholder="Descripción"></textarea>
-          <input class="field" id="cursoEnlace" type="url" placeholder="Enlace al curso (https://...)" required>
+          <div class="courses__form-row">
+            <select class="field" id="cursoModalidad" required>
+              <option value="" disabled selected>Modalidad</option>
+              <option value="presencial">Presencial</option>
+              <option value="en_linea">En línea</option>
+            </select>
+            <input class="field" id="cursoHora" type="time" required>
+            <input class="field" id="cursoDuracion" type="number" step="0.5" min="0.5" placeholder="Duración (horas)" required>
+          </div>
+          <div class="courses__form-row">
+            <input class="field" id="cursoFechaInicio" type="date" required>
+            <input class="field" id="cursoFechaFin" type="date" required>
+            <label class="field courses__checkbox">
+              <input type="checkbox" id="cursoProximamente"> Próximamente
+            </label>
+          </div>
+          <fieldset class="courses__dias">
+            <legend>Días de la semana</legend>
+            <label class="courses__dia"><input type="checkbox" value="lun"> Lun</label>
+            <label class="courses__dia"><input type="checkbox" value="mar"> Mar</label>
+            <label class="courses__dia"><input type="checkbox" value="mie"> Mié</label>
+            <label class="courses__dia"><input type="checkbox" value="jue"> Jue</label>
+            <label class="courses__dia"><input type="checkbox" value="vie"> Vie</label>
+            <label class="courses__dia"><input type="checkbox" value="sab"> Sáb</label>
+            <label class="courses__dia"><input type="checkbox" value="dom"> Dom</label>
+          </fieldset>
+          <div class="courses__form-row">
+            <input class="field" id="cursoCupo" type="number" min="1" placeholder="Cupo máximo (opcional)">
+            <input class="field" id="cursoCosto" type="number" step="0.01" min="0" placeholder="Costo en MXN (opcional)">
+          </div>
+          <input class="field" id="cursoInstructor" type="text" placeholder="Impartido por" required>
           <input class="field" id="cursoImagen" type="url" placeholder="URL de imagen (opcional, https://...)">
-          <button class="button button--glow" type="submit">Publicar curso</button>
+          <div class="courses__form-actions">
+            <button class="button button--outline" type="button" id="cursoCancelar">Cancelar</button>
+            <button class="button button--glow" type="submit">Publicar curso</button>
+          </div>
         </form>
       </section>
 

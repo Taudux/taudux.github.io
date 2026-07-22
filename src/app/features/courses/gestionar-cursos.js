@@ -19,18 +19,43 @@
   const lista = document.getElementById("cursosLista");
   const form = document.getElementById("cursoForm");
   const inputTitulo = document.getElementById("cursoTitulo");
+  const inputCategoria = document.getElementById("cursoCategoria");
   const inputDescripcion = document.getElementById("cursoDescripcion");
-  const inputEnlace = document.getElementById("cursoEnlace");
+  const inputModalidad = document.getElementById("cursoModalidad");
+  const inputFechaInicio = document.getElementById("cursoFechaInicio");
+  const inputFechaFin = document.getElementById("cursoFechaFin");
+  const checksDias = Array.from(document.querySelectorAll(".courses__dias input"));
+  const inputHora = document.getElementById("cursoHora");
+  const inputDuracion = document.getElementById("cursoDuracion");
+  const inputProximamente = document.getElementById("cursoProximamente");
+  const inputCupo = document.getElementById("cursoCupo");
+  const inputCosto = document.getElementById("cursoCosto");
+  const inputInstructor = document.getElementById("cursoInstructor");
   const inputImagen = document.getElementById("cursoImagen");
   const botonEnviar = form.querySelector('button[type="submit"]');
+  const botonCancelar = document.getElementById("cursoCancelar");
 
   // id del curso en edición; null significa que el form crea uno nuevo.
   let editandoId = null;
 
   form.addEventListener("submit", enviarFormulario);
+  botonCancelar.addEventListener("click", limpiarFormulario);
+  inputProximamente.addEventListener("change", actualizarObligatoriedadHorario);
 
   await pintarCursos();
   cuerpo.classList.remove("courses--auth-pending");
+  actualizarObligatoriedadHorario();
+
+  // Con "Próximamente" marcado, el curso aún no tiene horario definitivo: hora,
+  // duración, fechas y días dejan de ser obligatorios (siguen siendo editables
+  // por si ya se sabe parte del horario).
+  function actualizarObligatoriedadHorario() {
+    const requerido = !inputProximamente.checked;
+    inputHora.required = requerido;
+    inputDuracion.required = requerido;
+    inputFechaInicio.required = requerido;
+    inputFechaFin.required = requerido;
+  }
 
   async function pintarCursos() {
     const resultado = await listarCursos();
@@ -61,10 +86,68 @@
       tarjeta.appendChild(img);
     }
 
+    const badgeModalidad = etiquetaModalidad(curso);
+    if (badgeModalidad) {
+      const badgeEl = document.createElement("span");
+      badgeEl.className = `courses__badge courses__badge--${curso.modalidad}`;
+      badgeEl.textContent = badgeModalidad;
+      tarjeta.appendChild(badgeEl);
+    }
+
+    if (curso.categoria) {
+      const categoriaEl = document.createElement("span");
+      categoriaEl.className = "courses__badge courses__badge--categoria";
+      categoriaEl.textContent = curso.categoria;
+      tarjeta.appendChild(categoriaEl);
+    }
+
+    if (curso.proximamente) {
+      const proximamenteEl = document.createElement("span");
+      proximamenteEl.className = "courses__badge courses__badge--proximamente";
+      proximamenteEl.textContent = "Próximamente";
+      tarjeta.appendChild(proximamenteEl);
+    }
+
     const titulo = document.createElement("h3");
     titulo.className = "courses__card-title";
     titulo.textContent = curso.titulo;
     tarjeta.appendChild(titulo);
+
+    if (!curso.proximamente) {
+      const horario = formatearHorario(curso);
+      if (horario) {
+        const horarioEl = document.createElement("p");
+        horarioEl.className = "courses__card-meta";
+        horarioEl.textContent = horario;
+        tarjeta.appendChild(horarioEl);
+      }
+
+      const rango = formatearRangoFechas(curso);
+      if (rango) {
+        const rangoEl = document.createElement("p");
+        rangoEl.className = "courses__card-dates";
+        rangoEl.textContent = rango;
+        tarjeta.appendChild(rangoEl);
+      }
+    }
+
+    if (curso.instructor) {
+      const instructorEl = document.createElement("p");
+      instructorEl.className = "courses__card-instructor";
+      instructorEl.textContent = `Imparte: ${curso.instructor}`;
+      tarjeta.appendChild(instructorEl);
+    }
+
+    const costo = formatearCosto(curso.costo);
+    const extra = [curso.cupo_maximo ? `Cupo: ${curso.cupo_maximo}` : null, costo]
+      .filter(Boolean)
+      .join(" · ");
+    if (extra) {
+      const extraEl = document.createElement("p");
+      extraEl.className = "courses__card-extra";
+      extraEl.textContent = extra;
+      tarjeta.appendChild(extraEl);
+    }
 
     if (curso.descripcion) {
       const desc = document.createElement("p");
@@ -72,19 +155,6 @@
       desc.textContent = curso.descripcion;
       tarjeta.appendChild(desc);
     }
-
-    const acciones = document.createElement("div");
-    acciones.className = "courses__card-actions";
-    const enlace = document.createElement("a");
-    enlace.className = "courses__card-link";
-    enlace.textContent = "Ir al curso →";
-    if (esUrlSegura(curso.enlace)) {
-      enlace.href = curso.enlace;
-      enlace.target = "_blank";
-      enlace.rel = "noopener noreferrer";
-    }
-    acciones.appendChild(enlace);
-    tarjeta.appendChild(acciones);
 
     const adminAcciones = document.createElement("div");
     adminAcciones.className = "courses__card-admin";
@@ -111,25 +181,56 @@
   function cargarEnFormulario(curso) {
     editandoId = curso.id;
     inputTitulo.value = curso.titulo || "";
+    inputCategoria.value = curso.categoria || "";
     inputDescripcion.value = curso.descripcion || "";
-    inputEnlace.value = curso.enlace || "";
+    inputModalidad.value = curso.modalidad || "";
+    inputFechaInicio.value = curso.fecha_inicio || "";
+    inputFechaFin.value = curso.fecha_fin || "";
+    inputProximamente.checked = Boolean(curso.proximamente);
+    const dias = curso.dias_semana || [];
+    checksDias.forEach((check) => (check.checked = dias.includes(check.value)));
+    inputHora.value = curso.hora_inicio || "";
+    inputDuracion.value = curso.duracion_horas || "";
+    inputCupo.value = curso.cupo_maximo || "";
+    inputCosto.value = curso.costo ?? "";
+    inputInstructor.value = curso.instructor || "";
     inputImagen.value = curso.imagen_url || "";
     botonEnviar.textContent = "Guardar cambios";
+    actualizarObligatoriedadHorario();
     form.scrollIntoView({ behavior: "smooth" });
   }
 
   function limpiarFormulario() {
     editandoId = null;
     form.reset();
+    checksDias.forEach((check) => (check.checked = false));
     botonEnviar.textContent = "Publicar curso";
+    actualizarObligatoriedadHorario();
   }
 
   async function enviarFormulario(evento) {
     evento.preventDefault();
+
+    const diasSeleccionados = checksDias.filter((c) => c.checked).map((c) => c.value);
+    if (!inputProximamente.checked && diasSeleccionados.length === 0) {
+      mostrarToast("Selecciona al menos un día de la semana.", "error");
+      return;
+    }
+
     const datos = {
       titulo: inputTitulo.value.trim(),
+      categoria: inputCategoria.value,
       descripcion: inputDescripcion.value.trim(),
-      enlace: inputEnlace.value.trim(),
+      modalidad: inputModalidad.value,
+      fecha_inicio: inputFechaInicio.value,
+      fecha_fin: inputFechaFin.value,
+      proximamente: inputProximamente.checked,
+      dias_semana: diasSeleccionados,
+      hora_inicio: inputHora.value,
+      duracion_horas: inputDuracion.value,
+      cupo_maximo: inputCupo.value,
+      costo: inputCosto.value,
+      instructor: inputInstructor.value.trim(),
       imagen_url: inputImagen.value.trim(),
     };
 

@@ -53,6 +53,12 @@
   gap: 1rem;
 }
 
+.courses__form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
 .courses__list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -78,10 +84,41 @@
   margin-bottom: 1rem;
 }
 
+.courses__badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.2rem 0.7rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-field);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.courses__badge--en_linea {
+  color: var(--color-accent);
+}
+
+.courses__badge--categoria {
+  margin-left: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+}
+
 .courses__card-title {
   color: var(--color-text);
   font-size: 1.15rem;
   margin-bottom: 0.5rem;
+}
+
+.courses__card-meta,
+.courses__card-dates,
+.courses__card-instructor,
+.courses__card-extra {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  margin-bottom: 0.4rem;
 }
 
 .courses__card-description {
@@ -91,25 +128,65 @@
   margin-bottom: 1rem;
 }
 
+/* Grupo de checkboxes de días de la semana en el form de alta/edición. */
+.courses__dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.courses__dias legend {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.courses__dia {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.courses__dia:has(input:checked) {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* Checkbox "Próximamente" con la misma altura visual que un .field de texto. */
+.courses__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.courses__badge--proximamente {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Envuelve el botón "Más información" del catálogo público. */
 .courses__card-actions {
   margin-top: auto;
-}
-
-.courses__card-link {
-  color: var(--color-accent);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.courses__card-link:hover {
-  text-decoration: underline;
+  padding-top: 0.75rem;
 }
 
 /* Acciones de administrador por tarjeta (solo en gestionar-cursos.html). */
 .courses__card-admin {
   display: flex;
   gap: 0.75rem;
-  margin-top: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
 }
 
 .courses__action {
@@ -123,5 +200,11 @@
 .courses__action--danger {
   background: color-mix(in srgb, #e5484d 20%, transparent);
   color: #ffb4b4;
+}
+
+.courses__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 }

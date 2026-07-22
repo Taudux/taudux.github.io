@@ -156,6 +156,12 @@ signupForm.addEventListener("submit", async (evento) => {
   const email = document.getElementById("signupEmail").value.trim();
   const password = document.getElementById("signupPassword").value;
   const passwordConfirm = document.getElementById("signupPasswordConfirm").value;
+  const aceptaPrivacidad = document.getElementById("signupPrivacidad").checked;
+
+  if (!aceptaPrivacidad) {
+    mostrarToast("Debes aceptar el Aviso de Privacidad para crear tu cuenta.", "error");
+    return;
+  }
 
   if (!passwordValida(password)) {
     mostrarToast("La contraseña no cumple los requisitos.", "error");

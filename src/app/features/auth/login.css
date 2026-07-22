@@ -208,4 +208,34 @@
 .password-requirements__item--invalid::before {
   content: "✕ ";
 }
+
+.auth__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.auth__consent-check {
+  margin-top: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+}
+
+.auth__consent-text {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.auth__consent-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.auth__consent-link:hover {
+  text-decoration: underline;
+}
 }

@@ -121,7 +121,7 @@ function crearTarjetaCurso(curso) {
 }
 
 // Gate de sesión para el detalle del curso: sin sesión, avisa y manda a login;
-// con sesión, el detalle real todavía no existe (placeholder, ver F-007).
+// con sesión, el detalle real todavía no existe (placeholder, ver F-008).
 async function verMasInformacion() {
   const session = await obtenerSesion();
   if (!session) {

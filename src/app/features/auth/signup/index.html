@@ -101,10 +101,6 @@
             </button>
           </div>
         </div>
-        <label class="auth__consent">
-          <input type="checkbox" id="signupPrivacidad" class="auth__consent-check" required>
-          <span>Acepto el <a href="/src/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__link">Aviso de Privacidad</a>.</span>
-        </label>
         <button type="submit" class="auth__submit button button--glow" data-loading-text="Creando cuenta…">Crear cuenta</button>
       </form>
 
@@ -112,6 +108,10 @@
         <p>¿Ya tienes una cuenta? <a class="auth__link" data-preserve-next href="/src/app/features/auth/login/">Inicia sesión</a></p>
       </div>
     </section>
+
+    <div class="auth__legal">
+      <p>Al continuar, confirmas que aceptas el <a href="/src/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__link">Aviso de Privacidad</a>.</p>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -27,13 +27,22 @@
   margin-bottom: 2.5rem;
 }
 
+/* El navbar es fijo: sin este margen tapa el título al saltar por ancla. */
 .legal__section {
   margin-bottom: 2rem;
+  scroll-margin-top: 6rem;
 }
 
 .legal__section-title {
   font-size: 1.1rem;
   margin-bottom: 0.75rem;
+  color: var(--color-text);
+}
+
+.legal__subsection-title {
+  font-size: 0.95rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
   color: var(--color-text);
 }
 
@@ -57,5 +66,10 @@
 
 .legal__contact {
   color: var(--color-text);
+}
+
+.legal__external {
+  color: var(--color-accent);
+  text-decoration: underline;
 }
 }

@@ -28,125 +28,306 @@
   <main class="legal__main">
     <article class="legal__container panel panel--spacious">
       <h1 class="legal__title">Aviso de Privacidad</h1>
-      <p class="legal__updated">Última actualización: 21 de julio de 2026</p>
+      <p class="legal__updated">Última actualización: 23 de julio de 2026</p>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">1. Responsable del tratamiento de tus datos</h2>
+      <section class="legal__section" id="responsable">
+        <h2 class="legal__section-title">1. Quién es responsable de tus datos</h2>
         <p>
-          <span class="legal__contact">[NOMBRE COMPLETO DEL RESPONSABLE]</span>, quien opera
+          <span class="legal__contact">René Samael Flores Ortega</span>, quien opera
           bajo la marca <strong>Taudux</strong> (en adelante, "el Responsable"), es
           responsable del uso y protección de tus datos personales, con domicilio en
           Villas del Cimatario, Universo 2000, 76085 Santiago de Querétaro, Querétaro,
-          México. Para cualquier tema relacionado con este aviso puedes contactarnos en
-          <strong>customerservice@taudux.com</strong> o al teléfono +52 446 254 9778.
+          México.
+        </p>
+        <p>
+          Para cualquier tema relacionado con este aviso puedes escribirnos a
+          <strong>samaelflores@taudux.com</strong> o llamarnos al +52 446 254 9778.
+          Ese es también el canal para ejercer tus derechos, como se explica en la
+          sección 10.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">2. Datos personales que recabamos</h2>
-        <p>Para crear y operar tu cuenta recabamos, de forma directa cuando te registras:</p>
+      <section class="legal__section" id="alcance">
+        <h2 class="legal__section-title">2. A quién aplica este aviso</h2>
+        <p>
+          Este aviso aplica a cualquier persona que visite <strong>taudux.com</strong> y
+          sus subpáginas, cree una cuenta o use las herramientas y cursos publicados en
+          el sitio. Está redactado conforme a la Ley Federal de Protección de Datos
+          Personales en Posesión de los Particulares (LFPDPPP) y su reglamento, que es
+          la legislación mexicana aplicable al Responsable.
+        </p>
+      </section>
+
+      <section class="legal__section" id="datos">
+        <h2 class="legal__section-title">3. Qué datos recabamos y cómo los obtenemos</h2>
+
+        <h3 class="legal__subsection-title">Los datos que tú nos das</h3>
+        <p>
+          Los recabamos de forma directa cuando llenas el formulario de registro:
+        </p>
         <ul>
           <li>Nombre(s) y apellidos.</li>
           <li>Correo electrónico.</li>
           <li>Número de teléfono.</li>
-          <li>Contraseña (se almacena cifrada por nuestro proveedor; el Responsable no la conoce ni puede verla).</li>
+          <li>Contraseña. La guarda cifrada nuestro proveedor de autenticación: el Responsable no la conoce ni puede verla.</li>
         </ul>
+
+        <h3 class="legal__subsection-title">Los datos que se generan solos al navegar</h3>
         <p>
-          No recabamos datos personales sensibles ni datos financieros o patrimoniales a
-          través de este sitio.
+          Como en cualquier sitio web, al cargar nuestras páginas se generan datos
+          técnicos que registran los servicios que las entregan (ver sección 5):
+          tu dirección IP, el tipo de navegador y dispositivo, y las páginas que
+          visitaste. No los usamos para crear perfiles tuyos ni para publicidad.
+        </p>
+
+        <p>
+          No recabamos datos personales sensibles (origen racial o étnico, estado de
+          salud, creencias religiosas, opiniones políticas, preferencia sexual, entre
+          otros) ni datos financieros o patrimoniales a través de este sitio.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">3. Finalidades del tratamiento</h2>
-        <p><strong>Finalidades primarias</strong> (necesarias para el servicio):</p>
+      <section class="legal__section" id="finalidades">
+        <h2 class="legal__section-title">4. Para qué usamos tus datos</h2>
+        <p><strong>Finalidades primarias</strong>, es decir, las que son necesarias para darte el servicio:</p>
         <ul>
           <li>Crear, autenticar y administrar tu cuenta de usuario.</li>
           <li>Enviarte correos de confirmación de registro y de recuperación de contraseña.</li>
           <li>Darte acceso a los cursos y herramientas de la plataforma.</li>
           <li>Atender tus solicitudes, dudas o comentarios.</li>
+          <li>Mantener la seguridad del sitio y prevenir usos fraudulentos o abusivos.</li>
         </ul>
         <p>
-          Actualmente no tratamos tus datos para finalidades secundarias (por ejemplo,
-          mercadotecnia o prospección comercial). Si esto cambia, actualizaremos este aviso
-          y te daremos la posibilidad de negarte a esas finalidades sin afectar el servicio.
+          <strong>Actualmente no tratamos tus datos para finalidades secundarias.</strong>
+          No te enviamos publicidad, boletines comerciales ni encuestas de mercadotecnia.
+          Si esto llegara a cambiar, actualizaremos este aviso y te daremos un mecanismo
+          para negarte a esas finalidades sin que eso afecte el servicio que ya recibes.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">4. Transferencias y proveedores (encargados)</h2>
+      <section class="legal__section" id="terceros">
+        <h2 class="legal__section-title">5. Con quién compartimos tus datos</h2>
         <p>
-          Para operar el servicio nos apoyamos en proveedores que tratan tus datos por
-          cuenta y bajo instrucciones del Responsable, únicamente para las finalidades
-          descritas:
+          <strong>No vendemos tus datos personales</strong> ni los transferimos a terceros
+          con fines distintos de los descritos aquí. Sí nos apoyamos en proveedores que
+          los tratan por cuenta y bajo instrucciones del Responsable.
+        </p>
+
+        <h3 class="legal__subsection-title">Encargados que tratan los datos de tu cuenta</h3>
+        <ul>
+          <li>
+            <strong>Supabase</strong> — infraestructura de autenticación y base de datos donde se
+            almacena tu cuenta y tu perfil.
+            <a class="legal__external" href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer">Ver su política de privacidad</a>.
+          </li>
+          <li>
+            <strong>Resend</strong> — servicio de envío de correos de autenticación; recibe tu
+            correo electrónico para poder entregarte esos mensajes.
+            <a class="legal__external" href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Ver su política de privacidad</a>.
+          </li>
+        </ul>
+
+        <h3 class="legal__subsection-title">Servicios que reciben tu dirección IP al cargar el sitio</h3>
+        <p>
+          Estos servicios no tratan los datos de tu cuenta, pero por la naturaleza técnica
+          de la web reciben tu dirección IP y datos básicos de tu navegador cada vez que
+          cargas una página. Te los nombramos por transparencia:
         </p>
         <ul>
-          <li><strong>Supabase</strong> — infraestructura de autenticación y base de datos donde se almacena tu cuenta y perfil.</li>
-          <li><strong>Resend</strong> — servicio de envío de correos de autenticación; recibe tu correo electrónico para entregarte esos mensajes.</li>
+          <li>
+            <strong>GitHub Pages</strong> — aloja y entrega el sitio.
+            <a class="legal__external" href="https://docs.github.com/es/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">Ver su política de privacidad</a>.
+          </li>
+          <li>
+            <strong>Google Fonts</strong> — entrega las tipografías del sitio.
+            <a class="legal__external" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Ver su política de privacidad</a>.
+          </li>
+          <li>
+            <strong>jsDelivr</strong> — red de distribución que entrega las librerías de
+            JavaScript que el sitio necesita para funcionar.
+            <a class="legal__external" href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank" rel="noopener noreferrer">Ver su política de privacidad</a>.
+          </li>
+        </ul>
+
+        <h3 class="legal__subsection-title">Autoridades</h3>
+        <p>
+          Podemos divulgar tus datos personales a autoridades competentes cuando la ley
+          nos lo exija. Estas transferencias no requieren tu consentimiento, conforme al
+          artículo 37 de la LFPDPPP.
+        </p>
+      </section>
+
+      <section class="legal__section" id="almacenamiento">
+        <h2 class="legal__section-title">6. Dónde se almacenan tus datos</h2>
+        <p>
+          Los proveedores mencionados en la sección anterior operan servidores ubicados
+          <strong>fuera del territorio mexicano</strong>. Al crear una cuenta y usar el
+          servicio, tus datos se almacenan y procesan en esa infraestructura, siempre
+          bajo las finalidades descritas en este aviso y con las obligaciones de
+          protección que cada proveedor asume en su propio contrato de tratamiento.
+        </p>
+      </section>
+
+      <section class="legal__section" id="conservacion">
+        <h2 class="legal__section-title">7. Cuánto tiempo los conservamos</h2>
+        <p>
+          Conservamos tus datos personales mientras tu cuenta siga activa y sigan siendo
+          necesarios para las finalidades de la sección 4.
+        </p>
+        <p>
+          Cuando solicitas la eliminación de tu cuenta, borramos tus datos personales
+          salvo aquellos que debamos conservar por una obligación legal, fiscal o
+          regulatoria, o para atender o defender una reclamación. En esos casos los
+          conservamos solo por el plazo que exija dicha obligación y luego los
+          eliminamos.
+        </p>
+      </section>
+
+      <section class="legal__section" id="seguridad">
+        <h2 class="legal__section-title">8. Cómo protegemos tus datos</h2>
+        <p>
+          Implementamos medidas de seguridad administrativas, técnicas y físicas
+          razonables para proteger tus datos personales contra daño, pérdida,
+          alteración, destrucción o uso, acceso o tratamiento no autorizado. Entre ellas:
+        </p>
+        <ul>
+          <li>Cifrado de contraseñas por parte de nuestro proveedor de autenticación.</li>
+          <li>Controles de acceso a nivel de fila en la base de datos: cada usuario solo puede consultar y editar sus propios datos.</li>
+          <li>Conexiones cifradas entre tu navegador y nuestros proveedores.</li>
         </ul>
         <p>
-          No vendemos ni transferimos tus datos personales a terceros con fines distintos
-          de los aquí señalados, salvo en los casos previstos por la ley (por ejemplo,
-          requerimientos de autoridad competente).
+          Ningún sistema es infalible. En caso de una vulneración de seguridad que afecte
+          de forma significativa tus derechos patrimoniales o morales, te lo informaremos
+          conforme a la ley para que puedas tomar las medidas correspondientes.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">5. Medidas de seguridad</h2>
+      <section class="legal__section" id="cookies">
+        <h2 class="legal__section-title">9. Cookies y almacenamiento en tu navegador</h2>
         <p>
-          Implementamos medidas de seguridad administrativas, técnicas y físicas razonables
-          para proteger tus datos personales contra daño, pérdida, alteración, destrucción o
-          uso, acceso o tratamiento no autorizado. Entre ellas: cifrado de contraseñas,
-          acceso restringido a la base de datos mediante controles de acceso a nivel de fila
-          (cada usuario solo puede ver y editar sus propios datos) y conexiones cifradas.
-          Ningún sistema es infalible; en caso de una vulneración que afecte de forma
-          significativa tus derechos, te lo informaremos conforme a la ley.
+          <strong>No utilizamos cookies de rastreo publicitario ni de terceros con fines
+          de perfilamiento</strong>, y tampoco herramientas de analítica que te sigan
+          entre sitios.
+        </p>
+        <p>
+          Para mantener tu sesión iniciada usamos el almacenamiento de sesión del
+          navegador (<em>session storage</em>), gestionado por nuestro proveedor de
+          autenticación. La sesión vive únicamente en la pestaña donde iniciaste sesión y
+          termina cuando la cierras: si abres el sitio en otra pestaña, tendrás que
+          iniciar sesión de nuevo.
+        </p>
+        <p>
+          Como se explica en la sección 5, los servicios de alojamiento y distribución
+          registran tu dirección IP como parte del funcionamiento normal de la web.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">6. Uso de tecnologías de almacenamiento local</h2>
+      <section class="legal__section" id="derechos-arco">
+        <h2 class="legal__section-title">10. Tus derechos ARCO y cómo ejercerlos</h2>
+        <p>En cualquier momento puedes ejercer estos cuatro derechos sobre tus datos personales:</p>
+        <ul>
+          <li><strong>Acceso</strong> — saber qué datos tuyos tenemos y cómo los usamos.</li>
+          <li><strong>Rectificación</strong> — corregirlos cuando sean inexactos o estén incompletos.</li>
+          <li><strong>Cancelación</strong> — pedir que los eliminemos cuando consideres que no se requieren.</li>
+          <li><strong>Oposición</strong> — oponerte a que los usemos para una finalidad concreta.</li>
+        </ul>
         <p>
-          Para mantener tu sesión iniciada utilizamos almacenamiento de sesión del
-          navegador (session storage) gestionado por nuestro proveedor de autenticación.
-          La sesión vive únicamente en la pestaña donde iniciaste sesión y termina al
-          cerrarla. No utilizamos cookies de rastreo publicitario ni de terceros con
-          fines de perfilamiento.
+          Para ejercerlos, envía tu solicitud a <strong>samaelflores@taudux.com</strong>
+          incluyendo: tu nombre completo, el correo con el que te registraste, una
+          descripción clara de los datos y del derecho que quieres ejercer, y un documento
+          que acredite tu identidad (o la representación legal, si actúas a nombre de otra
+          persona).
+        </p>
+        <p>Los plazos que seguimos, conforme a la LFPDPPP, son:</p>
+        <ul>
+          <li>Hasta <strong>5 días hábiles</strong> para pedirte aclaraciones si tu solicitud no es clara o falta información.</li>
+          <li>Tienes <strong>10 días hábiles</strong> para responder a esa solicitud de aclaración; si no respondes, se tendrá por no presentada.</li>
+          <li>Hasta <strong>20 días hábiles</strong> para comunicarte nuestra respuesta, contados desde que recibimos tu solicitud completa.</li>
+          <li>Hasta <strong>15 días hábiles</strong> adicionales para hacerla efectiva, si la respuesta es procedente.</li>
+        </ul>
+        <p>
+          El ejercicio de estos derechos es gratuito. Te responderemos por correo
+          electrónico a la dirección desde la que nos escribiste.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">7. Derechos ARCO y revocación del consentimiento</h2>
+      <section class="legal__section" id="limitacion">
+        <h2 class="legal__section-title">11. Cómo limitar el uso o divulgación de tus datos</h2>
         <p>
-          Tienes derecho a <strong>Acceder</strong> a tus datos personales, <strong>Rectificarlos</strong>
-          cuando sean inexactos, <strong>Cancelarlos</strong> cuando consideres que no se
-          requieren, y <strong>Oponerte</strong> a su tratamiento (derechos ARCO). También
-          puedes revocar en cualquier momento el consentimiento que nos otorgaste.
+          Además de los derechos ARCO, puedes pedirnos que limitemos el uso o la
+          divulgación de tus datos personales escribiendo a
+          <strong>samaelflores@taudux.com</strong>. Te confirmaremos la procedencia de
+          tu solicitud y, si aplica, la haremos efectiva.
         </p>
         <p>
-          Para ejercer estos derechos, envía tu solicitud a
-          <strong>customerservice@taudux.com</strong> indicando tu nombre, el correo con el
-          que te registraste y una descripción clara de lo que solicitas. Responderemos tu
-          solicitud dentro de los plazos que marca la ley. Puedes además eliminar tu cuenta
-          escribiéndonos a ese mismo correo.
+          También puedes inscribirte en el <strong>Registro Público de Consumidores
+          (RPC)</strong> de la Procuraduría Federal del Consumidor, si en el futuro
+          llegáramos a enviar comunicaciones con fines mercadotécnicos o publicitarios.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">8. Cambios al aviso de privacidad</h2>
+      <section class="legal__section" id="revocacion">
+        <h2 class="legal__section-title">12. Cómo revocar tu consentimiento</h2>
+        <p>
+          Puedes revocar en cualquier momento el consentimiento que nos otorgaste para el
+          tratamiento de tus datos personales, por el mismo canal y con los mismos
+          requisitos descritos en la sección 10.
+        </p>
+        <p>
+          Ten en cuenta que algunos datos son indispensables para operar tu cuenta: si
+          revocas el consentimiento sobre ellos, no podremos seguir prestándote el
+          servicio y tu cuenta se dará de baja.
+        </p>
+      </section>
+
+      <section class="legal__section" id="menores">
+        <h2 class="legal__section-title">13. Menores de edad</h2>
+        <p>
+          Este sitio y sus servicios están dirigidos a personas <strong>mayores de
+          edad</strong>. Si un menor de edad desea crear una cuenta, debe hacerlo con el
+          consentimiento y bajo la supervisión de quien ejerza la patria potestad o la
+          tutela, quien será responsable de sus datos personales frente a nosotros.
+        </p>
+        <p>
+          Si detectamos que se creó una cuenta de un menor sin ese consentimiento,
+          podemos eliminarla. Si eres madre, padre o tutor y crees que un menor a tu cargo
+          nos proporcionó datos personales, escríbenos a
+          <strong>samaelflores@taudux.com</strong> y procederemos a eliminarlos.
+        </p>
+      </section>
+
+      <section class="legal__section" id="cambios">
+        <h2 class="legal__section-title">14. Cambios a este aviso</h2>
         <p>
           Este aviso puede actualizarse por cambios legales, en nuestras prácticas o en el
           servicio. Publicaremos cualquier modificación en esta misma página, indicando la
-          fecha de la última actualización al inicio.
+          fecha de la última actualización al inicio del documento. Te recomendamos
+          revisarla periódicamente.
         </p>
       </section>
 
-      <section class="legal__section">
-        <h2 class="legal__section-title">9. Consentimiento</h2>
+      <section class="legal__section" id="autoridad">
+        <h2 class="legal__section-title">15. Autoridad competente</h2>
         <p>
-          Al registrarte y marcar la casilla de aceptación, o al continuar usando el sitio,
-          manifiestas que leíste este Aviso de Privacidad y otorgas tu consentimiento para
+          Si consideras que tu derecho a la protección de datos personales fue vulnerado,
+          o que en el tratamiento de tus datos existe alguna violación a la LFPDPPP,
+          puedes presentar una denuncia o queja ante el <strong>Instituto Nacional de
+          Transparencia, Acceso a la Información y Protección de Datos Personales
+          (INAI)</strong>.
+        </p>
+      </section>
+
+      <section class="legal__section" id="consentimiento">
+        <h2 class="legal__section-title">16. Tu consentimiento</h2>
+        <p>
+          Al crear una cuenta en Taudux o al continuar usando este sitio, manifiestas que
+          leíste y entendiste este Aviso de Privacidad, y otorgas tu consentimiento para
           el tratamiento de tus datos personales conforme a lo aquí descrito.
+        </p>
+        <p>
+          Como no recabamos datos personales sensibles ni financieros, la ley no exige un
+          consentimiento expreso por escrito. Puedes revocarlo en cualquier momento
+          siguiendo la sección 12.
         </p>
       </section>
     </article>

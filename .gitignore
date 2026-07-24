@@ -1,5 +1,9 @@
-# Configuración del editor
-.vscode/
-.kiro/
-.claude/
+# AI agent config
 CLAUDE.md
+AGENTS.md
+.claude/
+.agents/
+.kiro/
+.vscode/
+.atl/
+openspec/

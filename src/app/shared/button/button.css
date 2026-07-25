@@ -2,8 +2,12 @@
 
 @layer components {
   .button {
+    min-inline-size: 0;
+    max-inline-size: 100%;
     border: 0;
     cursor: pointer;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .button:focus-visible {
@@ -32,7 +36,7 @@
     inset: -4px;
     border-radius: calc(var(--radius-field) + 4px);
     background: var(--color-accent-dark);
-    z-index: -1;
+    z-index: var(--z-behind);
     filter: blur(10px);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
@@ -99,15 +103,5 @@
   .button--outline:hover {
     border-color: var(--color-accent);
     color: var(--color-text);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .button--glow,
-    .button--glow::before,
-    .button.button--access,
-    .button--whatsapp,
-    .button--outline {
-      transition: none;
-    }
   }
 }

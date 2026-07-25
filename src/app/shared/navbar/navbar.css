@@ -89,11 +89,12 @@
     color: var(--color-text-inverse);
   }
 
-  .navbar__link:focus-visible,
-  .navbar__toggle:focus-visible,
-  .nav-dropdown__toggle:focus-visible,
-  .floating-menu__link:focus-visible,
-  .user-menu__toggle:focus-visible {
+  .navbar__brand:focus-visible,
+  .navbar__link:not(.button):focus-visible,
+  .navbar__toggle:not(.button):focus-visible,
+  .nav-dropdown__toggle:not(.button):focus-visible,
+  .floating-menu__link:not(.button):focus-visible,
+  .user-menu__toggle:not(.button):focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
@@ -282,18 +283,21 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .navbar,
-    .navbar__brand,
-    .navbar__links,
-    .navbar__link,
-    .nav-dropdown__toggle,
-    .floating-menu__link.nav-dropdown__link--workspace {
-      transition: none;
+  @media (max-width: 360px) {
+    .navbar__brand {
+      flex: 1 1 auto;
+      min-inline-size: 0;
     }
 
-    .nav-dropdown__toggle {
-      animation: none;
+    .navbar__logo {
+      max-inline-size: 100%;
+      height: auto;
+      max-block-size: 64px;
+    }
+
+    .navbar__links--simple {
+      flex: 0 1 auto;
+      min-inline-size: 0;
     }
   }
 }

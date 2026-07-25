@@ -28,6 +28,7 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  overflow-wrap: anywhere;
 }
 
 .explore__welcome {
@@ -50,14 +51,20 @@
 
 .explore__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 1.5rem;
+  min-inline-size: 0;
+}
+
+.explore__grid > * {
+  min-inline-size: 0;
 }
 
 .explore__card {
   display: block;
   text-decoration: none;
   padding: 1.75rem;
+  min-inline-size: 0;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -80,15 +87,4 @@
   margin-bottom: 1rem;
 }
 
-.explore__badge {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  letter-spacing: 0.5px;
-  color: var(--color-accent);
-  border: 1px solid
-    color-mix(in srgb, var(--color-accent) 40%, transparent);
-  border-radius: var(--radius-pill);
-  padding: 4px 12px;
-}
 }

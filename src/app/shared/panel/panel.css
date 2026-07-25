@@ -12,4 +12,10 @@
   .panel--spacious {
     padding: 4rem 3rem;
   }
+
+  @media (max-width: 360px) {
+    .panel--spacious {
+      padding: 2rem 1.25rem;
+    }
+  }
 }

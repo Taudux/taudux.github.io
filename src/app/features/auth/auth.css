@@ -16,6 +16,7 @@
   .auth__card {
     width: 100%;
     max-width: 460px;
+    min-inline-size: 0;
     text-align: center;
   }
 
@@ -36,6 +37,7 @@
   }
 
   .auth__status {
+    min-inline-size: 0;
     margin-bottom: 1.25rem;
     padding: 0.8rem 1rem;
     border: 1px solid var(--color-border);
@@ -43,6 +45,7 @@
     color: var(--color-text-muted);
     line-height: 1.4;
     text-align: left;
+    overflow-wrap: anywhere;
   }
 
   .auth__status[hidden] {
@@ -63,6 +66,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    min-inline-size: 0;
   }
 
   .auth__form[hidden] {
@@ -117,6 +121,8 @@
   }
 
   .auth__actions {
+    width: 100%;
+    min-inline-size: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -124,16 +130,19 @@
     margin-top: 1.5rem;
     color: var(--color-text-muted);
     font-size: 0.9rem;
+    overflow-wrap: anywhere;
   }
 
   .auth__link,
   .auth__link-button {
+    max-inline-size: 100%;
     border: 0;
     background: transparent;
     color: var(--color-accent);
     font: inherit;
     cursor: pointer;
     text-decoration: none;
+    overflow-wrap: anywhere;
   }
 
   .auth__link:hover,
@@ -155,6 +164,7 @@
     font-size: 0.8rem;
     line-height: 1.5;
     text-align: center;
+    overflow-wrap: anywhere;
   }
 
   .password-field {
@@ -270,11 +280,6 @@
   @media (prefers-reduced-motion: reduce) {
     .auth__spinner {
       animation: none;
-    }
-
-    .password-field__toggle,
-    .password-requirements__item {
-      transition: none;
     }
   }
 }

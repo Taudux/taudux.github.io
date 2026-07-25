@@ -443,7 +443,7 @@ html {
 
 .carousel__track {
   display: flex;
-  animation: carousel-scroll-left 60s linear infinite;
+  animation: carousel-scroll-left 50s linear infinite;
   width: max-content;
 }
 
@@ -502,6 +502,7 @@ html {
 
 .contact__info {
   flex: 1 1 40%;
+  min-inline-size: 0;
 }
 
 .contact__title {
@@ -518,6 +519,7 @@ html {
   margin-bottom: 2rem;
   color: var(--color-text-muted);
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .contact__form {
@@ -525,11 +527,16 @@ html {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-inline-size: 0;
 }
 
 .contact__row {
   display: flex;
   gap: 1rem;
+}
+
+.contact__row > * {
+  min-inline-size: 0;
 }
 
 .contact__submit {
@@ -565,6 +572,7 @@ html {
 
 .footer__detail {
   margin: 0.3rem 0;
+  overflow-wrap: anywhere;
 }
 
 .footer__link {
@@ -583,6 +591,8 @@ html {
 
 .footer__column {
   flex: 0 1 160px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .footer__heading {
@@ -647,4 +657,20 @@ html {
   .contact__row {
     flex-direction: column;
   }
+}
+
+@media (max-width: 360px) {
+  .contact {
+    padding-inline: 1rem;
+  }
+
+  .contact__panel {
+    padding: 1.25rem;
+  }
+
+  .contact__title {
+    font-size: 2rem;
+    overflow-wrap: anywhere;
+  }
+}
 }

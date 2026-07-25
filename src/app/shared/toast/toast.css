@@ -14,12 +14,14 @@
 }
 
 .toast {
+  min-inline-size: 0;
   font-family: var(--font-body);
   font-size: 0.9rem;
   line-height: 1.4;
   padding: 0.85rem 1.15rem;
   border-radius: var(--radius-field);
   max-width: 22rem;
+  overflow-wrap: anywhere;
   backdrop-filter: blur(6px);
   background: color-mix(
     in srgb,
@@ -66,7 +68,7 @@
 @media (prefers-reduced-motion: reduce) {
   .toast {
     transform: none;
-    transition: none;
+    transition: opacity 0.2s ease;
   }
 
   .toast--visible {

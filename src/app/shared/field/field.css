@@ -12,15 +12,11 @@
 
   .field:focus {
     border-color: var(--color-accent);
-    outline: none;
   }
 
-  .field--centered {
-    text-align: center;
-  }
-
-  select.field--centered {
-    text-align-last: center;
+  .field:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .field--textarea {

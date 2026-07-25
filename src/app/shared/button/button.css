@@ -6,8 +6,14 @@
     cursor: pointer;
   }
 
+  .button:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
   .button--glow {
     position: relative;
+    isolation: isolate;
     padding: 0.75rem 2rem;
     border: 2px solid transparent;
     border-radius: var(--radius-field);
@@ -26,7 +32,7 @@
     inset: -4px;
     border-radius: calc(var(--radius-field) + 4px);
     background: var(--color-accent-dark);
-    z-index: var(--z-behind);
+    z-index: -1;
     filter: blur(10px);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
@@ -93,5 +99,15 @@
   .button--outline:hover {
     border-color: var(--color-accent);
     color: var(--color-text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button--glow,
+    .button--glow::before,
+    .button.button--access,
+    .button--whatsapp,
+    .button--outline {
+      transition: none;
+    }
   }
 }

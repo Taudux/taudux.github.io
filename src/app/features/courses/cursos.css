@@ -55,14 +55,30 @@
 
 .courses__form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: 1rem;
+}
+
+.courses__form-row > * {
+  min-width: 0;
+}
+
+.courses__field-group {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.courses__field-label {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
 }
 
 .courses__list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .courses__empty {
@@ -74,6 +90,7 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
+  min-width: 0;
 }
 
 .courses__card-image {
@@ -110,6 +127,7 @@
   color: var(--color-text);
   font-size: 1.15rem;
   margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
 }
 
 .courses__card-meta,
@@ -119,6 +137,7 @@
   color: var(--color-text-muted);
   font-size: 0.82rem;
   margin-bottom: 0.4rem;
+  overflow-wrap: anywhere;
 }
 
 .courses__card-description {
@@ -126,6 +145,7 @@
   font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 1rem;
+  overflow-wrap: anywhere;
 }
 
 /* Grupo de checkboxes de días de la semana en el form de alta/edición. */
@@ -205,6 +225,7 @@
 .courses__form-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.75rem;
 }
 }

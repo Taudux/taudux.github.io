@@ -82,7 +82,7 @@
       const img = document.createElement("img");
       img.className = "courses__card-image";
       img.src = curso.imagen_url;
-      img.alt = "";
+      img.alt = curso.titulo ? `Imagen del curso: ${curso.titulo}` : "Imagen del curso";
       tarjeta.appendChild(img);
     }
 

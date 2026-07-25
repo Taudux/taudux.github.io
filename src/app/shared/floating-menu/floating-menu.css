@@ -40,4 +40,10 @@
     margin: 2px 4px 4px;
     border-top: var(--border-subtle);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-menu__link {
+      transition: none;
+    }
+  }
 }

@@ -28,6 +28,7 @@
   const inputHora = document.getElementById("cursoHora");
   const inputDuracion = document.getElementById("cursoDuracion");
   const inputProximamente = document.getElementById("cursoProximamente");
+  const controlesProgramacion = [inputHora, inputDuracion, inputFechaInicio, inputFechaFin];
   const inputCupo = document.getElementById("cursoCupo");
   const inputCosto = document.getElementById("cursoCosto");
   const inputInstructor = document.getElementById("cursoInstructor");
@@ -40,21 +41,24 @@
 
   form.addEventListener("submit", enviarFormulario);
   botonCancelar.addEventListener("click", limpiarFormulario);
-  inputProximamente.addEventListener("change", actualizarObligatoriedadHorario);
+  inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
 
   await pintarCursos();
   cuerpo.classList.remove("courses--auth-pending");
-  actualizarObligatoriedadHorario();
+  actualizarEstadoProgramacion();
 
-  // Con "Próximamente" marcado, el curso aún no tiene horario definitivo: hora,
-  // duración, fechas y días dejan de ser obligatorios (siguen siendo editables
-  // por si ya se sabe parte del horario).
-  function actualizarObligatoriedadHorario() {
-    const requerido = !inputProximamente.checked;
-    inputHora.required = requerido;
-    inputDuracion.required = requerido;
-    inputFechaInicio.required = requerido;
-    inputFechaFin.required = requerido;
+  // Un curso próximo no debe conservar una programación parcial o desactualizada.
+  function actualizarEstadoProgramacion() {
+    const esProximamente = inputProximamente.checked;
+    controlesProgramacion.forEach((control) => {
+      if (esProximamente) control.value = "";
+      control.disabled = esProximamente;
+      control.required = !esProximamente;
+    });
+    checksDias.forEach((check) => {
+      if (esProximamente) check.checked = false;
+      check.disabled = esProximamente;
+    });
   }
 
   async function pintarCursos() {
@@ -196,7 +200,7 @@
     inputInstructor.value = curso.instructor || "";
     inputImagen.value = curso.imagen_url || "";
     botonEnviar.textContent = "Guardar cambios";
-    actualizarObligatoriedadHorario();
+    actualizarEstadoProgramacion();
     form.scrollIntoView({ behavior: "smooth" });
   }
 
@@ -205,7 +209,7 @@
     form.reset();
     checksDias.forEach((check) => (check.checked = false));
     botonEnviar.textContent = "Publicar curso";
-    actualizarObligatoriedadHorario();
+    actualizarEstadoProgramacion();
   }
 
   async function enviarFormulario(evento) {

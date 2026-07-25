@@ -1,0 +1,9 @@
+/* Estados visuales exclusivos del formulario de gestion de cursos. */
+
+@layer features {
+  .courses__field-group:has(.field:disabled),
+  .courses__dia:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

@@ -63,21 +63,24 @@ function normalizarCamposCurso({
   instructor,
   proximamente,
 }) {
+  const esProximamente = Boolean(proximamente);
+
   return {
     titulo,
     descripcion: descripcion || null,
     imagen_url: imagen_url || null,
     categoria: categoria || null,
     modalidad: modalidad || null,
-    fecha_inicio: fecha_inicio || null,
-    fecha_fin: fecha_fin || null,
-    dias_semana: dias_semana && dias_semana.length ? dias_semana : null,
-    hora_inicio: hora_inicio || null,
-    duracion_horas: duracion_horas ? parseFloat(duracion_horas) : null,
+    fecha_inicio: esProximamente ? null : fecha_inicio || null,
+    fecha_fin: esProximamente ? null : fecha_fin || null,
+    dias_semana:
+      esProximamente || !dias_semana || !dias_semana.length ? null : dias_semana,
+    hora_inicio: esProximamente ? null : hora_inicio || null,
+    duracion_horas: esProximamente || !duracion_horas ? null : parseFloat(duracion_horas),
     cupo_maximo: cupo_maximo ? parseInt(cupo_maximo, 10) : null,
     costo: costo !== "" && costo !== null && costo !== undefined ? parseFloat(costo) : null,
     instructor: instructor || null,
-    proximamente: Boolean(proximamente),
+    proximamente: esProximamente,
   };
 }
 

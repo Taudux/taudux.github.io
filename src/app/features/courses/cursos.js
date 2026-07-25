@@ -21,9 +21,9 @@
   }
 })();
 
-// Tarjeta de solo lectura y activable: imagen, badges de modalidad/próximamente,
-// título, descripción, horario y rango de fechas (omitidos si el curso es
-// "próximamente") y cupo/costo — cada dato opcional solo si existe.
+// Tarjeta pública de solo lectura y activable: imagen, título, descripción,
+// información de modalidad/fechas/horario y chips de cupo/costo/estado.
+// Fechas y horario se omiten si el curso es "próximamente".
 function crearTarjetaCurso(curso) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "courses__card courses__card--catalog panel";
@@ -49,35 +49,6 @@ function crearTarjetaCurso(curso) {
   const cuerpo = document.createElement("div");
   cuerpo.className = "courses__card-body";
 
-  const encabezado = document.createElement("div");
-  encabezado.className = "courses__card-header";
-
-  const badges = document.createElement("div");
-  badges.className = "courses__badges";
-
-  const badgeModalidad = etiquetaModalidad(curso);
-  if (badgeModalidad) {
-    const badgeEl = document.createElement("span");
-    badgeEl.className = `courses__badge courses__badge--${curso.modalidad}`;
-    badgeEl.textContent = badgeModalidad;
-    badges.appendChild(badgeEl);
-  }
-
-  if (badges.childElementCount) {
-    encabezado.appendChild(badges);
-  }
-
-  if (curso.proximamente) {
-    const proximamenteEl = document.createElement("span");
-    proximamenteEl.className = "courses__badge courses__badge--proximamente";
-    proximamenteEl.textContent = "Próximamente";
-    encabezado.appendChild(proximamenteEl);
-  }
-
-  if (encabezado.childElementCount) {
-    cuerpo.appendChild(encabezado);
-  }
-
   const titulo = document.createElement("h2");
   titulo.className = "courses__card-title";
   titulo.textContent = curso.titulo;
@@ -90,23 +61,42 @@ function crearTarjetaCurso(curso) {
     cuerpo.appendChild(desc);
   }
 
-  const metadatos = document.createElement("div");
-  metadatos.className = "courses__card-meta-grid";
+  const informacion = document.createElement("div");
+  informacion.className = "courses__card-info";
+
+  agregarInformacionCurso(
+    informacion,
+    "modalidad",
+    "Modalidad",
+    etiquetaModalidad(curso)
+  );
 
   if (!curso.proximamente) {
-    const horario = formatearHorario(curso);
-    agregarMetaCurso(metadatos, "Horario", horario);
-
     const rango = formatearRangoFechas(curso);
-    agregarMetaCurso(metadatos, "Fechas", rango);
+    agregarInformacionCurso(informacion, "fechas", "Fechas", rango);
+
+    const horario = formatearHorario(curso);
+    agregarInformacionCurso(informacion, "horario", "Horario", horario);
   }
 
-  const costo = formatearCosto(curso.costo);
-  agregarMetaCurso(metadatos, "Cupo", curso.cupo_maximo ? `${curso.cupo_maximo} lugares` : null);
-  agregarMetaCurso(metadatos, "Inversión", costo);
+  if (informacion.childElementCount) {
+    cuerpo.appendChild(informacion);
+  }
 
-  if (metadatos.childElementCount) {
-    cuerpo.appendChild(metadatos);
+  const chips = document.createElement("div");
+  chips.className = "courses__card-chips";
+
+  agregarChipCurso(
+    chips,
+    curso.cupo_maximo ? `Cupo: ${curso.cupo_maximo} lugares` : null
+  );
+  agregarChipCurso(chips, formatearCosto(curso.costo));
+  if (curso.proximamente) {
+    agregarChipCurso(chips, "Próximamente", "proximamente");
+  }
+
+  if (chips.childElementCount) {
+    cuerpo.appendChild(chips);
   }
 
   tarjeta.appendChild(cuerpo);
@@ -124,22 +114,38 @@ function crearTarjetaCurso(curso) {
   return tarjeta;
 }
 
-function agregarMetaCurso(contenedor, etiqueta, valor) {
+function agregarInformacionCurso(contenedor, tipo, etiqueta, valor) {
   if (!valor) return;
 
-  const item = document.createElement("div");
-  item.className = "courses__card-meta-item";
+  const item = document.createElement("p");
+  item.className = `courses__card-info-row courses__card-info-row--${tipo}`;
 
   const label = document.createElement("span");
-  label.className = "courses__card-meta-label";
-  label.textContent = `${etiqueta}:`;
+  label.className = "courses__card-info-label";
+  label.textContent = `${etiqueta}: `;
 
   const value = document.createElement("strong");
-  value.className = "courses__card-meta-value";
+  value.className = "courses__card-info-value";
   value.textContent = valor;
 
-  item.append(label, value);
+  const texto = document.createElement("span");
+  texto.className = "courses__card-info-text";
+  texto.append(label, value);
+
+  item.appendChild(texto);
   contenedor.appendChild(item);
+}
+
+function agregarChipCurso(contenedor, texto, modificador = null) {
+  if (!texto) return;
+
+  const chip = document.createElement("span");
+  chip.className = "courses__card-chip";
+  if (modificador) {
+    chip.classList.add(`courses__card-chip--${modificador}`);
+  }
+  chip.textContent = texto;
+  contenedor.appendChild(chip);
 }
 
 function crearFallbackCurso(media, curso) {

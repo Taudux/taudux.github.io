@@ -21,6 +21,16 @@
   margin-bottom: 2.5rem;
 }
 
+.courses__eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .courses__title {
   font-size: clamp(1.8rem, 4vw, 2.4rem);
   margin-bottom: 0.5rem;
@@ -35,6 +45,29 @@
   margin: 0 auto;
   color: var(--color-text-muted);
   line-height: 1.6;
+}
+
+.courses--catalog .courses__main {
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 34rem),
+    var(--color-background);
+}
+
+.courses--catalog .courses__container {
+  max-width: 1040px;
+}
+
+.courses--catalog .courses__header {
+  margin-bottom: 3.5rem;
+}
+
+.courses--catalog .courses__title {
+  margin-bottom: 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.courses--catalog .courses__intro {
+  max-width: 680px;
 }
 
 /* Panel de alta: solo existe en gestionar-cursos.html (página admin-gated). */
@@ -81,6 +114,11 @@
   min-width: 0;
 }
 
+.courses--catalog .courses__list {
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: 2rem;
+}
+
 .courses__empty {
   color: var(--color-text-muted);
   text-align: center;
@@ -93,12 +131,135 @@
   min-width: 0;
 }
 
+.courses__card--catalog {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border-color: color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--color-accent) 4%, transparent), transparent 42%),
+    var(--color-background-deep);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  animation: course-card-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.courses__card--catalog::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: var(--z-content);
+  width: 3px;
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-dark), transparent 92%);
+  opacity: 0.9;
+}
+
+.courses__card--catalog:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--color-accent) 48%, var(--color-border));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.38), 0 0 32px color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.courses__card--catalog:only-child {
+  width: 100%;
+  max-width: 760px;
+  justify-self: center;
+}
+
+.courses__card-media {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 160px;
+  overflow: hidden;
+  background-color: #071017;
+}
+
+.courses__card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 25%, rgba(7, 10, 13, 0.82) 100%);
+}
+
+.courses__card-media--fallback {
+  padding: 1.5rem;
+  background:
+    linear-gradient(rgba(0, 225, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 225, 255, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 78% 30%, color-mix(in srgb, var(--color-accent) 28%, transparent), transparent 28%),
+    linear-gradient(135deg, #06111a, #0c1720 58%, #071017);
+  background-size: 28px 28px, 28px 28px, auto, auto;
+}
+
+.courses__card-media-label,
+.courses__card-media-topic {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.courses__card-media-label {
+  margin-bottom: 0.45rem;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.courses__card-media-topic {
+  max-width: 80%;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.courses__card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.65rem 1.8rem 1.8rem;
+}
+
+.courses__card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  margin-bottom: 1rem;
+}
+
+.courses__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .courses__card-image {
   width: 100%;
   height: 140px;
   object-fit: cover;
   border-radius: var(--radius-field);
   margin-bottom: 1rem;
+}
+
+.courses__card-media .courses__card-image {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
 }
 
 .courses__badge {
@@ -123,11 +284,63 @@
   border: 1px solid var(--color-border);
 }
 
+.courses__card--catalog .courses__badge--categoria {
+  margin-left: 0;
+}
+
+.courses__card--catalog .courses__badge {
+  margin-bottom: 0;
+}
+
 .courses__card-title {
   color: var(--color-text);
   font-size: 1.15rem;
   margin-bottom: 0.5rem;
   overflow-wrap: anywhere;
+}
+
+.courses__card--catalog .courses__card-title {
+  max-width: 18ch;
+  margin-bottom: 1.15rem;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  line-height: 1.25;
+}
+
+.courses__card-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.courses__card-meta-item {
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: var(--border-subtle);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.courses__card-meta-label,
+.courses__card-meta-value {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.courses__card-meta-label {
+  margin-bottom: 0.25rem;
+  color: var(--color-text-subtle);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.courses__card-meta-value {
+  color: var(--color-text);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .courses__card-meta,
@@ -146,6 +359,10 @@
   line-height: 1.5;
   margin-bottom: 1rem;
   overflow-wrap: anywhere;
+}
+
+.courses__card--catalog .courses__card-description {
+  margin-bottom: 0;
 }
 
 /* Grupo de checkboxes de días de la semana en el form de alta/edición. */
@@ -198,7 +415,39 @@
 /* Envuelve el botón "Más información" del catálogo público. */
 .courses__card-actions {
   margin-top: auto;
-  padding-top: 0.75rem;
+  padding-top: 1.5rem;
+}
+
+.courses__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.15rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-button);
+  background: var(--color-accent);
+  color: var(--color-background-deep);
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.courses__cta::after {
+  content: "→";
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.courses__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+.courses__cta:hover::after {
+  transform: translateX(3px);
 }
 
 /* Acciones de administrador por tarjeta (solo en gestionar-cursos.html). */
@@ -227,5 +476,62 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+@keyframes course-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .courses--catalog .courses__main {
+    padding: 7rem 1rem 3rem;
+  }
+
+  .courses--catalog .courses__header {
+    margin-bottom: 2.5rem;
+  }
+
+  .courses__card-body {
+    padding: 1.35rem;
+  }
+
+  .courses__card-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .courses__badge--proximamente {
+    align-self: flex-start;
+  }
+
+  .courses__card-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .courses__cta {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courses__card--catalog {
+    animation: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .courses__card--catalog:hover,
+  .courses__cta:hover,
+  .courses__cta:hover::after {
+    transform: none;
+  }
 }
 }

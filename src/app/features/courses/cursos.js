@@ -27,97 +27,148 @@
 // cada dato opcional solo si existe.
 function crearTarjetaCurso(curso) {
   const tarjeta = document.createElement("article");
-  tarjeta.className = "courses__card panel";
+  tarjeta.className = "courses__card courses__card--catalog panel";
+
+  const media = document.createElement("div");
+  media.className = "courses__card-media";
 
   if (curso.imagen_url && esUrlSegura(curso.imagen_url)) {
     const img = document.createElement("img");
     img.className = "courses__card-image";
     img.src = curso.imagen_url;
-    img.alt = "";
-    tarjeta.appendChild(img);
+    img.alt = curso.titulo ? `Portada del curso ${curso.titulo}` : "Portada del curso";
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.addEventListener("error", () => crearFallbackCurso(media, curso), { once: true });
+    media.appendChild(img);
+  } else {
+    crearFallbackCurso(media, curso);
   }
+
+  tarjeta.appendChild(media);
+
+  const cuerpo = document.createElement("div");
+  cuerpo.className = "courses__card-body";
+
+  const encabezado = document.createElement("div");
+  encabezado.className = "courses__card-header";
+
+  const badges = document.createElement("div");
+  badges.className = "courses__badges";
 
   const badgeModalidad = etiquetaModalidad(curso);
   if (badgeModalidad) {
     const badgeEl = document.createElement("span");
     badgeEl.className = `courses__badge courses__badge--${curso.modalidad}`;
     badgeEl.textContent = badgeModalidad;
-    tarjeta.appendChild(badgeEl);
+    badges.appendChild(badgeEl);
   }
 
   if (curso.categoria) {
     const categoriaEl = document.createElement("span");
     categoriaEl.className = "courses__badge courses__badge--categoria";
     categoriaEl.textContent = curso.categoria;
-    tarjeta.appendChild(categoriaEl);
+    badges.appendChild(categoriaEl);
+  }
+
+  if (badges.childElementCount) {
+    encabezado.appendChild(badges);
   }
 
   if (curso.proximamente) {
     const proximamenteEl = document.createElement("span");
     proximamenteEl.className = "courses__badge courses__badge--proximamente";
     proximamenteEl.textContent = "Próximamente";
-    tarjeta.appendChild(proximamenteEl);
+    encabezado.appendChild(proximamenteEl);
   }
 
-  const titulo = document.createElement("h3");
+  if (encabezado.childElementCount) {
+    cuerpo.appendChild(encabezado);
+  }
+
+  const titulo = document.createElement("h2");
   titulo.className = "courses__card-title";
   titulo.textContent = curso.titulo;
-  tarjeta.appendChild(titulo);
+  cuerpo.appendChild(titulo);
+
+  const metadatos = document.createElement("div");
+  metadatos.className = "courses__card-meta-grid";
 
   if (!curso.proximamente) {
     const horario = formatearHorario(curso);
-    if (horario) {
-      const horarioEl = document.createElement("p");
-      horarioEl.className = "courses__card-meta";
-      horarioEl.textContent = horario;
-      tarjeta.appendChild(horarioEl);
-    }
+    agregarMetaCurso(metadatos, "Horario", horario);
 
     const rango = formatearRangoFechas(curso);
-    if (rango) {
-      const rangoEl = document.createElement("p");
-      rangoEl.className = "courses__card-dates";
-      rangoEl.textContent = rango;
-      tarjeta.appendChild(rangoEl);
-    }
+    agregarMetaCurso(metadatos, "Fechas", rango);
   }
 
-  if (curso.instructor) {
-    const instructorEl = document.createElement("p");
-    instructorEl.className = "courses__card-instructor";
-    instructorEl.textContent = `Imparte: ${curso.instructor}`;
-    tarjeta.appendChild(instructorEl);
-  }
+  agregarMetaCurso(metadatos, "Instructor", curso.instructor);
 
   const costo = formatearCosto(curso.costo);
-  const extra = [curso.cupo_maximo ? `Cupo: ${curso.cupo_maximo}` : null, costo]
-    .filter(Boolean)
-    .join(" · ");
-  if (extra) {
-    const extraEl = document.createElement("p");
-    extraEl.className = "courses__card-extra";
-    extraEl.textContent = extra;
-    tarjeta.appendChild(extraEl);
+  agregarMetaCurso(metadatos, "Cupo", curso.cupo_maximo ? `${curso.cupo_maximo} lugares` : null);
+  agregarMetaCurso(metadatos, "Inversión", costo);
+
+  if (metadatos.childElementCount) {
+    cuerpo.appendChild(metadatos);
   }
 
   if (curso.descripcion) {
     const desc = document.createElement("p");
     desc.className = "courses__card-description";
     desc.textContent = curso.descripcion;
-    tarjeta.appendChild(desc);
+    cuerpo.appendChild(desc);
   }
 
   const acciones = document.createElement("div");
   acciones.className = "courses__card-actions";
   const masInfo = document.createElement("button");
-  masInfo.className = "button button--outline";
+  masInfo.className = "button courses__cta";
   masInfo.type = "button";
-  masInfo.textContent = "Más información";
+  masInfo.textContent = curso.proximamente ? "Conocer detalles" : "Más información";
+  masInfo.setAttribute(
+    "aria-label",
+    `${masInfo.textContent}: ${curso.titulo || "curso sin título"}`
+  );
   masInfo.addEventListener("click", verMasInformacion);
   acciones.appendChild(masInfo);
-  tarjeta.appendChild(acciones);
+  cuerpo.appendChild(acciones);
+  tarjeta.appendChild(cuerpo);
 
   return tarjeta;
+}
+
+function agregarMetaCurso(contenedor, etiqueta, valor) {
+  if (!valor) return;
+
+  const item = document.createElement("div");
+  item.className = "courses__card-meta-item";
+
+  const label = document.createElement("span");
+  label.className = "courses__card-meta-label";
+  label.textContent = etiqueta;
+
+  const value = document.createElement("strong");
+  value.className = "courses__card-meta-value";
+  value.textContent = valor;
+
+  item.append(label, value);
+  contenedor.appendChild(item);
+}
+
+function crearFallbackCurso(media, curso) {
+  media.replaceChildren();
+  media.classList.add("courses__card-media--fallback");
+  media.setAttribute("aria-hidden", "true");
+
+  const mediaLabel = document.createElement("span");
+  mediaLabel.className = "courses__card-media-label";
+  mediaLabel.textContent = "TAUDUX / ACADEMY";
+
+  const mediaTopic = document.createElement("span");
+  mediaTopic.className = "courses__card-media-topic";
+  mediaTopic.textContent = (curso.categoria || "Formación tecnológica").toUpperCase();
+
+  media.append(mediaLabel, mediaTopic);
 }
 
 // Gate de sesión para el detalle del curso: sin sesión, avisa y manda a login;

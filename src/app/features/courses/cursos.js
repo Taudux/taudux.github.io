@@ -21,10 +21,9 @@
   }
 })();
 
-// Tarjeta de solo lectura: imagen, badges de modalidad/categoría/próximamente, título,
-// horario y rango de fechas (omitidos si el curso es "próximamente"), instructor,
-// cupo/costo, descripción y botón "Más información" (gate de sesión, ver F-008) —
-// cada dato opcional solo si existe.
+// Tarjeta de solo lectura y activable: imagen, badges de modalidad/próximamente,
+// título, descripción, horario y rango de fechas (omitidos si el curso es
+// "próximamente") y cupo/costo — cada dato opcional solo si existe.
 function crearTarjetaCurso(curso) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "courses__card courses__card--catalog panel";
@@ -64,13 +63,6 @@ function crearTarjetaCurso(curso) {
     badges.appendChild(badgeEl);
   }
 
-  if (curso.categoria) {
-    const categoriaEl = document.createElement("span");
-    categoriaEl.className = "courses__badge courses__badge--categoria";
-    categoriaEl.textContent = curso.categoria;
-    badges.appendChild(categoriaEl);
-  }
-
   if (badges.childElementCount) {
     encabezado.appendChild(badges);
   }
@@ -91,6 +83,13 @@ function crearTarjetaCurso(curso) {
   titulo.textContent = curso.titulo;
   cuerpo.appendChild(titulo);
 
+  if (curso.descripcion) {
+    const desc = document.createElement("p");
+    desc.className = "courses__card-description";
+    desc.textContent = curso.descripcion;
+    cuerpo.appendChild(desc);
+  }
+
   const metadatos = document.createElement("div");
   metadatos.className = "courses__card-meta-grid";
 
@@ -102,8 +101,6 @@ function crearTarjetaCurso(curso) {
     agregarMetaCurso(metadatos, "Fechas", rango);
   }
 
-  agregarMetaCurso(metadatos, "Instructor", curso.instructor);
-
   const costo = formatearCosto(curso.costo);
   agregarMetaCurso(metadatos, "Cupo", curso.cupo_maximo ? `${curso.cupo_maximo} lugares` : null);
   agregarMetaCurso(metadatos, "Inversión", costo);
@@ -112,27 +109,17 @@ function crearTarjetaCurso(curso) {
     cuerpo.appendChild(metadatos);
   }
 
-  if (curso.descripcion) {
-    const desc = document.createElement("p");
-    desc.className = "courses__card-description";
-    desc.textContent = curso.descripcion;
-    cuerpo.appendChild(desc);
-  }
-
-  const acciones = document.createElement("div");
-  acciones.className = "courses__card-actions";
-  const masInfo = document.createElement("button");
-  masInfo.className = "button courses__cta";
-  masInfo.type = "button";
-  masInfo.textContent = curso.proximamente ? "Conocer detalles" : "Más información";
-  masInfo.setAttribute(
-    "aria-label",
-    `${masInfo.textContent}: ${curso.titulo || "curso sin título"}`
-  );
-  masInfo.addEventListener("click", verMasInformacion);
-  acciones.appendChild(masInfo);
-  cuerpo.appendChild(acciones);
   tarjeta.appendChild(cuerpo);
+
+  const activador = document.createElement("button");
+  activador.className = "courses__card-hit-area";
+  activador.type = "button";
+  activador.setAttribute(
+    "aria-label",
+    `Ver detalles del curso: ${curso.titulo || "curso sin título"}`
+  );
+  activador.addEventListener("click", verMasInformacion);
+  tarjeta.appendChild(activador);
 
   return tarjeta;
 }
@@ -145,7 +132,7 @@ function agregarMetaCurso(contenedor, etiqueta, valor) {
 
   const label = document.createElement("span");
   label.className = "courses__card-meta-label";
-  label.textContent = etiqueta;
+  label.textContent = `${etiqueta}:`;
 
   const value = document.createElement("strong");
   value.className = "courses__card-meta-value";

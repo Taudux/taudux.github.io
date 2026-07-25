@@ -110,28 +110,6 @@ function etiquetaModalidad(curso) {
   return null;
 }
 
-// Orden y abreviaturas de los días de la semana (códigos guardados en BD).
-const DIAS_SEMANA_ORDEN = ["lun", "mar", "mie", "jue", "vie", "sab", "dom"];
-const DIAS_SEMANA_ETIQUETA = {
-  lun: "Lun",
-  mar: "Mar",
-  mie: "Mié",
-  jue: "Jue",
-  vie: "Vie",
-  sab: "Sáb",
-  dom: "Dom",
-};
-
-// "Lun y Mié" / "Lun, Mié y Vie", ordenados de lunes a domingo. null si no hay días.
-function formatearDiasSemana(dias) {
-  if (!dias || dias.length === 0) return null;
-  const ordenados = DIAS_SEMANA_ORDEN.filter((codigo) => dias.includes(codigo)).map(
-    (codigo) => DIAS_SEMANA_ETIQUETA[codigo]
-  );
-  if (ordenados.length === 1) return ordenados[0];
-  return `${ordenados.slice(0, -1).join(", ")} y ${ordenados[ordenados.length - 1]}`;
-}
-
 // Parseo manual por partes: new Date("YYYY-MM-DD") interpreta UTC y puede mostrar
 // el día anterior según la zona horaria del navegador.
 function parsearFechaLocal(fecha) {
@@ -153,28 +131,33 @@ function formatearRangoFechas(curso) {
   return null;
 }
 
-// Línea meta compacta "Lun y Mié · 6:00 pm · 2 h", omitiendo lo que falte.
-// Comparte formato entre el catálogo público y el panel de gestión.
+// Rango en formato de 24 horas, calculado con la hora inicial y la duración.
+// La duración se captura en el formulario, pero no se muestra en las tarjetas.
 function formatearHorario(curso) {
-  const partes = [];
+  if (typeof curso.hora_inicio !== "string") return null;
 
-  const dias = formatearDiasSemana(curso.dias_semana);
-  if (dias) partes.push(dias);
+  const partesHora = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.exec(
+    curso.hora_inicio
+  );
+  if (!partesHora) return null;
 
-  if (curso.hora_inicio) {
-    const [hora, minuto] = curso.hora_inicio.split(":").map(Number);
-    const horaLocal = new Date();
-    horaLocal.setHours(hora, minuto, 0, 0);
-    partes.push(
-      horaLocal.toLocaleTimeString("es-MX", { hour: "numeric", minute: "2-digit" })
-    );
-  }
+  const horaInicio = Number(partesHora[1]);
+  const minutoInicio = Number(partesHora[2]);
 
-  if (curso.duracion_horas) {
-    partes.push(`${curso.duracion_horas} h`);
-  }
+  const formatearMinutos = (minutosTotales) => {
+    const minutosDelDia = ((minutosTotales % 1440) + 1440) % 1440;
+    const hora = Math.floor(minutosDelDia / 60);
+    const minuto = minutosDelDia % 60;
+    return `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
+  };
 
-  return partes.join(" · ");
+  const inicioEnMinutos = horaInicio * 60 + minutoInicio;
+  const duracionEnMinutos = Math.round(Number(curso.duracion_horas) * 60);
+  const inicio = formatearMinutos(inicioEnMinutos);
+
+  if (!Number.isFinite(duracionEnMinutos) || duracionEnMinutos <= 0) return inicio;
+
+  return `${inicio} - ${formatearMinutos(inicioEnMinutos + duracionEnMinutos)}`;
 }
 
 // "Gratis" si el costo es 0, "$500.00 MXN" si es mayor, null si no se capturó.

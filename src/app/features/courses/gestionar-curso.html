@@ -143,9 +143,11 @@
             <input class="field" id="cursoInstructor" type="text" placeholder="Impartido por" required>
           </div>
           <div class="courses__field-group">
-            <label class="courses__field-label" for="cursoImagen">URL de imagen (opcional)</label>
-            <input class="field" id="cursoImagen" type="url" placeholder="URL de imagen (opcional, https://...)">
+            <label class="courses__field-label" for="cursoPortada">Portada local (opcional)</label>
+            <input class="field" id="cursoPortada" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="cursoPortadaAyuda cursoPortadaEstado">
           </div>
+          <p class="courses__categories-help" id="cursoPortadaAyuda">Usa una imagen JPG, PNG o WebP de hasta 5 MiB.</p>
+          <p class="courses__categories-help" id="cursoPortadaEstado" role="status" aria-live="polite"></p>
           <div class="courses__data-status" id="cursoOperacionEstado" role="alert" tabindex="-1" hidden>
             <p class="courses__data-status-message" id="cursoOperacionMensaje"></p>
           </div>
@@ -164,6 +166,7 @@
   <script src="/src/app/core/auth/auth.service.js"></script>
   <script src="/src/app/core/categorias/categorias.service.js"></script>
   <script src="/src/app/core/cursos/cursos.service.js"></script>
+  <script src="/src/app/core/cursos/portadas-curso.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>
   <script src="/src/app/features/courses/gestionar-curso.js"></script>

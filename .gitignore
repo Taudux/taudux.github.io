@@ -7,3 +7,6 @@ AGENTS.md
 .vscode/
 .atl/
 openspec/
+
+# Supabase local state
+supabase/.temp/

@@ -5,11 +5,50 @@
 */
 
 (async () => {
+  function crearDatosEnvioCurso({
+    titulo,
+    datosCategoria,
+    descripcion,
+    modalidad,
+    fechaInicio,
+    fechaFin,
+    proximamente,
+    diasSemana,
+    horaInicio,
+    duracionHoras,
+    cupoMaximo,
+    costo,
+    instructor,
+  }, cursoActual) {
+    return {
+      titulo: titulo.trim(),
+      ...datosCategoria,
+      descripcion: descripcion.trim(),
+      modalidad,
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      proximamente,
+      dias_semana: diasSemana,
+      hora_inicio: horaInicio,
+      duracion_horas: duracionHoras,
+      cupo_maximo: cupoMaximo,
+      costo,
+      instructor: instructor.trim(),
+      imagen_url: cursoActual?.imagen_url || "",
+    };
+  }
+
+  if (typeof module === "object" && module.exports) {
+    module.exports = Object.freeze({ crearDatosEnvioCurso });
+    return;
+  }
+
   const PAGINA = "course_admin_form";
   const RUTA_LISTA = "/src/app/features/courses/gestionar-cursos.html";
   const VALOR_CATEGORIA_SIN_ASIGNAR = "__sin_categoria__";
   const PREFIJO_CATEGORIA_LEGACY = "__categoria_legacy__:";
   const UUID_CURSO = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const UUID_OPERACION_CURSO = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
   const startup = document.getElementById("adminStartup");
   const startupTitulo = document.getElementById("adminStartupTitle");
@@ -41,7 +80,8 @@
   const inputCupo = document.getElementById("cursoCupo");
   const inputCosto = document.getElementById("cursoCosto");
   const inputInstructor = document.getElementById("cursoInstructor");
-  const inputImagen = document.getElementById("cursoImagen");
+  const inputPortada = document.getElementById("cursoPortada");
+  const estadoPortada = document.getElementById("cursoPortadaEstado");
   const botonEnviar = document.getElementById("cursoEnviar");
   const botonCancelar = document.getElementById("cursoCancelar");
   const estadoCategorias = document.getElementById("categoriasEstado");
@@ -56,7 +96,12 @@
   let modoCategorias = "cargando";
   let cargaCategoriasEnCurso = false;
   let secuenciaCargaCategorias = 0;
-  let operacionCreacion = null;
+  const flujoMutacionCurso = window.portadasCurso.crearFlujoMutacionCurso({
+    subirPortada: window.portadasCurso.subir,
+    crearCurso,
+    actualizarCurso,
+    generarOperacionId: generarIdOperacionCurso,
+  });
 
   form.addEventListener("submit", enviarFormulario);
   form.addEventListener("input", invalidarOperacionSiCambio);
@@ -68,6 +113,7 @@
   botonReintentarRuta.addEventListener("click", () => window.location.reload());
   startupReintentar.addEventListener("click", () => window.location.reload());
   inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
+  inputPortada.addEventListener("change", seleccionarPortadaLocal);
 
   const inicioStartup = iniciarTiempo();
   try {
@@ -209,6 +255,15 @@
       if (esProximamente) check.checked = false;
       check.disabled = esProximamente;
     });
+  }
+
+  function seleccionarPortadaLocal() {
+    const archivo = inputPortada.files?.[0];
+    if (!archivo) {
+      estadoPortada.textContent = "";
+      return;
+    }
+    estadoPortada.textContent = `Se usará el archivo ${archivo.name}.`;
   }
 
   function crearCategoriasLegacy(nombresExtra = []) {
@@ -413,47 +468,48 @@
     inputCupo.value = curso.cupo_maximo || "";
     inputCosto.value = curso.costo ?? "";
     inputInstructor.value = curso.instructor || "";
-    inputImagen.value = curso.imagen_url || "";
   }
 
   function obtenerDatosFormulario() {
     const diasSeleccionados = checksDias
       .filter((check) => check.checked)
       .map((check) => check.value);
-    return {
-      titulo: inputTitulo.value.trim(),
-      ...obtenerDatosCategoriaFormulario(),
-      descripcion: inputDescripcion.value.trim(),
+    return crearDatosEnvioCurso({
+      titulo: inputTitulo.value,
+      datosCategoria: obtenerDatosCategoriaFormulario(),
+      descripcion: inputDescripcion.value,
       modalidad: inputModalidad.value,
-      fecha_inicio: inputFechaInicio.value,
-      fecha_fin: inputFechaFin.value,
+      fechaInicio: inputFechaInicio.value,
+      fechaFin: inputFechaFin.value,
       proximamente: inputProximamente.checked,
-      dias_semana: diasSeleccionados,
-      hora_inicio: inputHora.value,
-      duracion_horas: inputDuracion.value,
-      cupo_maximo: inputCupo.value,
+      diasSemana: diasSeleccionados,
+      horaInicio: inputHora.value,
+      duracionHoras: inputDuracion.value,
+      cupoMaximo: inputCupo.value,
       costo: inputCosto.value,
-      instructor: inputInstructor.value.trim(),
-      imagen_url: inputImagen.value.trim(),
-    };
+      instructor: inputInstructor.value,
+    }, cursoEditando);
   }
 
-  function firmaDatosCurso(datos) {
-    return JSON.stringify(datos);
+  function firmaSolicitud(datos = obtenerDatosFormulario(), archivo = inputPortada.files?.[0] || null) {
+    const portada = archivo ? {
+      name: archivo.name,
+      size: archivo.size,
+      type: archivo.type,
+      lastModified: archivo.lastModified,
+    } : null;
+    return JSON.stringify({ datos, portada });
   }
 
-  function generarIdOperacion() {
+  function generarIdOperacionCurso() {
     if (!window.crypto || typeof window.crypto.randomUUID !== "function") return null;
-    const id = window.crypto.randomUUID();
-    return UUID_CURSO.test(id) ? id : null;
+    const id = window.crypto.randomUUID().toLowerCase();
+    return UUID_OPERACION_CURSO.test(id) ? id : null;
   }
 
   function invalidarOperacionSiCambio() {
-    if (!operacionCreacion) return;
-    const firmaActual = firmaDatosCurso(obtenerDatosFormulario());
-    if (firmaActual === operacionCreacion.firma) return;
-    operacionCreacion = null;
-    ocultarErrorOperacion();
+    if (flujoMutacionCurso.estaEnCurso()) return;
+    if (flujoMutacionCurso.invalidarOperacion(firmaSolicitud())) ocultarErrorOperacion();
   }
 
   function mostrarErrorOperacion(mensaje) {
@@ -472,69 +528,39 @@
   async function enviarFormulario(evento) {
     evento.preventDefault();
     const datos = obtenerDatosFormulario();
+    const archivoPortada = inputPortada.files?.[0] || null;
     if (!inputProximamente.checked && datos.dias_semana.length === 0) {
       mostrarToast("Selecciona al menos un día de la semana.", "error");
       return;
     }
 
-    let operacionId = null;
-    if (!cursoId) {
-      const firma = firmaDatosCurso(datos);
-      if (!operacionCreacion) {
-        const id = generarIdOperacion();
-        if (!id) {
-          const inicio = iniciarTiempo();
-          reportarFallo("course_create", null, inicio, "operation_id_unavailable");
-          mostrarErrorOperacion(
-            "Tu navegador no puede preparar una publicación segura. Actualízalo y vuelve a intentarlo."
-          );
-          return;
-        }
-        operacionCreacion = { id, firma };
-      }
-      operacionId = operacionCreacion.id;
-    }
-
     ocultarErrorOperacion();
-    botonEnviar.disabled = true;
+    const textoBoton = botonEnviar.textContent;
     const inicio = iniciarTiempo();
-    let falloReportado = false;
-    let resultado;
-    try {
-      resultado = cursoId
-        ? await actualizarCurso(cursoId, datos)
-        : await crearCurso(datos, operacionId);
-    } catch (error) {
-      reportarFallo(
-        cursoId ? "course_update" : "course_create",
-        error,
-        inicio,
-        "save_exception"
-      );
-      falloReportado = true;
-      resultado = {
-        ok: false,
-        ambigua: !cursoId,
-        mensaje: cursoId
-          ? "No se pudo guardar el curso."
-          : "No se pudo confirmar si el curso fue publicado. Reintenta sin cambiar los datos.",
-      };
-    }
-    botonEnviar.disabled = false;
+    const resultado = await flujoMutacionCurso.ejecutar({
+      cursoId,
+      datos,
+      archivoPortada,
+      firma: firmaSolicitud(datos, archivoPortada),
+      controles: form.elements,
+      alCambiarEtapa: (etapa) => {
+        botonEnviar.textContent = etapa === "upload"
+          ? "Subiendo portada..."
+          : cursoId ? "Guardando..." : "Publicando...";
+      },
+    });
+    botonEnviar.textContent = textoBoton;
     if (!resultado.ok) {
-      if (!falloReportado) {
-        reportarFallo(
-          cursoId ? "course_update" : "course_create",
-          null,
-          inicio,
-          resultado.codigo || (resultado.ambigua ? "create_confirmation_pending" : "save_failed")
-        );
-      }
-      mostrarToast(resultado.mensaje, "error");
-      mostrarErrorOperacion(resultado.mensaje);
+      reportarFallo(
+        resultado.etapa === "upload" ? "course_cover_upload" : cursoId ? "course_update" : "course_create",
+        resultado.error || null,
+        inicio,
+        resultado.codigo || (resultado.ambigua ? "create_confirmation_pending" : "save_failed")
+      );
+      mostrarToast(resultado.mensajeUsuario, "error");
+      mostrarErrorOperacion(resultado.mensajeUsuario);
       return;
     }
-    operacionCreacion = null;
     window.location.href = `${RUTA_LISTA}?resultado=${cursoId ? "actualizado" : "creado"}`;
   }
 })();

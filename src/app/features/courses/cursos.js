@@ -1,8 +1,8 @@
 /*
   Catálogo de cursos: lista pública de solo lectura, NO requiere sesión (se accede
   desde el navbar sin iniciar sesión). La lectura de la tabla la habilita la RLS
-  pública de `cursos` (migración 0005). La gestión (alta/edición/borrado) vive en
-  gestionar-cursos.js. Depende de cursos.service.js y toast.js (cargar antes).
+  pública de `cursos` (migración 0005). La administración vive en las tres páginas
+  gestionar-cursos/curso/categorias. Depende de cursos.service.js y toast.js.
 */
 
 (async () => {

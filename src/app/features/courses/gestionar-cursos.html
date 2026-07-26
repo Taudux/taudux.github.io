@@ -12,14 +12,13 @@
   <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
   <link rel="stylesheet" href="/src/app/shared/button/button.css">
   <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
-  <link rel="stylesheet" href="/src/app/shared/field/field.css">
   <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
   <link rel="stylesheet" href="/src/app/features/courses/cursos.css">
   <link rel="stylesheet" href="/src/app/features/courses/gestionar-cursos.css">
 </head>
 
-<body class="courses courses--auth-pending">
-  <nav class="navbar navbar--scrolled">
+<body class="courses">
+  <nav class="navbar navbar--scrolled" id="adminNavbar" hidden>
     <a href="/index.html" class="navbar__brand">
       <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
@@ -30,131 +29,43 @@
 
   <main class="courses__main">
     <div class="courses__container">
-      <header class="courses__header">
-        <h1 class="courses__title">Gestionar cursos</h1>
-        <p class="courses__intro">
-          Publica, edita o elimina los cursos que verán los usuarios.
-        </p>
-      </header>
-
-      <section class="courses__categories-panel panel panel--spacious" aria-labelledby="categoriasTitulo">
-        <div class="courses__categories-heading">
-          <div>
-            <h2 class="courses__subtitle" id="categoriasTitulo">Categorías</h2>
-            <p class="courses__categories-help" id="categoriasAyuda">
-              Las categorías inactivas siguen visibles en sus cursos, pero no se ofrecen al publicar uno nuevo.
-            </p>
+      <section class="courses__startup-status panel panel--spacious" id="adminStartup" role="status" aria-live="polite" aria-busy="true" tabindex="-1">
+        <div class="courses__startup-loader" id="adminStartupLoader" aria-hidden="true"></div>
+        <p class="courses__startup-announcement" id="adminStartupLoadingMessage">Cargando la administración de cursos.</p>
+        <div class="courses__startup-error" id="adminStartupError" hidden>
+          <h1 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración</h1>
+          <p class="courses__startup-message" id="adminStartupMessage"></p>
+          <div class="courses__startup-actions">
+            <button class="button button--outline" type="button" id="adminStartupRetry" hidden>Reintentar</button>
+            <a class="button button--outline" href="/src/app/features/courses/cursos.html">Volver al catálogo</a>
           </div>
-          <form class="courses__category-create" id="categoriaForm">
-            <label class="courses__field-label" for="categoriaNombre">Nueva categoría</label>
-            <div class="courses__category-create-controls">
-              <input class="field" id="categoriaNombre" type="text" maxlength="80" autocomplete="off" required disabled>
-              <button class="button button--outline" type="submit" id="categoriaAgregar" disabled>Agregar</button>
-            </div>
-          </form>
         </div>
-        <div class="courses__categories-status" id="categoriasEstado" role="status" tabindex="-1" hidden>
-          <p class="courses__categories-status-message" id="categoriasEstadoMensaje"></p>
-          <button class="button button--outline courses__category-action" type="button" id="categoriasReintentar">
-            Reintentar
-          </button>
-        </div>
-        <ul class="courses__categories-list" id="categoriasLista" aria-live="polite"></ul>
       </section>
+      <noscript>
+        <p class="courses__noscript panel">Necesitas habilitar JavaScript para administrar cursos. Puedes volver al <a href="/src/app/features/courses/cursos.html">catálogo de cursos</a>.</p>
+      </noscript>
 
-      <section class="courses__admin-panel panel panel--spacious">
-        <h2 class="courses__subtitle">Publicar un curso</h2>
-        <form class="courses__form" id="cursoForm">
-            <div class="courses__form-row">
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoTitulo">Título</label>
-                <input class="field" id="cursoTitulo" type="text" placeholder="Título" required>
-              </div>
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoCategoria">Categoría</label>
-                <select class="field" id="cursoCategoria" aria-describedby="categoriasAyuda categoriasEstadoMensaje" disabled>
-                  <option value="" selected>Cargando categorías...</option>
-                </select>
-              </div>
-            </div>
-            <div class="courses__field-group">
-              <label class="courses__field-label" for="cursoDescripcion">Descripción</label>
-              <textarea class="field field--textarea" id="cursoDescripcion" placeholder="Descripción"></textarea>
-            </div>
-            <div class="courses__form-row">
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoModalidad">Modalidad</label>
-                <select class="field" id="cursoModalidad" required>
-                  <option value="" disabled selected>Modalidad</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="en_linea">En línea</option>
-                </select>
-              </div>
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoHora">Hora de inicio</label>
-                <input class="field" id="cursoHora" type="time" required>
-              </div>
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoDuracion">Duración (horas)</label>
-                <input class="field" id="cursoDuracion" type="number" step="0.5" min="0.5" placeholder="Duración (horas)" required>
-              </div>
-            </div>
-            <div class="courses__form-row">
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoFechaInicio">Fecha de inicio</label>
-                <input class="field" id="cursoFechaInicio" type="date" required>
-              </div>
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoFechaFin">Fecha de fin</label>
-                <input class="field" id="cursoFechaFin" type="date" required>
-              </div>
-              <label class="field courses__checkbox" for="cursoProximamente">
-                <input type="checkbox" id="cursoProximamente"> Próximamente
-              </label>
-            </div>
-            <fieldset class="courses__dias">
-              <legend>Días de la semana</legend>
-              <label class="courses__dia" for="cursoDiaLun"><input type="checkbox" id="cursoDiaLun" value="lun"> Lun</label>
-              <label class="courses__dia" for="cursoDiaMar"><input type="checkbox" id="cursoDiaMar" value="mar"> Mar</label>
-              <label class="courses__dia" for="cursoDiaMie"><input type="checkbox" id="cursoDiaMie" value="mie"> Mié</label>
-              <label class="courses__dia" for="cursoDiaJue"><input type="checkbox" id="cursoDiaJue" value="jue"> Jue</label>
-              <label class="courses__dia" for="cursoDiaVie"><input type="checkbox" id="cursoDiaVie" value="vie"> Vie</label>
-              <label class="courses__dia" for="cursoDiaSab"><input type="checkbox" id="cursoDiaSab" value="sab"> Sáb</label>
-              <label class="courses__dia" for="cursoDiaDom"><input type="checkbox" id="cursoDiaDom" value="dom"> Dom</label>
-            </fieldset>
-            <div class="courses__form-row">
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoCupo">Cupo máximo (opcional)</label>
-                <input class="field" id="cursoCupo" type="number" min="1" placeholder="Cupo máximo (opcional)">
-              </div>
-              <div class="courses__field-group">
-                <label class="courses__field-label" for="cursoCosto">Costo en MXN (opcional)</label>
-                <input class="field" id="cursoCosto" type="number" step="0.01" min="0" placeholder="Costo en MXN (opcional)">
-              </div>
-            </div>
-            <div class="courses__field-group">
-              <label class="courses__field-label" for="cursoInstructor">Instructor</label>
-              <input class="field" id="cursoInstructor" type="text" placeholder="Impartido por" required>
-            </div>
-            <div class="courses__field-group">
-              <label class="courses__field-label" for="cursoImagen">URL de imagen (opcional)</label>
-              <input class="field" id="cursoImagen" type="url" placeholder="URL de imagen (opcional, https://...)">
-            </div>
-            <div class="courses__form-actions">
-              <button class="button button--outline" type="button" id="cursoCancelar">Cancelar</button>
-              <button class="button button--glow" type="submit">Publicar curso</button>
-            </div>
-        </form>
-      </section>
+      <div class="courses__admin-content" id="adminContent" hidden>
+        <header class="courses__header">
+          <h1 class="courses__title">Gestionar cursos</h1>
+          <p class="courses__intro">Edita o elimina los cursos que verán los usuarios.</p>
+          <div class="courses__header-actions">
+            <a class="button button--glow" href="/src/app/features/courses/gestionar-curso.html">Nuevo curso</a>
+          </div>
+        </header>
 
-      <section class="courses__list" id="cursosLista"></section>
+        <section class="courses__data-status" id="cursosEstado" role="alert" tabindex="-1" hidden>
+          <p class="courses__data-status-message" id="cursosEstadoMensaje"></p>
+          <button class="button button--outline" type="button" id="cursosReintentar">Reintentar carga</button>
+        </section>
+        <section class="courses__list" id="cursosLista" aria-label="Cursos publicados" aria-busy="true" tabindex="-1"></section>
+      </div>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/core/categorias/categorias.service.js"></script>
   <script src="/src/app/core/cursos/cursos.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>

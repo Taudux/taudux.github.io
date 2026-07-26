@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <title>Gestionar categorías | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="/src/app/shared/floating-menu/floating-menu.css">
+  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/app/shared/button/button.css">
+  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/src/app/shared/field/field.css">
+  <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
+  <link rel="stylesheet" href="/src/app/features/courses/cursos.css">
+  <link rel="stylesheet" href="/src/app/features/courses/gestionar-cursos.css">
+</head>
+
+<body class="courses">
+  <nav class="navbar navbar--scrolled" id="adminNavbar" hidden>
+    <a href="/index.html" class="navbar__brand">
+      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
+    </a>
+    <div class="navbar__links navbar__links--visible navbar__links--simple">
+      <a href="#" id="accessBtn" class="navbar__link button button--access">Salir</a>
+    </div>
+  </nav>
+
+  <main class="courses__main">
+    <div class="courses__container">
+      <section class="courses__startup-status panel panel--spacious" id="adminStartup" role="status" aria-live="polite" aria-busy="true" tabindex="-1">
+        <div class="courses__startup-loader" id="adminStartupLoader" aria-hidden="true"></div>
+        <p class="courses__startup-announcement" id="adminStartupLoadingMessage">Cargando la administración de categorías.</p>
+        <div class="courses__startup-error" id="adminStartupError" hidden>
+          <h1 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración de categorías</h1>
+          <p class="courses__startup-message" id="adminStartupMessage"></p>
+          <div class="courses__startup-actions">
+            <button class="button button--outline" type="button" id="adminStartupRetry" hidden>Reintentar</button>
+            <a class="button button--outline" href="/src/app/features/courses/gestionar-cursos.html">Volver a cursos</a>
+          </div>
+        </div>
+      </section>
+      <noscript>
+        <p class="courses__noscript panel">Necesitas habilitar JavaScript para administrar categorías. Puedes <a href="/src/app/features/courses/gestionar-cursos.html">volver a cursos</a>.</p>
+      </noscript>
+
+      <div class="courses__admin-content" id="adminContent" hidden>
+        <nav class="courses-admin-nav" aria-label="Administración de cursos">
+          <a class="courses-admin-nav__link" href="/src/app/features/courses/gestionar-curso.html">Cursos</a>
+          <span class="courses-admin-nav__link courses-admin-nav__link--active" aria-current="page">Categorías</span>
+        </nav>
+
+        <header class="courses__header">
+          <h1 class="courses__title">Gestionar categorías</h1>
+          <p class="courses__intro">Organiza las categorías disponibles al publicar cursos.</p>
+        </header>
+
+        <section class="courses__categories-panel panel panel--spacious" aria-labelledby="categoriasTitulo">
+        <div class="courses__categories-heading">
+          <div>
+            <h2 class="courses__subtitle" id="categoriasTitulo">Categorías</h2>
+            <p class="courses__categories-help">
+              Las categorías inactivas siguen visibles en sus cursos, pero no se ofrecen al publicar uno nuevo.
+            </p>
+          </div>
+          <form class="courses__category-create" id="categoriaForm">
+            <label class="courses__field-label" for="categoriaNombre">Nueva categoría</label>
+            <div class="courses__category-create-controls">
+              <input class="field" id="categoriaNombre" type="text" maxlength="80" autocomplete="off" required disabled>
+              <button class="button button--outline" type="submit" id="categoriaAgregar" disabled>Agregar</button>
+            </div>
+          </form>
+        </div>
+        <div class="courses__categories-status" id="categoriasEstado" role="status" tabindex="-1" hidden>
+          <p class="courses__categories-status-message" id="categoriasEstadoMensaje"></p>
+          <button class="button button--outline courses__category-action" type="button" id="categoriasReintentar">Reintentar</button>
+        </div>
+        <ul class="courses__categories-list" id="categoriasLista" aria-live="polite"></ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/src/app/core/supabase/supabase-client.js"></script>
+  <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/core/categorias/categorias.service.js"></script>
+  <script src="/src/app/core/cursos/cursos.service.js"></script>
+  <script src="/src/app/shared/navbar/navbar.js"></script>
+  <script src="/src/app/shared/toast/toast.js"></script>
+  <script src="/src/app/features/courses/gestionar-categorias.js"></script>
+</body>
+
+</html>

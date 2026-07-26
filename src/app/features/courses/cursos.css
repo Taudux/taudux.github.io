@@ -1,10 +1,6 @@
-/* Estilos de la página de cursos: lista pública + panel de alta para admins. */
+/* Estilos compartidos por el catálogo público y la administración de cursos. */
 
 @layer features {
-.courses--auth-pending {
-  visibility: hidden;
-}
-
 .courses__main {
   min-height: 100vh;
   padding: 8rem 2rem 4rem;
@@ -70,7 +66,7 @@
   max-width: 680px;
 }
 
-/* Panel de alta: solo existe en gestionar-cursos.html (página admin-gated). */
+/* Panel de alta/edición de gestionar-curso.html (página admin-gated). */
 .courses__admin-panel {
   margin-bottom: 3rem;
 }
@@ -455,7 +451,7 @@
   color: var(--color-accent);
 }
 
-/* Acciones de administrador por tarjeta (solo en gestionar-cursos.html). */
+/* Acciones de administrador por tarjeta en la lista de gestionar-cursos.html. */
 .courses__card-admin {
   display: flex;
   gap: 0.75rem;

@@ -66,7 +66,43 @@
   max-width: 680px;
 }
 
-/* Panel de alta/edición de gestionar-curso.html (página admin-gated). */
+.courses__header-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.courses__header-actions[hidden],
+.courses__data-status[hidden] {
+  display: none;
+}
+
+.courses__data-status {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: var(--border-subtle);
+  border-radius: var(--radius-field);
+}
+
+.courses__data-status--error {
+  border-color: color-mix(in srgb, var(--color-error) 38%, transparent);
+}
+
+.courses__data-status-message {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.courses__data-status--error .courses__data-status-message {
+  color: var(--color-error);
+}
+
+/* Panel de alta/edición de editar-curso.html (página admin-gated). */
 .courses__admin-panel {
   margin-bottom: 3rem;
 }
@@ -182,7 +218,10 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 210px;
+  align-self: start;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background-color: #071017;
 }
@@ -244,6 +283,7 @@
   width: 100%;
   height: 140px;
   object-fit: cover;
+  object-position: center;
   border-radius: var(--radius-field);
   margin-bottom: 1rem;
 }
@@ -451,8 +491,10 @@
   color: var(--color-accent);
 }
 
-/* Acciones de administrador por tarjeta en la lista de gestionar-cursos.html. */
+/* Acciones administrativas independientes del hit-area de la tarjeta. */
 .courses__card-admin {
+  position: relative;
+  z-index: var(--z-highlight);
   display: flex;
   gap: 0.75rem;
   margin-top: auto;
@@ -511,8 +553,7 @@
   }
 
   .courses__card-media {
-    min-height: 0;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
   }
 }
 

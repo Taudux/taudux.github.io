@@ -200,7 +200,7 @@ async function destinoDespuesDeAuth(session) {
   const destino = obtenerDestinoAuth();
   if (destino) return destino;
   return (await esAdmin(session))
-    ? "/src/app/features/explore/explorar.html"
+    ? "/src/app/features/courses/cursos.html"
     : "/index.html";
 }
 

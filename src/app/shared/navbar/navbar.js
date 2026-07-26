@@ -13,6 +13,18 @@ async function salirYVolver(evento) {
   window.location.href = "/index.html";
 }
 
+window.addEventListener("taudux:operation-error", () => {
+  queueMicrotask(() => {
+    if (typeof mostrarToast !== "function") return;
+    const reporteVisible = document.querySelector(
+      '[role="alert"]:not([hidden]), .courses__startup-status--error:not([hidden]), .courses__data-status--error:not([hidden])'
+    );
+    if (!reporteVisible) {
+      mostrarToast("No se pudo completar la operación. Intenta nuevamente.", "error");
+    }
+  });
+});
+
 function actualizarEstadoVisualNavbar() {
   const navbar = document.getElementById("navbar");
   if (!navbar) return;
@@ -129,37 +141,12 @@ async function actualizarBotonAcceso() {
   });
 }
 
-async function agregarMiEspacio() {
-  const menu = document.getElementById("explorarMenu");
-  if (!menu || menu.querySelector(".nav-dropdown__link--workspace")) return;
-
-  const session = await obtenerSesion();
-  if (!session) return;
-
-  // Mi espacio es solo para administradores; a los demás ni se les muestra.
-  if (!(await esAdmin(session))) return;
-
-  const enlace = document.createElement("a");
-  enlace.href = "/src/app/features/explore/explorar.html";
-  enlace.className =
-    "nav-dropdown__link nav-dropdown__link--workspace floating-menu__link";
-  enlace.textContent = "Mi espacio";
-
-  const separador = document.createElement("div");
-  separador.className =
-    "nav-dropdown__separator floating-menu__separator";
-
-  menu.prepend(separador);
-  menu.prepend(enlace);
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   configurarMenuMovil();
   configurarDropdownExplorar();
   actualizarEstadoVisualNavbar();
   actualizarEnlaceActivo();
   actualizarBotonAcceso();
-  agregarMiEspacio();
 });
 
 window.addEventListener("scroll", () => {

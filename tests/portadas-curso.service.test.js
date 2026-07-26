@@ -13,7 +13,7 @@ const MIGRATION_PATH = "supabase/migrations/0011_portadas_cursos_storage.sql";
 const MIGRATIONS_PATH = "supabase/migrations";
 const OLD_MIGRATIONS_PATH = ".kiro/supabase/migrations";
 const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
-const FORM_HTML_PATH = "src/app/features/courses/gestionar-curso.html";
+const FORM_HTML_PATH = "src/app/features/courses/editar-curso.html";
 const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0001_crear_perfiles.sql": "26ceb164a9867a458f0b146dba7a875f3326ac273c9e6ca478f77a70db7033b7",
   "0002_perfil_telefono.sql": "8f42344006b42ab8babc7c6fb854dcf353a25785296c8b390978b0b78522992c",

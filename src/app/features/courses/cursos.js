@@ -1,30 +1,141 @@
 /*
-  Catálogo de cursos: lista pública de solo lectura, NO requiere sesión (se accede
-  desde el navbar sin iniciar sesión). La lectura de la tabla la habilita la RLS
-  pública de `cursos` (migración 0005). La administración vive en las tres páginas
-  gestionar-cursos/curso/categorias. Depende de cursos.service.js y toast.js.
+  Catálogo público de cursos con controles de administración revelados solo al rol
+  admin. RLS sigue siendo el gate real para las escrituras. Depende de auth.service.js,
+  cursos.service.js y toast.js.
 */
 
-(async () => {
+async function iniciarCatalogoCursos() {
+  const PAGINA = "course_catalog";
   const lista = document.getElementById("cursosLista");
+  const controlesAdmin = document.getElementById("adminControls");
+  const estado = document.getElementById("cursosEstado");
+  const mensajeEstado = document.getElementById("cursosEstadoMensaje");
+  const botonReintentar = document.getElementById("cursosReintentar");
+  const eliminacionesEnCurso = new Set();
+  let usuarioAdmin = false;
 
-  const resultado = await listarCursos();
-  if (!resultado.ok) {
-    mostrarToast(resultado.mensaje, "error");
-  } else if (resultado.data.length === 0) {
+  botonReintentar.addEventListener("click", async () => {
+    const cargados = await pintarCursos();
+    (cargados ? lista : estado).focus();
+  });
+
+  try {
+    const session = await obtenerSesion();
+    usuarioAdmin = Boolean(session && await esAdmin(session));
+  } catch (error) {
+    reportarFallo("catalog_admin_check", error, Date.now(), "admin_check_failed");
+  }
+  controlesAdmin.hidden = !usuarioAdmin;
+  await pintarCursos();
+  mostrarResultadoGuardado();
+
+  async function pintarCursos() {
+    const inicio = iniciarTiempo();
+    lista.setAttribute("aria-busy", "true");
+    botonReintentar.disabled = true;
+    let resultado;
+    try {
+      resultado = await listarCursos();
+    } catch (error) {
+      reportarFallo("course_list_load", error, inicio, "list_exception");
+      mostrarErrorLista("No se pudieron cargar los cursos. Reintenta cuando tengas conexión.");
+      return false;
+    } finally {
+      lista.setAttribute("aria-busy", "false");
+      botonReintentar.disabled = false;
+    }
+
+    if (!resultado.ok) {
+      reportarFallo("course_list_load", null, inicio, resultado.codigo || "list_failed");
+      mostrarErrorLista(resultado.mensaje || "No se pudieron cargar los cursos.");
+      return false;
+    }
+
+    estado.hidden = true;
+    mensajeEstado.textContent = "";
+    lista.replaceChildren();
+    if (resultado.data.length === 0) {
+      const vacio = document.createElement("p");
+      vacio.className = "courses__empty";
+      vacio.textContent = "Aún no hay cursos publicados.";
+      lista.appendChild(vacio);
+      return true;
+    }
+    resultado.data.forEach((curso) => lista.appendChild(crearTarjetaCurso(curso, usuarioAdmin, borrarCurso)));
+    return true;
+  }
+
+  function iniciarTiempo() {
+    return typeof iniciarMedicionOperacion === "function" ? iniciarMedicionOperacion() : Date.now();
+  }
+
+  function reportarFallo(operacion, error, inicio, codigo) {
+    if (typeof reportarErrorOperacion === "function") {
+      reportarErrorOperacion({ operacion, pagina: PAGINA, error, codigo, inicio });
+      return;
+    }
+    console.error("[cursos]", { operacion, codigo: codigo || "unknown_error" });
+  }
+
+  function mostrarErrorLista(mensaje) {
+    estado.hidden = false;
+    estado.classList.add("courses__data-status--error");
+    mensajeEstado.textContent = mensaje;
+  }
+
+  function mostrarResultadoGuardado() {
+    const url = new URL(window.location.href);
+    const resultado = url.searchParams.get("resultado");
+    if (resultado === "creado") mostrarToast("Curso publicado.", "success");
+    if (resultado === "actualizado") mostrarToast("Curso actualizado.", "success");
+    if (!resultado) return;
+    url.searchParams.delete("resultado");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
+  async function borrarCurso(curso, boton) {
+    if (eliminacionesEnCurso.has(curso.id)) return;
+    if (!window.confirm(`¿Eliminar "${curso.titulo}"?`)) return;
+
+    eliminacionesEnCurso.add(curso.id);
+    boton.disabled = true;
+    const inicio = iniciarTiempo();
+    try {
+      const resultado = await eliminarCurso(curso.id);
+      if (!resultado.ok) {
+        reportarFallo("course_delete", null, inicio, resultado.codigo || "delete_failed");
+        mostrarErrorLista(resultado.mensaje || "No se pudo eliminar el curso.");
+        estado.focus();
+        return;
+      }
+      mostrarToast("Curso eliminado.", "success");
+      retirarTarjetaEliminada(boton);
+      await pintarCursos();
+    } catch (error) {
+      reportarFallo("course_delete", error, inicio, "delete_exception");
+      mostrarErrorLista("No se pudo eliminar el curso. Puedes volver a intentarlo.");
+      estado.focus();
+    } finally {
+      eliminacionesEnCurso.delete(curso.id);
+      boton.disabled = false;
+    }
+  }
+
+  function retirarTarjetaEliminada(boton) {
+    const tarjeta = typeof boton.closest === "function" ? boton.closest(".courses__card") : null;
+    if (tarjeta) tarjeta.remove();
+    if (lista.childElementCount > 0) return;
     const vacio = document.createElement("p");
     vacio.className = "courses__empty";
     vacio.textContent = "Aún no hay cursos publicados.";
     lista.appendChild(vacio);
-  } else {
-    resultado.data.forEach((curso) => lista.appendChild(crearTarjetaCurso(curso)));
   }
-})();
+}
 
 // Tarjeta pública de solo lectura y activable: imagen, título, descripción,
 // información de modalidad/fechas/horario y chips de cupo/costo/estado.
 // Fechas y horario se omiten si el curso es "próximamente".
-function crearTarjetaCurso(curso) {
+function crearTarjetaCurso(curso, usuarioAdmin = false, alEliminar = null) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "courses__card courses__card--catalog panel";
 
@@ -101,6 +212,25 @@ function crearTarjetaCurso(curso) {
 
   tarjeta.appendChild(cuerpo);
 
+  if (usuarioAdmin) {
+    const acciones = document.createElement("div");
+    acciones.className = "courses__card-admin";
+
+    const editar = document.createElement("a");
+    editar.className = "button courses__action";
+    editar.href = `/src/app/features/courses/editar-curso.html?id=${encodeURIComponent(curso.id)}`;
+    editar.textContent = "Editar";
+
+    const eliminar = document.createElement("button");
+    eliminar.className = "button courses__action courses__action--danger";
+    eliminar.type = "button";
+    eliminar.textContent = "Eliminar";
+    eliminar.addEventListener("click", () => alEliminar(curso, eliminar));
+
+    acciones.append(editar, eliminar);
+    cuerpo.appendChild(acciones);
+  }
+
   const activador = document.createElement("button");
   activador.className = "courses__card-hit-area";
   activador.type = "button";
@@ -176,3 +306,10 @@ async function verMasInformacion() {
   }
   mostrarToast("El detalle del curso estará disponible pronto.");
 }
+
+window.tauduxCursosCatalog = {
+  iniciar: iniciarCatalogoCursos,
+  crearTarjeta: crearTarjetaCurso,
+};
+window.tauduxCursosCatalog.ready = window.tauduxCursosCatalog.iniciar();
+Object.freeze(window.tauduxCursosCatalog);

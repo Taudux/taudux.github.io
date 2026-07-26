@@ -35,9 +35,16 @@
           Formación en programación, análisis de datos e inteligencia artificial.
           Elige un curso y empieza a aprender con Taudux.
         </p>
+        <div class="courses__header-actions" id="adminControls" hidden>
+          <a class="button button--glow" href="/src/app/features/courses/editar-curso.html">Nuevo curso</a>
+        </div>
       </header>
 
-      <section class="courses__list" id="cursosLista"></section>
+      <section class="courses__data-status" id="cursosEstado" role="alert" tabindex="-1" hidden>
+        <p class="courses__data-status-message" id="cursosEstadoMensaje"></p>
+        <button class="button button--outline" type="button" id="cursosReintentar">Reintentar carga</button>
+      </section>
+      <section class="courses__list" id="cursosLista" aria-label="Cursos publicados" aria-busy="true" tabindex="-1"></section>
     </div>
   </main>
 

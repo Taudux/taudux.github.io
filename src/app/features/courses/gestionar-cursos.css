@@ -1,9 +1,159 @@
-/* Estados visuales exclusivos del formulario de gestion de cursos. */
+/* Gestión administrativa de cursos y de su catálogo de categorías. */
 
 @layer features {
+  .courses__categories-panel {
+    margin-bottom: 2rem;
+  }
+
+  .courses__categories-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(min(300px, 100%), 0.8fr);
+    align-items: end;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .courses__categories-heading .courses__subtitle {
+    margin-bottom: 0.4rem;
+  }
+
+  .courses__categories-help,
+  .courses__category-empty {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .courses__categories-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: var(--border-subtle);
+    border-radius: var(--radius-field);
+    color: var(--color-text-muted);
+  }
+
+  .courses__categories-status--migration {
+    border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
+    color: var(--color-accent);
+  }
+
+  .courses__categories-status--error {
+    border-color: color-mix(in srgb, var(--color-error) 38%, transparent);
+    color: var(--color-error);
+  }
+
+  .courses__categories-status-message {
+    line-height: 1.45;
+  }
+
+  .courses__category-create {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .courses__category-create-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+  }
+
+  .courses__categories-list {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .courses__category-item {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto;
+    align-items: end;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: var(--border-subtle);
+  }
+
+  .courses__category-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .courses__category-status {
+    padding: 0.2rem 0.55rem;
+    border: var(--border-subtle);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .courses__category-status--inactive {
+    color: var(--color-error);
+  }
+
+  .courses__category-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .courses__category-action {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .courses__category-action--danger {
+    color: var(--color-error);
+  }
+
+  .courses__categories-panel--busy .courses__categories-list {
+    opacity: 0.65;
+  }
+
+  .courses__category-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
   .courses__field-group:has(.field:disabled),
   .courses__dia:has(input:disabled) {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 720px) {
+    .courses__categories-heading,
+    .courses__category-item {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    .courses__category-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 440px) {
+    .courses__category-create-controls,
+    .courses__category-details,
+    .courses__categories-status {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .courses__categories-status {
+      display: grid;
+      align-items: stretch;
+    }
+
+    .courses__category-status {
+      justify-self: start;
+    }
   }
 }

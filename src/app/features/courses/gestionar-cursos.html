@@ -37,6 +37,31 @@
         </p>
       </header>
 
+      <section class="courses__categories-panel panel panel--spacious" aria-labelledby="categoriasTitulo">
+        <div class="courses__categories-heading">
+          <div>
+            <h2 class="courses__subtitle" id="categoriasTitulo">Categorías</h2>
+            <p class="courses__categories-help" id="categoriasAyuda">
+              Las categorías inactivas siguen visibles en sus cursos, pero no se ofrecen al publicar uno nuevo.
+            </p>
+          </div>
+          <form class="courses__category-create" id="categoriaForm">
+            <label class="courses__field-label" for="categoriaNombre">Nueva categoría</label>
+            <div class="courses__category-create-controls">
+              <input class="field" id="categoriaNombre" type="text" maxlength="80" autocomplete="off" required disabled>
+              <button class="button button--outline" type="submit" id="categoriaAgregar" disabled>Agregar</button>
+            </div>
+          </form>
+        </div>
+        <div class="courses__categories-status" id="categoriasEstado" role="status" tabindex="-1" hidden>
+          <p class="courses__categories-status-message" id="categoriasEstadoMensaje"></p>
+          <button class="button button--outline courses__category-action" type="button" id="categoriasReintentar">
+            Reintentar
+          </button>
+        </div>
+        <ul class="courses__categories-list" id="categoriasLista" aria-live="polite"></ul>
+      </section>
+
       <section class="courses__admin-panel panel panel--spacious">
         <h2 class="courses__subtitle">Publicar un curso</h2>
         <form class="courses__form" id="cursoForm">
@@ -47,10 +72,8 @@
               </div>
               <div class="courses__field-group">
                 <label class="courses__field-label" for="cursoCategoria">Categoría</label>
-                <select class="field" id="cursoCategoria" required>
-                  <option value="" disabled selected>Categoría</option>
-                  <option value="Inteligencia artificial">Inteligencia artificial</option>
-                  <option value="Análisis de datos">Análisis de datos</option>
+                <select class="field" id="cursoCategoria" aria-describedby="categoriasAyuda categoriasEstadoMensaje" disabled>
+                  <option value="" selected>Cargando categorías...</option>
                 </select>
               </div>
             </div>
@@ -131,6 +154,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/src/app/core/supabase/supabase-client.js"></script>
   <script src="/src/app/core/auth/auth.service.js"></script>
+  <script src="/src/app/core/categorias/categorias.service.js"></script>
   <script src="/src/app/core/cursos/cursos.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>

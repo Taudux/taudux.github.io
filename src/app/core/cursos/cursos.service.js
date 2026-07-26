@@ -1,5 +1,6 @@
 /*
-  Servicio de datos de cursos: único punto de acceso a la tabla public.cursos.
+  Servicio principal de listado y CRUD de public.cursos. El retiro seguro de una
+  categoría cuenta sus referencias desde categorias.service.js.
   Depende de supabaseClient (core/supabase/supabase-client.js) y debe cargarse
   después de él. La seguridad real la impone la RLS de Postgres (insert/update/
   delete solo para rol 'admin'); estas validaciones son de UX y defensa en capa.
@@ -15,16 +16,117 @@ function esUrlSegura(url) {
   }
 }
 
+const CAMPOS_CURSO_BASE =
+  "id, titulo, descripcion, imagen_url, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en";
+const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_rel:categorias!cursos_categoria_id_fkey(id, nombre, activo)`;
+let disponibilidadCategoriasEnCursos = null;
+
+function registrarErrorSupabaseCursos(contexto, error, datos = {}) {
+  console.error("[cursos.service]", {
+    contexto,
+    ...datos,
+    error: {
+      code: error?.code || null,
+      message: error?.message || null,
+      details: error?.details || null,
+      hint: error?.hint || null,
+    },
+  });
+}
+
+// Solo reconoce objetos ausentes de 0010. Los demás errores conservan su flujo normal.
+function esErrorEsquemaCategoriasCursoAusente(error) {
+  const code = error?.code;
+  const texto = `${error?.message || ""} ${error?.details || ""} ${
+    error?.hint || ""
+  }`.toLowerCase();
+  const mencionaColumna = texto.includes("categoria_id");
+  const mencionaRelacion =
+    texto.includes("cursos_categoria_id_fkey") ||
+    (texto.includes("cursos") && texto.includes("categorias"));
+  const mencionaTabla =
+    texto.includes("public.categorias") || texto.includes('relation "categorias"');
+
+  return (
+    (code === "42703" && mencionaColumna) ||
+    (code === "PGRST204" && mencionaColumna) ||
+    (code === "PGRST200" && mencionaRelacion) ||
+    (code === "42P01" && mencionaTabla) ||
+    (code === "PGRST205" && mencionaTabla)
+  );
+}
+
 // Lista todos los cursos, del más reciente al más antiguo.
 async function listarCursos() {
-  const { data, error } = await supabaseClient
+  const resultadoNormalizado = await supabaseClient
     .from("cursos")
-    .select(
-      "id, titulo, descripcion, imagen_url, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en"
-    )
+    .select(CAMPOS_CURSO_NORMALIZADO)
     .order("creado_en", { ascending: false });
-  if (error) return { ok: false, mensaje: "No se pudieron cargar los cursos." };
-  return { ok: true, data };
+
+  if (!resultadoNormalizado.error) {
+    disponibilidadCategoriasEnCursos = true;
+    return {
+      ok: true,
+      data: (resultadoNormalizado.data || []).map(normalizarCategoriaCurso),
+      modoCategorias: "normalizado",
+    };
+  }
+
+  registrarErrorSupabaseCursos("listar-normalizado", resultadoNormalizado.error);
+  if (!esErrorEsquemaCategoriasCursoAusente(resultadoNormalizado.error)) {
+    return { ok: false, mensaje: "No se pudieron cargar los cursos." };
+  }
+
+  disponibilidadCategoriasEnCursos = false;
+  const resultadoLegacy = await supabaseClient
+    .from("cursos")
+    .select(CAMPOS_CURSO_BASE)
+    .order("creado_en", { ascending: false });
+  if (resultadoLegacy.error) {
+    registrarErrorSupabaseCursos("listar-legacy", resultadoLegacy.error);
+    return { ok: false, mensaje: "No se pudieron cargar los cursos." };
+  }
+  return {
+    ok: true,
+    data: (resultadoLegacy.data || []).map(normalizarCategoriaCursoLegacy),
+    modoCategorias: "legacy",
+  };
+}
+
+function normalizarCategoriaCurso(curso) {
+  const relacion = Array.isArray(curso.categoria_rel)
+    ? curso.categoria_rel[0]
+    : curso.categoria_rel;
+  return {
+    ...curso,
+    categoria: (relacion && relacion.nombre) || curso.categoria || null,
+    categoria_rel: relacion || null,
+  };
+}
+
+function normalizarCategoriaCursoLegacy(curso) {
+  return {
+    ...curso,
+    categoria: curso.categoria || null,
+    categoria_id: null,
+    categoria_rel: null,
+  };
+}
+
+function usarCategoriasNormalizadas(campos) {
+  if (disponibilidadCategoriasEnCursos === false || campos.categoria_modo === "legacy") {
+    return false;
+  }
+  if (disponibilidadCategoriasEnCursos === true || campos.categoria_modo === "normalizado") {
+    return true;
+  }
+  if (
+    typeof obtenerDisponibilidadCategoriasNormalizadas === "function" &&
+    obtenerDisponibilidadCategoriasNormalizadas() !== null
+  ) {
+    return obtenerDisponibilidadCategoriasNormalizadas();
+  }
+  return Object.hasOwn(campos, "categoria_id");
 }
 
 // Crea un curso (solo admins; la RLS bloquea a los demás).
@@ -36,40 +138,62 @@ async function crearCurso(campos) {
   if (imagen_url && !esUrlSegura(imagen_url)) {
     return { ok: false, mensaje: "La imagen debe ser una URL http o https válida." };
   }
-  const { data, error } = await supabaseClient
+  let usarNormalizado = usarCategoriasNormalizadas(campos);
+  let resultado = await supabaseClient
     .from("cursos")
-    .insert(normalizarCamposCurso(campos))
+    .insert(normalizarCamposCurso(campos, usarNormalizado))
     .select()
     .single();
-  if (error) return { ok: false, mensaje: "No se pudo crear el curso." };
-  return { ok: true, data };
+
+  if (
+    resultado.error &&
+    usarNormalizado &&
+    esErrorEsquemaCategoriasCursoAusente(resultado.error) &&
+    Object.hasOwn(campos, "categoria")
+  ) {
+    registrarErrorSupabaseCursos("crear-normalizado-reintento-legacy", resultado.error);
+    disponibilidadCategoriasEnCursos = false;
+    usarNormalizado = false;
+    resultado = await supabaseClient
+      .from("cursos")
+      .insert(normalizarCamposCurso(campos, usarNormalizado))
+      .select()
+      .single();
+  }
+
+  if (resultado.error) {
+    registrarErrorSupabaseCursos("crear", resultado.error, {
+      modoCategorias: usarNormalizado ? "normalizado" : "legacy",
+    });
+    return { ok: false, mensaje: "No se pudo crear el curso." };
+  }
+  return { ok: true, data: resultado.data };
 }
 
 // Convierte strings vacíos del form en null y normaliza los campos numéricos/array,
 // igual que ya se hacía a mano con `imagen_url || null`.
-function normalizarCamposCurso({
-  titulo,
-  descripcion,
-  imagen_url,
-  categoria,
-  modalidad,
-  fecha_inicio,
-  fecha_fin,
-  dias_semana,
-  hora_inicio,
-  duracion_horas,
-  cupo_maximo,
-  costo,
-  instructor,
-  proximamente,
-}) {
+function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategoriasNormalizadas(campos)) {
+  const {
+    titulo,
+    descripcion,
+    imagen_url,
+    modalidad,
+    fecha_inicio,
+    fecha_fin,
+    dias_semana,
+    hora_inicio,
+    duracion_horas,
+    cupo_maximo,
+    costo,
+    instructor,
+    proximamente,
+  } = campos;
   const esProximamente = Boolean(proximamente);
 
-  return {
+  const normalizados = {
     titulo,
     descripcion: descripcion || null,
     imagen_url: imagen_url || null,
-    categoria: categoria || null,
     modalidad: modalidad || null,
     fecha_inicio: esProximamente ? null : fecha_inicio || null,
     fecha_fin: esProximamente ? null : fecha_fin || null,
@@ -82,6 +206,13 @@ function normalizarCamposCurso({
     instructor: instructor || null,
     proximamente: esProximamente,
   };
+
+  if (usarCategoriaNormalizada && Object.hasOwn(campos, "categoria_id")) {
+    normalizados.categoria_id = campos.categoria_id || null;
+  } else if (!usarCategoriaNormalizada && Object.hasOwn(campos, "categoria")) {
+    normalizados.categoria = campos.categoria || null;
+  }
+  return normalizados;
 }
 
 // Actualiza un curso existente (solo admins).
@@ -89,20 +220,50 @@ async function actualizarCurso(id, campos) {
   if (campos.imagen_url && !esUrlSegura(campos.imagen_url)) {
     return { ok: false, mensaje: "La imagen debe ser una URL http o https válida." };
   }
-  const { data, error } = await supabaseClient
+  let usarNormalizado = usarCategoriasNormalizadas(campos);
+  let resultado = await supabaseClient
     .from("cursos")
-    .update(normalizarCamposCurso(campos))
+    .update(normalizarCamposCurso(campos, usarNormalizado))
     .eq("id", id)
     .select()
     .single();
-  if (error) return { ok: false, mensaje: "No se pudo actualizar el curso." };
-  return { ok: true, data };
+
+  if (
+    resultado.error &&
+    usarNormalizado &&
+    esErrorEsquemaCategoriasCursoAusente(resultado.error) &&
+    Object.hasOwn(campos, "categoria")
+  ) {
+    registrarErrorSupabaseCursos("actualizar-normalizado-reintento-legacy", resultado.error, {
+      cursoId: id,
+    });
+    disponibilidadCategoriasEnCursos = false;
+    usarNormalizado = false;
+    resultado = await supabaseClient
+      .from("cursos")
+      .update(normalizarCamposCurso(campos, usarNormalizado))
+      .eq("id", id)
+      .select()
+      .single();
+  }
+
+  if (resultado.error) {
+    registrarErrorSupabaseCursos("actualizar", resultado.error, {
+      cursoId: id,
+      modoCategorias: usarNormalizado ? "normalizado" : "legacy",
+    });
+    return { ok: false, mensaje: "No se pudo actualizar el curso." };
+  }
+  return { ok: true, data: resultado.data };
 }
 
 // Elimina un curso (solo admins).
 async function eliminarCurso(id) {
   const { error } = await supabaseClient.from("cursos").delete().eq("id", id);
-  if (error) return { ok: false, mensaje: "No se pudo eliminar el curso." };
+  if (error) {
+    registrarErrorSupabaseCursos("eliminar", error, { cursoId: id });
+    return { ok: false, mensaje: "No se pudo eliminar el curso." };
+  }
   return { ok: true };
 }
 

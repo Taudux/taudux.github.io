@@ -1,4 +1,4 @@
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
+export const MAX_FILE_BYTES = 10_000_000;
 const MAX_DIMENSION = 8192;
 const MAX_PIXELS = 40_000_000;
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -168,6 +168,11 @@ export function inspectImage(input, declaredMime) {
   } else invalid();
   if (extension !== expected) invalid();
   return { ...size, extension, mime: `image/${extension === "jpg" ? "jpeg" : extension}` };
+}
+export function inspectGeneratedCover(input, declaredMime) {
+  const image = inspectImage(input, declaredMime);
+  if (image.extension !== "jpg" || image.width !== 1200 || image.height !== 900) invalid();
+  return image;
 }
 export async function contentPath(bytes, extension) {
   if (!["jpg", "png", "webp"].includes(extension)) invalid();

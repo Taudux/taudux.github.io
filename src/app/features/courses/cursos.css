@@ -166,7 +166,7 @@
 .courses__card--catalog {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(210px, 28%) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 35%) minmax(0, 1fr);
   width: 100%;
   max-width: 900px;
   justify-self: center;

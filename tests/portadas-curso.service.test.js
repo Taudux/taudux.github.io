@@ -11,10 +11,13 @@ const FUNCTION_PATH = "supabase/functions/upload-course-cover/index.ts";
 const VALIDATION_PATH = "supabase/functions/upload-course-cover/validation.mjs";
 const MIGRATION_PATH = "supabase/migrations/0011_portadas_cursos_storage.sql";
 const CLEANUP_MIGRATION_PATH = "supabase/migrations/0012_secure_course_cover_cleanup.sql";
+const BUCKET_LIMIT_MIGRATION_PATH = "supabase/migrations/0013_course_cover_bucket_limit.sql";
+const BUCKET_LIMIT_TEST_PATH = "supabase/tests/0013_course_cover_bucket_limit.test.sql";
 const MIGRATIONS_PATH = "supabase/migrations";
 const OLD_MIGRATIONS_PATH = ".kiro/supabase/migrations";
 const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
 const FORM_HTML_PATH = "src/app/features/courses/editar-curso.html";
+const DECISIONS_PATH = ".kiro/steering/decisions.md";
 const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0001_crear_perfiles.sql": "26ceb164a9867a458f0b146dba7a875f3326ac273c9e6ca478f77a70db7033b7",
   "0002_perfil_telefono.sql": "8f42344006b42ab8babc7c6fb854dcf353a25785296c8b390978b0b78522992c",
@@ -28,6 +31,7 @@ const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0010_normalizar_categorias_cursos.sql": "dd9dee6da65b5fa1d264a5c2ab878109404be973b2eb46d40e6ae4f101a0b099",
   "0011_portadas_cursos_storage.sql": "d95ee0e59eb896c76f43b9a8f276b19748341566830816b7eb3a655981d22bea",
   "0012_secure_course_cover_cleanup.sql": "cb449a48c4dfcfad4da34dd0272fbe87bc1d30656a53b660e5e8c53abf63ac59",
+  "0013_course_cover_bucket_limit.sql": "fd494b4351906300aa10f0c5ee66b8dc2f02f7b4f853517dd9d357f8e2dae48f",
 });
 const SERVICE_SOURCE = fs.readFileSync(SERVICE_PATH, "utf8");
 const FUNCTION_SOURCE = fs.readFileSync(FUNCTION_PATH, "utf8");
@@ -56,6 +60,12 @@ const JPEG = Uint8Array.from([
   0xff, 0xd8, 0xff, 0xc0, 0, 11, 8, 0, 1, 0, 1, 1, 1, 0x11, 0,
   0xff, 0xda, 0, 8, 1, 1, 0, 0, 0x3f, 0, 1, 0xff, 0xd9,
 ]);
+const GENERATED_JPEG = JPEG.slice();
+GENERATED_JPEG[7] = 0x03; GENERATED_JPEG[8] = 0x84;
+GENERATED_JPEG[9] = 0x04; GENERATED_JPEG[10] = 0xb0;
+const CHROME_CANVAS_JPEG = new Uint8Array(fs.readFileSync(
+  "tests/fixtures/course-cover-canvas-1200x900.jpg"
+));
 const WEBP = Uint8Array.from([
   0x52, 0x49, 0x46, 0x46, 22, 0, 0, 0, 0x57, 0x45, 0x42, 0x50,
   0x56, 0x50, 0x38, 0x20, 10, 0, 0, 0, 0x10, 0, 0, 0x9d, 1, 0x2a, 1, 0, 1, 0,
@@ -74,10 +84,14 @@ function selectedFile(name = "cover.png", type = "image/png", bytes = PNG) {
   return new File([bytes], name, { type, lastModified: 1 });
 }
 
+function generatedFile() {
+  return selectedFile("course-cover.jpg", "image/jpeg", GENERATED_JPEG);
+}
+
 function uploadRequest(options = {}) {
   const origin = Object.hasOwn(options, "origin") ? options.origin : ORIGIN;
   const token = Object.hasOwn(options, "token") ? options.token : "Bearer current-user";
-  const file = Object.hasOwn(options, "file") ? options.file : selectedFile();
+  const file = Object.hasOwn(options, "file") ? options.file : selectedFile("course-cover.jpg", "image/jpeg", GENERATED_JPEG);
   const { files, method = "POST" } = options;
   const headers = {};
   if (origin !== undefined) headers.origin = origin;
@@ -149,11 +163,11 @@ async function createEndpointHarness(options = {}) {
       calls.decoded++;
       if (options.decoderError) throw options.decoderError;
       const bitmap = {
-        width: options.bitmapWidth ?? 1,
-        height: options.bitmapHeight ?? 1,
+        width: options.bitmapWidth ?? 1200,
+        height: options.bitmapHeight ?? 900,
         close() { calls.closed++; },
       };
-      assert.equal(mime, "image/png");
+      assert.equal(mime, "image/jpeg");
       assert.ok(bytes.byteLength > 0);
       return bitmap;
     },
@@ -204,6 +218,21 @@ function assertTelemetry(calls, level, code, status) {
   assert.equal(event.status, status);
   assert.equal(event.durationMs, 7);
   assert.equal(Object.hasOwn(event, "errorRateThresholdsPercent"), false);
+}
+
+function assertValidationTelemetry(calls, stage) {
+  assert.equal(calls.logs.length, 1);
+  assert.equal(calls.logs[0].level, "error");
+  const event = JSON.parse(calls.logs[0].value);
+  assert.deepEqual(event, {
+    event: "upload_course_cover",
+    code: "invalid_image",
+    status: 400,
+    durationMs: 7,
+    stage,
+  });
+  assert.doesNotMatch(calls.logs[0].value,
+    /bytes|file|name|mime|width|height|authorization|auth|session|user|url|email|phone|address|Bearer|course-cover\.jpg/i);
 }
 
 test("validates structural JPEG, PNG, and all required WebP headers with deterministic paths", async () => {
@@ -257,7 +286,7 @@ test("browser invocation has a hard aborting deadline and ignores late completio
     clearTimer(id) { cleared = id; },
     AbortControllerImpl: AbortController,
   });
-  const observed = service.subir(selectedFile()).then(
+  const observed = service.subir(generatedFile()).then(
     () => { settled = "success"; },
     (error) => { settled = error.message; }
   );
@@ -285,7 +314,7 @@ test("browser successful invocation sends FormData, signal, and clears its timer
     clearTimer: (id) => { cleared = id; },
     AbortControllerImpl: AbortController,
   });
-  assert.deepEqual(await service.subir(selectedFile()), {
+  assert.deepEqual(await service.subir(generatedFile()), {
     url: MANAGED_URL,
     path: MANAGED_PATH,
     associationToken: ASSOCIATION_TOKEN,
@@ -298,13 +327,14 @@ test("browser successful invocation sends FormData, signal, and clears its timer
 
 test("browser maps function outcomes without exposing remote details", async () => {
   const responses = [
-    [{ data: null, error: { context: { json: async () => ({ code: "auth_required", message: "secret" }) } } }, /sesión expiró/],
-    [{ data: { ok: false, code: "forbidden" }, error: null }, /permisos/],
-    [{ data: { ok: false, code: "invalid_image" }, error: null }, /imagen JPG/],
-    [{ data: { ok: false, code: "decoder_unavailable" }, error: null }, /temporalmente/],
-    [{ data: { ok: false, code: "upload_failed" }, error: null }, /No se pudo subir/],
+    [{ data: null, error: { context: { json: async () => ({ code: "auth_required", message: "secret" }) } } }, "auth_required", "Tu sesión expiró. Inicia sesión nuevamente."],
+    [{ data: { ok: false, code: "forbidden" }, error: null }, "forbidden", "No tienes permisos para subir portadas."],
+    [{ data: { ok: false, code: "invalid_request" }, error: null }, "invalid_request", "No se pudo procesar la solicitud de portada. Inténtalo de nuevo."],
+    [{ data: { ok: false, code: "invalid_image" }, error: null }, "invalid_image", "La portada generada no es un JPEG válido de 1200 × 900."],
+    [{ data: { ok: false, code: "decoder_unavailable" }, error: null }, "decoder_unavailable", "El servicio de portadas no está disponible temporalmente. Inténtalo de nuevo."],
+    [{ data: { ok: false, code: "upload_failed" }, error: null }, "upload_failed", "No se pudo subir la portada. Revisa tu conexión e inténtalo de nuevo."],
   ];
-  for (const [response, expected] of responses) {
+  for (const [response, expectedCode, expectedMessage] of responses) {
     let cleared = false;
     const service = crearClientePortadas({
       client: { functions: { invoke: async () => response } },
@@ -312,9 +342,31 @@ test("browser maps function outcomes without exposing remote details", async () 
       clearTimer: () => { cleared = true; },
       AbortControllerImpl: AbortController,
     });
-    await assert.rejects(service.subir(selectedFile()), expected);
+    await assert.rejects(service.subir(generatedFile()), (error) => {
+      assert.equal(error.code, expectedCode);
+      assert.equal(error.message, expectedMessage);
+      return true;
+    });
     assert.equal(cleared, true);
   }
+});
+
+test("generated upload client accepts only a non-empty JPEG within the 10 MB result limit", async () => {
+  const accepted = selectedFile("course-cover.jpg", "image/jpeg", GENERATED_JPEG);
+  const invocations = [];
+  const service = crearClientePortadas({
+    client: { functions: { async invoke(_name, options) {
+      invocations.push(options.body.get("file"));
+      return { data: { ok: true, url: MANAGED_URL.replace(/\.png$/, ".jpg"), path: MANAGED_PATH.replace(/\.png$/, ".jpg"), associationToken: ASSOCIATION_TOKEN }, error: null };
+    } } },
+    setTimer: () => 1,
+    clearTimer() {},
+    AbortControllerImpl: AbortController,
+  });
+  await service.subir(accepted);
+  assert.equal(invocations[0], accepted);
+  await assert.rejects(service.subir(selectedFile()), /JPEG generada/i);
+  await assert.rejects(service.subir(new File([new Uint8Array(10_000_001)], "course-cover.jpg", { type: "image/jpeg" })), /10 MB/);
 });
 
 test("admin edit submission preserves its loaded cover without consulting external URL fields", async () => {
@@ -451,8 +503,12 @@ test("shared form workflow uploads local covers and preserves an existing cover 
 test("shared form workflow blocks DB after upload failure and warns after DB failure", async () => {
   const controls = [{ disabled: false }, { disabled: true }];
   let databaseCalls = 0;
+  const typedUploadError = Object.assign(new Error("No se pudo procesar la solicitud de portada. Inténtalo de nuevo."), {
+    code: "invalid_request",
+  });
+  let uploadAttempts = 0;
   const uploadFailure = crearFlujoMutacionCurso({
-    subirPortada: async () => { throw new Error("No se pudo subir la portada."); },
+    subirPortada: async () => { uploadAttempts++; throw typedUploadError; },
     crearCurso: async () => { databaseCalls++; return { ok: true }; },
     actualizarCurso: async () => { databaseCalls++; return { ok: true }; },
     generarOperacionId: () => "operation-1",
@@ -462,6 +518,9 @@ test("shared form workflow blocks DB after upload failure and warns after DB fai
   });
   assert.equal(failedUpload.ok, false);
   assert.equal(failedUpload.etapa, "upload");
+  assert.equal(failedUpload.codigo, "invalid_request");
+  assert.equal(failedUpload.mensajeUsuario, typedUploadError.message);
+  assert.equal(uploadAttempts, 1);
   assert.equal(databaseCalls, 0);
   assert.deepEqual(controls.map((control) => control.disabled), [false, true]);
 
@@ -595,6 +654,12 @@ test("Edge handler rejects invalid bodies and files before decoding or service a
   let response = await handler(invalidBody);
   assert.equal(response.status, 400);
   assert.equal((await json(response)).code, "invalid_request");
+
+  const pngHarness = await createEndpointHarness();
+  response = await pngHarness.handler(uploadRequest({ file: selectedFile() }));
+  assert.equal(response.status, 400);
+  assert.equal((await json(response)).code, "invalid_image");
+  assert.ok(!pngHarness.calls.order.includes("service"));
   assert.equal(calls.decoded, 0);
   assert.ok(!calls.order.includes("service"));
 
@@ -607,6 +672,81 @@ test("Edge handler rejects invalid bodies and files before decoding or service a
   response = await duplicateHarness.handler(uploadRequest({ files: [selectedFile(), selectedFile("second.png")] }));
   assert.equal(response.status, 400);
   assert.equal((await json(response)).code, "invalid_request");
+});
+
+test("native multipart preserves realistic Canvas acceptance and rejects invalid derivatives before effects", async () => {
+  const accepted = await createEndpointHarness();
+  const acceptedResponse = await accepted.handler(uploadRequest({
+    file: selectedFile("course-cover.jpg", "image/jpeg", CHROME_CANVAS_JPEG),
+  }));
+  assert.equal(acceptedResponse.status, 200);
+  assert.equal((await json(acceptedResponse)).ok, true);
+  assert.ok(accepted.calls.order.includes("decode"));
+  assert.ok(accepted.calls.order.includes("upload"));
+
+  const dimensionMismatch = CHROME_CANVAS_JPEG.slice();
+  const sof = dimensionMismatch.findIndex((byte, index) => byte === 0xff && dimensionMismatch[index + 1] === 0xc0);
+  assert.ok(sof > 0, "fixture must contain a baseline JPEG SOF marker");
+  dimensionMismatch[sof + 5] = 0x03;
+  dimensionMismatch[sof + 6] = 0x83;
+
+  for (const [name, type, bytes] of [
+    ["malformed", "image/jpeg", Uint8Array.of(0xff, 0xd8, 0xff, 0xd9)],
+    ["truncated", "image/jpeg", CHROME_CANVAS_JPEG.slice(0, -1)],
+    ["MIME mismatch", "image/png", CHROME_CANVAS_JPEG],
+    ["dimension mismatch", "image/jpeg", dimensionMismatch],
+  ]) {
+    const rejected = await createEndpointHarness();
+    const response = await rejected.handler(uploadRequest({ file: selectedFile("course-cover.jpg", type, bytes) }));
+    assert.equal(response.status, 400, name);
+    assert.equal((await json(response)).code, "invalid_image", name);
+    assert.equal(rejected.calls.decoded, 0, name);
+    assert.ok(!rejected.calls.order.includes("service"), name);
+    assert.ok(!rejected.calls.order.includes("upload"), name);
+  }
+});
+
+test("Edge invalid-image telemetry attributes only fixed validation stages without changing responses", async (t) => {
+  const expectedResponse = { ok: false, code: "invalid_image", message: "The image is invalid." };
+
+  await t.test("structural inspection failure", async () => {
+    const { calls, handler } = await createEndpointHarness();
+    const response = await handler(uploadRequest({
+      file: selectedFile("private-name.jpg", "image/jpeg", Uint8Array.of(0xff, 0xd8, 0xff, 0xd9)),
+    }));
+    assert.equal(response.status, 400);
+    assert.deepEqual(await json(response), expectedResponse);
+    assertValidationTelemetry(calls, "inspect");
+  });
+
+  await t.test("decoder rejection", async () => {
+    const { calls, handler } = await createEndpointHarness({ decoderError: new Error("person@example.com") });
+    const response = await handler(uploadRequest());
+    assert.equal(response.status, 400);
+    assert.deepEqual(await json(response), expectedResponse);
+    assertValidationTelemetry(calls, "decode");
+  });
+
+  await t.test("decoded dimension mismatch", async () => {
+    const { calls, handler } = await createEndpointHarness({ bitmapWidth: 1199 });
+    const response = await handler(uploadRequest());
+    assert.equal(response.status, 400);
+    assert.deepEqual(await json(response), expectedResponse);
+    assertValidationTelemetry(calls, "decode");
+  });
+
+  await t.test("decoder unavailable preserves its public 503 contract without stage attribution", async () => {
+    const error = new Error("unavailable"); error.code = "decoder_unavailable";
+    const { calls, handler } = await createEndpointHarness({ decoderError: error });
+    const response = await handler(uploadRequest());
+    assert.equal(response.status, 503);
+    assert.deepEqual(await json(response), {
+      ok: false,
+      code: "decoder_unavailable",
+      message: "Image decoding is unavailable.",
+    });
+    assertTelemetry(calls, "error", "decoder_unavailable", 503);
+  });
 });
 
 test("Edge decoder is mandatory, rejects failures/mismatches, and always closes bitmaps", async (t) => {
@@ -642,8 +782,8 @@ test("Edge success creates and completes a server upload intent around Storage u
   assert.equal(response.status, 200);
   const body = await json(response);
   assert.equal(body.ok, true);
-  assert.match(body.url, /^https:\/\/yqkvgfqplmbbcebrivpt\.supabase\.co\/storage\/v1\/object\/public\/course-covers\/sha256\/[0-9a-f]{64}\.png$/);
-  assert.match(body.path, /^sha256\/[0-9a-f]{64}\.png$/);
+  assert.match(body.url, /^https:\/\/yqkvgfqplmbbcebrivpt\.supabase\.co\/storage\/v1\/object\/public\/course-covers\/sha256\/[0-9a-f]{64}\.jpg$/);
+  assert.match(body.path, /^sha256\/[0-9a-f]{64}\.jpg$/);
   assert.equal(body.associationToken, ASSOCIATION_TOKEN);
   assert.deepEqual(calls.order, [
     "getUser",
@@ -661,7 +801,7 @@ test("Edge success creates and completes a server upload intent around Storage u
   assert.equal(calls.closed, 1);
   assert.equal(calls.uploads[0].uploadOptions.upsert, false);
   assert.equal(calls.uploads[0].uploadOptions.cacheControl, "31536000");
-  assert.equal(calls.uploads[0].uploadOptions.contentType, "image/png");
+  assert.equal(calls.uploads[0].uploadOptions.contentType, "image/jpeg");
   assert.equal(calls.rpc[0].args.upload_storage_path, body.path);
   assert.equal(calls.rpc[1].args.upload_association_token, ASSOCIATION_TOKEN);
   assertTelemetry(calls, "info", "upload_ok", 200);
@@ -722,7 +862,7 @@ test("migration layout and 0011/0012 contracts remain fail-closed", () => {
 
   const versions = actualFiles.map((file) => file.slice(0, 4));
   assert.equal(new Set(versions).size, versions.length, "migration versions must be unique");
-  assert.deepEqual(versions, Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(4, "0")));
+  assert.deepEqual(versions, Array.from({ length: 13 }, (_, index) => String(index + 1).padStart(4, "0")));
 
   if (fs.existsSync(OLD_MIGRATIONS_PATH)) {
     const oldSqlFiles = fs.readdirSync(OLD_MIGRATIONS_PATH).filter((file) => file.endsWith(".sql"));
@@ -735,7 +875,7 @@ test("migration layout and 0011/0012 contracts remain fail-closed", () => {
   }
 
   assert.equal(MIGRATION_PATH, "supabase/migrations/0011_portadas_cursos_storage.sql");
-  assert.equal(path.resolve(CLEANUP_MIGRATION_PATH), path.resolve(MIGRATIONS_PATH, expectedFiles.at(-1)));
+  assert.equal(path.resolve(CLEANUP_MIGRATION_PATH), path.resolve(MIGRATIONS_PATH, "0012_secure_course_cover_cleanup.sql"));
 
   const executableSql = MIGRATION_SOURCE.replace(/^--.*$/gm, "").trim();
   assert.equal((executableSql.match(/^begin\s*;/gim) || []).length, 1);
@@ -773,6 +913,22 @@ test("migration layout and 0011/0012 contracts remain fail-closed", () => {
   assert.match(cleanupSql, /complete_course_cover_cleanup/i);
   assert.doesNotMatch(cleanupSql, /delete\s+from\s+storage\.objects/i);
   assert.doesNotMatch(cleanupSql, /grant[\s\S]*to\s+(?:anon|authenticated)/i);
+});
+
+test("0013 raises only the course-cover bucket limit to decimal 10 MB with guarded postconditions", () => {
+  assert.equal(fs.existsSync(BUCKET_LIMIT_MIGRATION_PATH), true);
+  assert.equal(fs.existsSync(BUCKET_LIMIT_TEST_PATH), true);
+  const sql = fs.readFileSync(BUCKET_LIMIT_MIGRATION_PATH, "utf8").replace(/^--.*$/gm, "");
+  const harness = fs.readFileSync(BUCKET_LIMIT_TEST_PATH, "utf8");
+  assert.match(sql, /begin\s*;/i);
+  assert.match(sql, /update\s+storage\.buckets/i);
+  assert.match(sql, /file_size_limit\s*=\s*10000000/i);
+  assert.match(sql, /where\s+id\s*=\s*'course-covers'/i);
+  assert.match(sql, /file_size_limit\s+is\s+distinct\s+from\s+10000000/i);
+  assert.match(sql, /commit\s*;/i);
+  assert.doesNotMatch(sql, /insert\s+into\s+storage\.buckets/i);
+  assert.match(harness, /taudux_cover_0013_test/i);
+  assert.match(harness, /10000000/);
 });
 
 test("static contracts preserve scope, dynamic server import, CORS, and tested form wiring", () => {
@@ -817,4 +973,33 @@ test("cover edit state has explicit retain, replacement, and confirmed-removal t
   assert.equal(current.obtenerArchivo(), null);
   assert.deepEqual(current.obtenerActual(), { url: null, path: null });
   assert.equal(current.seleccionarArchivo(file), "replacement");
+});
+
+test("ADR-010 records the generated crop contract and forward-only bucket migration", () => {
+  const decisions = fs.readFileSync(DECISIONS_PATH, "utf8");
+  assert.match(decisions, /ADR-010 addendum: generated 1200x900 course covers/i);
+  assert.match(decisions, /image\/jpeg[^\n]*quality[^\n]*0\.85/i);
+  assert.match(decisions, /#071017/i);
+  assert.match(decisions, /0013_course_cover_bucket_limit\.sql/i);
+  assert.match(decisions, /forward migration/i);
+});
+
+test("course form exposes the accessible crop workflow and loads it before the controller", () => {
+  assert.match(FORM_HTML_SOURCE, /class="courses__cropper"/);
+  assert.match(FORM_HTML_SOURCE, /<canvas[^>]+id="cursoPortadaLienzo"[^>]+aria-describedby="cursoPortadaInstrucciones"/s);
+  assert.match(FORM_HTML_SOURCE, /id="cursoPortadaZoom"[^>]+type="range"[^>]+aria-label="Zoom de la portada"/s);
+  assert.match(FORM_HTML_SOURCE, /id="cursoPortadaRestablecer"[^>]*>Restablecer recorte</);
+  assert.match(FORM_HTML_SOURCE, /id="cursoPortadaError"[^>]+role="alert"/s);
+  const cropperScript = FORM_HTML_SOURCE.indexOf("course-cover-cropper.js");
+  const controllerScript = FORM_HTML_SOURCE.indexOf("gestionar-curso.js");
+  assert.ok(cropperScript > 0 && cropperScript < controllerScript);
+});
+
+test("course submit generates the cover before upload and preserves retain/removal bypasses", () => {
+  const exportCall = FORM_SOURCE.indexOf("cropperPortada.exportFile()");
+  const mutationCall = FORM_SOURCE.indexOf("const resultado = await flujoMutacionCurso.ejecutar");
+  assert.ok(exportCall > 0 && exportCall < mutationCall);
+  assert.match(FORM_SOURCE, /estadoPortadaEdicion\.tieneActual\(\)/);
+  assert.match(FORM_SOURCE, /estadoEdicion\.confirmarRetiro\(\)/);
+  assert.match(FORM_SOURCE, /errorPortada\.focus\(\)/);
 });

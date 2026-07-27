@@ -176,3 +176,21 @@ test("live source contains no references to removed pages", () => {
   assert.equal(fs.existsSync(path.join(ROOT, "src/app/features/explore/explorar.html")), false);
   assert.equal(fs.existsSync(path.join(ROOT, "src/app/features/courses/gestionar-cursos.html")), false);
 });
+
+test("catalog cover uses the 35 percent 260px desktop target and stacks at exactly 760px", () => {
+  const css = read("src/app/features/courses/cursos.css");
+  assert.match(css, /grid-template-columns:\s*minmax\(260px,\s*35%\)\s+minmax\(0,\s*1fr\)/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*?\.courses__card--catalog\s*{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(css, /\.courses__card-media\s*{[\s\S]*?aspect-ratio:\s*4\s*\/\s*3/);
+  assert.match(css, /\.courses__card-body\s*{[\s\S]*?min-width:\s*0/);
+  assert.doesNotMatch(css, /@media\s*\(max-width:\s*761px\)/);
+});
+
+test("catalog and crop controls retain focus and reduced-motion alternatives", () => {
+  const catalogCss = read("src/app/features/courses/cursos.css");
+  const adminCss = read("src/app/features/courses/gestionar-cursos.css");
+  assert.match(catalogCss, /courses__card-hit-area:focus-visible/);
+  assert.match(catalogCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*animation:\s*none/);
+  assert.match(adminCss, /courses__cropper-canvas:focus-visible/);
+  assert.match(adminCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+});

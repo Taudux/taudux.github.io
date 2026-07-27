@@ -144,13 +144,23 @@
           </div>
           <div class="courses__field-group" id="cursoPortadaControles" aria-busy="false">
             <label class="courses__field-label" for="cursoPortada">Portada local (opcional)</label>
-            <input class="field" id="cursoPortada" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="cursoPortadaAyuda cursoPortadaEstado">
+            <input class="field" id="cursoPortada" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="cursoPortadaAyuda cursoPortadaEstado cursoPortadaError">
+            <div class="courses__cropper" id="cursoPortadaRecortador" hidden>
+              <p class="courses__categories-help" id="cursoPortadaInstrucciones">Arrastra la imagen con un puntero o un dedo. Ajusta el zoom y conserva todo el marco cubierto.</p>
+              <canvas class="courses__cropper-canvas" id="cursoPortadaLienzo" aria-describedby="cursoPortadaInstrucciones" tabindex="0"></canvas>
+              <div class="courses__cropper-controls">
+                <label class="courses__field-label" for="cursoPortadaZoom">Zoom</label>
+                <input class="courses__cropper-zoom" id="cursoPortadaZoom" type="range" min="1" max="3" step="0.01" value="1" aria-label="Zoom de la portada">
+                <button class="button button--outline" id="cursoPortadaRestablecer" type="button">Restablecer recorte</button>
+              </div>
+            </div>
             <div class="courses__cover-actions" id="cursoPortadaActualAcciones" hidden>
               <button class="button button--outline courses__cover-action" type="button" id="cursoQuitarPortadaActual" aria-describedby="cursoPortadaEstado">Quitar imagen actual</button>
             </div>
           </div>
-          <p class="courses__categories-help" id="cursoPortadaAyuda">Usa una imagen JPG, PNG o WebP de hasta 5 MiB.</p>
+          <p class="courses__categories-help" id="cursoPortadaAyuda">Selecciona una imagen JPG, PNG o WebP de hasta 10 MB. La validación definitiva se aplica a la portada generada.</p>
           <p class="courses__categories-help" id="cursoPortadaEstado" role="status" aria-live="polite" tabindex="-1"></p>
+          <p class="courses__cropper-error" id="cursoPortadaError" role="alert" tabindex="-1" hidden></p>
           <div class="courses__data-status" id="cursoOperacionEstado" role="alert" tabindex="-1" hidden>
             <p class="courses__data-status-message" id="cursoOperacionMensaje"></p>
           </div>
@@ -172,6 +182,7 @@
   <script src="/src/app/core/cursos/portadas-curso.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>
+  <script src="/src/app/features/courses/course-cover-cropper.js"></script>
   <script src="/src/app/features/courses/gestionar-curso.js"></script>
 </body>
 

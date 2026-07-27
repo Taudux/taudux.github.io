@@ -1,4 +1,4 @@
-import { contentPath, inspectImage, MAX_FILE_BYTES } from "./validation.mjs";
+import { contentPath, inspectGeneratedCover, MAX_FILE_BYTES } from "./validation.mjs";
 
 const BUCKET = "course-covers";
 const MAX_BODY_BYTES = MAX_FILE_BYTES + 64 * 1024;
@@ -140,13 +140,14 @@ export function createUploadCourseCoverHandler(overrides = {}) {
   return async function handleUploadCourseCover(request) {
     const started = dependencies.now();
     let responseOrigin = null;
-    const finish = (status, code, payload, origin) => {
+    const finish = (status, code, payload, origin, stage) => {
       const event = {
         event: "upload_course_cover",
         code,
         status,
         durationMs: Math.max(0, Math.round(dependencies.now() - started)),
       };
+      if (code === "invalid_image" && (stage === "inspect" || stage === "decode")) event.stage = stage;
       dependencies.logger[status >= 400 ? "error" : "info"](JSON.stringify(event));
       return new Response(payload === null ? null : JSON.stringify(payload), {
         status,
@@ -204,9 +205,11 @@ export function createUploadCourseCoverHandler(overrides = {}) {
       let bytes;
       let image;
       let path;
+      let validationStage = "inspect";
       try {
         bytes = new Uint8Array(await file.arrayBuffer());
-        image = inspectImage(bytes, file.type);
+        image = inspectGeneratedCover(bytes, file.type);
+        validationStage = "decode";
         await verifyDecodedImage(bytes, image, dependencies.decodeImage);
         path = await contentPath(bytes, image.extension);
       } catch (error) {
@@ -214,7 +217,7 @@ export function createUploadCourseCoverHandler(overrides = {}) {
         const status = unavailable ? 503 : 400;
         const code = unavailable ? "decoder_unavailable" : "invalid_image";
         const message = unavailable ? "Image decoding is unavailable." : "The image is invalid.";
-        return finish(status, code, { ok: false, code, message }, origin);
+        return finish(status, code, { ok: false, code, message }, origin, unavailable ? undefined : validationStage);
       }
 
       const serviceRole = dependencies.getEnv("SUPABASE_SERVICE_ROLE_KEY");

@@ -225,6 +225,52 @@
     opacity: 0.55;
   }
 
+  .courses__cropper {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .courses__cropper[hidden],
+  .courses__cropper-error[hidden] {
+    display: none;
+  }
+
+  .courses__cropper-canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-field);
+    background: #071017;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .courses__cropper-canvas:focus-visible,
+  .courses__cropper-zoom:focus-visible,
+  .courses__cropper-error:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .courses__cropper-controls {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .courses__cropper-zoom {
+    width: 100%;
+    accent-color: var(--color-accent);
+  }
+
+  .courses__cropper-error {
+    color: var(--color-error);
+    line-height: 1.5;
+  }
+
   .courses__categories-status {
     display: flex;
     align-items: center;
@@ -369,6 +415,10 @@
 
     .courses__category-status {
       justify-self: start;
+    }
+
+    .courses__cropper-controls {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 

@@ -120,12 +120,12 @@ order by reference_count desc, imagen_storage_path;
 ## Deployment Sequence
 
 1. Verify project ref `yqkvgfqplmbbcebrivpt`, inspect the audit, and capture a database backup according to the project's normal Supabase process.
-2. Apply `supabase/migrations/0012_secure_course_cover_cleanup.sql` as one complete transaction in the SQL Editor. Do not replay `0001`-`0011` and do not use `db push`.
-3. Verify `imagen_storage_path`, the object/tombstone registry, upload intents, queue RLS/grants, triggers, and service-role-only RPC grants. Confirm `anon` and `authenticated` cannot read or execute lifecycle internals.
+2. Apply `supabase/migrations/0012_secure_course_cover_cleanup.sql` and then `supabase/migrations/0013_course_cover_bucket_limit.sql`, each as one complete transaction in the SQL Editor. Do not replay earlier migrations and do not use `db push`.
+3. Verify `imagen_storage_path`, the object/tombstone registry, upload intents, queue RLS/grants, triggers, service-role-only RPC grants, and the `course-covers` decimal 10 MB file limit. Confirm `anon` and `authenticated` cannot read or execute lifecycle internals.
 4. During this migration-first window, deployed/cached clients that write only a canonical managed URL remain compatible: the trigger derives the path and verifies the exact object in `storage.objects`. External URLs continue to derive no path. Do not treat this compatibility as permission to trust arbitrary browser paths.
 5. Deploy `upload-course-cover` and `remove-course-cover` with platform JWT verification enabled. Preserve `SUPABASE_SERVICE_ROLE_KEY` only in function secrets.
-6. Smoke-test admin auth, non-admin denial, canonical upload response (`url`, `path`, and association token), stale-pair conflict, cached URL-only association, external URL dissociation, managed removal, shared-path retention, replacement cleanup, and course-deletion cleanup.
-7. Release browser assets only after both functions and `0012` are active.
+6. Smoke-test admin auth, non-admin denial, one generated 1200x900 JPEG at the exact size boundary, PNG/MIME/signature/dimension rejection before Storage, canonical upload response (`url`, `path`, and association token), stale-pair conflict, cached URL-only association, external URL dissociation, managed removal, shared-path retention, replacement cleanup, and course-deletion cleanup.
+7. Release browser assets only after both functions and migrations `0012` and `0013` are active. Exercise create/replace/retain/remove plus keyboard zoom/reset, pointer and one-finger pan, screen-reader status/error announcements, reduced motion, transparent and EXIF-oriented sources, timeout recovery, and 761px/760px/narrow layouts.
 
 No scheduler, log collector, or alert threshold is configured or claimed by this
 repository. `remove-course-cover` first claims the path created by the explicit removal,
@@ -186,14 +186,22 @@ retry/tombstone, delayed-association, and concurrent-lock assertions. It deliber
 refuses every other database name. Local runtime remains unverified when `psql`/Docker is
 not available; static Node tests are not a substitute for this execution.
 
+Run the bucket-limit harness separately against its exact disposable database:
+
+```bash
+psql "postgresql://postgres:<password>@127.0.0.1:<port>/taudux_cover_0013_test" \
+  -v ON_ERROR_STOP=1 \
+  -f supabase/tests/0013_course_cover_bucket_limit.test.sql
+```
+
 ## Rollback Boundary
 
 For an application rollback, roll back browser assets first and then both Edge Functions;
-leave migration `0012` installed. Its URL-only compatibility trigger permits the previous
+leave migrations `0012` and `0013` installed. The URL-only compatibility trigger permits the previous
 upload client to keep writing canonical managed URLs without a path, while tombstones still
 prevent resurrection.
 
-Do not reverse `0012` with ad hoc `DROP` statements. A schema rollback requires a separate
+Do not reverse `0012` or lower the `0013` bucket limit with ad hoc statements. A schema rollback requires a separate
 reviewed forward migration after writes are paused, every upload intent is expired/drained,
 the cleanup queue is empty, no object remains `deleting`, and all managed references have a
 documented destination. Preserve tombstones until no cached client can replay an old URL.

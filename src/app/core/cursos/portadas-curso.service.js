@@ -1,8 +1,8 @@
 /* Envía portadas a la función autenticada; el navegador nunca accede a Storage. */
 (() => {
-  const MAX_BYTES = 5 * 1024 * 1024;
+  const MAX_BYTES = 10_000_000;
   const TIMEOUT_MS = 15_000;
-  const MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
+  const MIME_GENERADO = "image/jpeg";
   const RUTA_GESTIONADA = /^sha256\/[0-9a-f]{64}\.(?:jpg|png|webp)$/;
   const TOKEN_ASOCIACION = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const URL_PORTADAS = "https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/";
@@ -11,9 +11,9 @@
   const MENSAJES = {
     auth_required: "Tu sesión expiró. Inicia sesión nuevamente.",
     forbidden: "No tienes permisos para subir portadas.",
-    invalid_image: "La portada no es una imagen JPG, PNG o WebP válida de hasta 5 MiB.",
-    invalid_request: "La portada no es una imagen JPG, PNG o WebP válida de hasta 5 MiB.",
-    payload_too_large: "La portada debe pesar más de 0 bytes y hasta 5 MiB.",
+    invalid_image: "La portada generada no es un JPEG válido de 1200 × 900.",
+    invalid_request: "No se pudo procesar la solicitud de portada. Inténtalo de nuevo.",
+    payload_too_large: "La portada generada debe pesar más de 0 bytes y hasta 10 MB.",
     decoder_unavailable: "El servicio de portadas no está disponible temporalmente. Inténtalo de nuevo.",
     upload_unavailable: "La carga segura de portadas no está disponible temporalmente. Inténtalo de nuevo.",
     upload_confirmation_pending: "No se pudo confirmar la portada de forma segura. Reintenta el mismo archivo.",
@@ -30,13 +30,13 @@
 
   function validarArchivo(archivo) {
     if (!archivo || typeof archivo.name !== "string") {
-      throw new Error("Selecciona una imagen JPG, PNG o WebP.");
+      throw new Error("Genera una portada JPEG antes de continuar.");
     }
     if (!Number.isFinite(archivo.size) || archivo.size <= 0 || archivo.size > MAX_BYTES) {
-      throw new Error("La portada debe pesar más de 0 bytes y hasta 5 MiB.");
+      throw new Error("La portada generada debe pesar más de 0 bytes y hasta 10 MB.");
     }
-    if (!MIMES.has(String(archivo.type || "").toLowerCase())) {
-      throw new Error("La portada debe ser un archivo JPG, PNG o WebP válido.");
+    if (String(archivo.type || "").toLowerCase() !== MIME_GENERADO) {
+      throw new Error("La portada debe ser la imagen JPEG generada por el recortador.");
     }
   }
 
@@ -104,17 +104,17 @@
         ]);
       } catch (error) {
         if (error?.code === "upload_timeout") throw error;
-        throw new Error(MENSAJE_GENERICO);
+        throw crearErrorPortada(MENSAJE_GENERICO, "upload_failed");
       } finally {
         clearTimer(timer);
       }
       const { data, error } = respuesta;
       if (error || data?.ok !== true) {
         const codigo = await obtenerCodigo(error, data);
-        throw new Error(MENSAJES[codigo] || MENSAJE_GENERICO);
+        throw crearErrorPortada(MENSAJES[codigo] || MENSAJE_GENERICO, codigo || "upload_failed");
       }
       const portada = validarPortadaGestionada(data);
-      if (!portada) throw new Error(MENSAJE_GENERICO);
+      if (!portada) throw crearErrorPortada(MENSAJE_GENERICO, "upload_failed");
       return portada;
     }
 
@@ -235,7 +235,7 @@
         return {
           ok: false,
           ambigua: etapa === "save" && !cursoId,
-          codigo: etapa === "upload" ? "upload_failed" : "save_exception",
+          codigo: etapa === "upload" ? error?.code || "upload_failed" : "save_exception",
           error,
           etapa,
           portadaSubida,

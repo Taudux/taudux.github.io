@@ -191,6 +191,11 @@
   const accionesPortadaActual = document.getElementById("cursoPortadaActualAcciones");
   const botonQuitarPortadaActual = document.getElementById("cursoQuitarPortadaActual");
   const estadoPortada = document.getElementById("cursoPortadaEstado");
+  const errorPortada = document.getElementById("cursoPortadaError");
+  const recortadorPortada = document.getElementById("cursoPortadaRecortador");
+  const lienzoPortada = document.getElementById("cursoPortadaLienzo");
+  const zoomPortada = document.getElementById("cursoPortadaZoom");
+  const botonRestablecerPortada = document.getElementById("cursoPortadaRestablecer");
   const botonEnviar = document.getElementById("cursoEnviar");
   const botonCancelar = document.getElementById("cursoCancelar");
   const estadoCategorias = document.getElementById("categoriasEstado");
@@ -206,6 +211,11 @@
   let cargaCategoriasEnCurso = false;
   let secuenciaCargaCategorias = 0;
   let estadoPortadaEdicion = crearEstadoPortadaEdicion();
+  let punteroPortada = null;
+  const cropperPortada = window.courseCoverCropper.create({
+    canvas: lienzoPortada,
+    onStateChange: actualizarEstadoCropper,
+  });
   const flujoMutacionCurso = window.portadasCurso.crearFlujoMutacionCurso({
     subirPortada: window.portadasCurso.subir,
     crearCurso,
@@ -232,6 +242,9 @@
     confirmarEstadoLocal: () => {
       cursoEditando.imagen_url = null;
       cursoEditando.imagen_storage_path = null;
+      cropperPortada.destroy();
+      recortadorPortada.hidden = true;
+      errorPortada.hidden = true;
     },
   });
 
@@ -246,7 +259,25 @@
   startupReintentar.addEventListener("click", () => window.location.reload());
   inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
   inputPortada.addEventListener("change", seleccionarPortadaLocal);
+  zoomPortada.addEventListener("input", () => cropperPortada.setZoom(zoomPortada.value));
+  botonRestablecerPortada.addEventListener("click", () => {
+    cropperPortada.reset();
+    zoomPortada.value = "1";
+    estadoPortada.textContent = "El recorte se restableció.";
+  });
+  lienzoPortada.addEventListener("pointerdown", iniciarArrastrePortada);
+  lienzoPortada.addEventListener("pointermove", moverPortada);
+  lienzoPortada.addEventListener("pointerup", terminarArrastrePortada);
+  lienzoPortada.addEventListener("pointercancel", terminarArrastrePortada);
   botonQuitarPortadaActual.addEventListener("click", quitarPortadaActual);
+  const observadorPortada = typeof ResizeObserver === "function"
+    ? new ResizeObserver(() => cropperPortada.render())
+    : null;
+  observadorPortada?.observe(lienzoPortada);
+  window.addEventListener("pagehide", () => {
+    observadorPortada?.disconnect();
+    cropperPortada.destroy();
+  }, { once: true });
 
   const inicioStartup = iniciarTiempo();
   try {
@@ -391,16 +422,57 @@
     });
   }
 
-  function seleccionarPortadaLocal() {
+  function actualizarEstadoCropper(estado) {
+    const ocupado = estado.phase === "decoding" || estado.phase === "exporting";
+    controlesPortada.setAttribute("aria-busy", String(ocupado));
+    zoomPortada.disabled = ocupado || estado.phase !== "ready";
+    botonRestablecerPortada.disabled = ocupado || estado.phase !== "ready";
+    if (estado.phase === "decoding") estadoPortada.textContent = "Preparando la imagen para recortarla.";
+    if (estado.phase === "ready") estadoPortada.textContent = "El recorte está listo.";
+    if (estado.phase === "exporting") estadoPortada.textContent = "Generando la portada.";
+    errorPortada.hidden = !estado.error;
+    errorPortada.textContent = estado.error || "";
+  }
+
+  function iniciarArrastrePortada(evento) {
+    if (cropperPortada.getState().phase !== "ready" || punteroPortada !== null) return;
+    punteroPortada = { id: evento.pointerId, x: evento.clientX, y: evento.clientY };
+    lienzoPortada.setPointerCapture(evento.pointerId);
+  }
+
+  function moverPortada(evento) {
+    if (!punteroPortada || evento.pointerId !== punteroPortada.id) return;
+    cropperPortada.pan(evento.clientX - punteroPortada.x, evento.clientY - punteroPortada.y);
+    punteroPortada.x = evento.clientX;
+    punteroPortada.y = evento.clientY;
+  }
+
+  function terminarArrastrePortada(evento) {
+    if (!punteroPortada || evento.pointerId !== punteroPortada.id) return;
+    lienzoPortada.releasePointerCapture?.(evento.pointerId);
+    punteroPortada = null;
+  }
+
+  async function seleccionarPortadaLocal() {
     const archivo = inputPortada.files?.[0];
     estadoPortadaEdicion.seleccionarArchivo(archivo || null);
     if (!archivo) {
+      cropperPortada.destroy();
+      recortadorPortada.hidden = true;
+      errorPortada.hidden = true;
       estadoPortada.textContent = estadoPortadaEdicion.tieneActual()
         ? "Se conservará la imagen actual."
         : "";
       return;
     }
-    estadoPortada.textContent = `Se usará el archivo ${archivo.name}.`;
+    recortadorPortada.hidden = false;
+    zoomPortada.value = "1";
+    try {
+      await cropperPortada.load(archivo);
+    } catch {
+      estadoPortadaEdicion.seleccionarArchivo(null);
+      errorPortada.focus();
+    }
   }
 
   function crearCategoriasLegacy(nombresExtra = []) {
@@ -670,7 +742,7 @@
     evento.preventDefault();
     if (quitarPortadaActual.estaEnCurso()) return;
     const datos = obtenerDatosFormulario();
-    const archivoPortada = inputPortada.files?.[0] || null;
+    const fuentePortada = inputPortada.files?.[0] || null;
     if (!inputProximamente.checked && datos.dias_semana.length === 0) {
       mostrarToast("Selecciona al menos un día de la semana.", "error");
       return;
@@ -679,12 +751,29 @@
     ocultarErrorOperacion();
     const textoBoton = botonEnviar.textContent;
     const inicio = iniciarTiempo();
+    let archivoPortada = null;
+    if (fuentePortada) {
+      if (cropperPortada.getState().phase !== "ready") {
+        errorPortada.hidden = false;
+        errorPortada.textContent = "Espera a que el recorte esté listo antes de continuar.";
+        errorPortada.focus();
+        return;
+      }
+      try {
+        archivoPortada = await cropperPortada.exportFile();
+      } catch (error) {
+        const mensaje = error?.message || "No se pudo generar la portada.";
+        mostrarToast(mensaje, "error");
+        errorPortada.focus();
+        return;
+      }
+    }
     const resultado = await flujoMutacionCurso.ejecutar({
       cursoId,
       datos,
       archivoPortada,
       portadaEsperada: cursoId ? estadoPortadaEdicion.obtenerActual() : null,
-      firma: firmaSolicitud(datos, archivoPortada),
+      firma: firmaSolicitud(datos, fuentePortada),
       controles: form.elements,
       alCambiarEtapa: (etapa) => {
         botonEnviar.textContent = etapa === "upload"

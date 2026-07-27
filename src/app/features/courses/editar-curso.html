@@ -142,12 +142,15 @@
             <label class="courses__field-label" for="cursoInstructor">Instructor</label>
             <input class="field" id="cursoInstructor" type="text" placeholder="Impartido por" required>
           </div>
-          <div class="courses__field-group">
+          <div class="courses__field-group" id="cursoPortadaControles" aria-busy="false">
             <label class="courses__field-label" for="cursoPortada">Portada local (opcional)</label>
             <input class="field" id="cursoPortada" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="cursoPortadaAyuda cursoPortadaEstado">
+            <div class="courses__cover-actions" id="cursoPortadaActualAcciones" hidden>
+              <button class="button button--outline courses__cover-action" type="button" id="cursoQuitarPortadaActual" aria-describedby="cursoPortadaEstado">Quitar imagen actual</button>
+            </div>
           </div>
           <p class="courses__categories-help" id="cursoPortadaAyuda">Usa una imagen JPG, PNG o WebP de hasta 5 MiB.</p>
-          <p class="courses__categories-help" id="cursoPortadaEstado" role="status" aria-live="polite"></p>
+          <p class="courses__categories-help" id="cursoPortadaEstado" role="status" aria-live="polite" tabindex="-1"></p>
           <div class="courses__data-status" id="cursoOperacionEstado" role="alert" tabindex="-1" hidden>
             <p class="courses__data-status-message" id="cursoOperacionMensaje"></p>
           </div>

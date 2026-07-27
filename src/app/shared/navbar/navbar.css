@@ -173,23 +173,6 @@
     display: flex;
   }
 
-  .floating-menu__link.nav-dropdown__link--workspace {
-    color: var(--color-text-inverse);
-    background-color: var(--color-accent);
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: center;
-    transition: box-shadow 0.2s ease;
-  }
-
-  .floating-menu__link.nav-dropdown__link--workspace:hover {
-    color: var(--color-text-inverse);
-    background-color: var(--color-accent);
-    box-shadow: 0 0 12px
-      color-mix(in srgb, var(--color-accent) 50%, transparent);
-  }
-
   .user-menu__toggle {
     border: none;
     cursor: pointer;

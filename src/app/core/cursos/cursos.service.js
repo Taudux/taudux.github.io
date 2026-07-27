@@ -17,8 +17,9 @@ function esUrlSegura(url) {
 }
 
 const CAMPOS_CURSO_BASE =
-  "id, titulo, descripcion, imagen_url, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en";
+  "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en";
 const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_rel:categorias!cursos_categoria_id_fkey(id, nombre, activo)`;
+const TOKEN_ASOCIACION_PORTADA = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let disponibilidadCategoriasEnCursos = null;
 
 function iniciarMedicionOperacion() {
@@ -263,6 +264,7 @@ function cursoCoincideConOperacion(curso, camposEsperados, usarNormalizado) {
     "titulo",
     "descripcion",
     "imagen_url",
+    "imagen_storage_path",
     "modalidad",
     "fecha_inicio",
     "fecha_fin",
@@ -345,7 +347,7 @@ async function insertarCursoConReconciliacion(id, campos, usarNormalizado) {
 
 // Crea un curso con un UUID de operación estable (solo admins; RLS es autoritativa).
 async function crearCurso(campos, operacionId) {
-  const { titulo, imagen_url } = campos;
+  const { titulo, imagen_url, imagen_storage_path, imagen_upload_token } = campos;
   if (!titulo) {
     return { ok: false, codigo: "title_required", mensaje: "El título es obligatorio." };
   }
@@ -354,6 +356,21 @@ async function crearCurso(campos, operacionId) {
       ok: false,
       codigo: "invalid_image_url",
       mensaje: "La imagen debe ser una URL http o https válida.",
+    };
+  }
+  if (imagen_storage_path && imagen_url !==
+      `https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/${imagen_storage_path}`) {
+    return {
+      ok: false,
+      codigo: "invalid_managed_cover",
+      mensaje: "La portada administrada no es válida.",
+    };
+  }
+  if (imagen_upload_token && (!imagen_storage_path || !TOKEN_ASOCIACION_PORTADA.test(imagen_upload_token))) {
+    return {
+      ok: false,
+      codigo: "invalid_cover_intent",
+      mensaje: "No se pudo asociar la portada de forma segura. Vuelve a subirla.",
     };
   }
   if (!esUuidOperacionValido(operacionId)) {
@@ -399,6 +416,8 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     titulo,
     descripcion,
     imagen_url,
+    imagen_storage_path,
+    imagen_upload_token,
     modalidad,
     fecha_inicio,
     fecha_fin,
@@ -416,6 +435,7 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     titulo,
     descripcion: descripcion || null,
     imagen_url: imagen_url || null,
+    imagen_storage_path: imagen_storage_path || null,
     modalidad: modalidad || null,
     fecha_inicio: esProximamente ? null : fecha_inicio || null,
     fecha_fin: esProximamente ? null : fecha_fin || null,
@@ -429,6 +449,8 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     proximamente: esProximamente,
   };
 
+  if (imagen_upload_token) normalizados.imagen_upload_token = imagen_upload_token;
+
   if (usarCategoriaNormalizada && Object.hasOwn(campos, "categoria_id")) {
     normalizados.categoria_id = campos.categoria_id || null;
   } else if (!usarCategoriaNormalizada && Object.hasOwn(campos, "categoria")) {
@@ -438,17 +460,36 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
 }
 
 // Actualiza un curso existente (solo admins).
-async function actualizarCurso(id, campos) {
+async function actualizarCurso(id, campos, portadaEsperada) {
   if (campos.imagen_url && !esUrlSegura(campos.imagen_url)) {
     return { ok: false, mensaje: "La imagen debe ser una URL http o https válida." };
   }
+  if (!portadaEsperada || !Object.hasOwn(portadaEsperada, "url") || !Object.hasOwn(portadaEsperada, "path")) {
+    return { ok: false, codigo: "cover_conflict", mensaje: "La portada cambió. Recarga la página." };
+  }
+  if (campos.imagen_storage_path && campos.imagen_url !==
+      `https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/${campos.imagen_storage_path}`) {
+    return { ok: false, codigo: "invalid_managed_cover", mensaje: "La portada administrada no es válida." };
+  }
+  if (campos.imagen_upload_token && (
+    !campos.imagen_storage_path || !TOKEN_ASOCIACION_PORTADA.test(campos.imagen_upload_token)
+  )) {
+    return { ok: false, codigo: "invalid_cover_intent", mensaje: "No se pudo asociar la portada de forma segura. Vuelve a subirla." };
+  }
   let usarNormalizado = usarCategoriasNormalizadas(campos);
-  let resultado = await supabaseClient
+  let solicitud = supabaseClient
     .from("cursos")
     .update(normalizarCamposCurso(campos, usarNormalizado))
-    .eq("id", id)
+    .eq("id", id);
+  solicitud = portadaEsperada.url === null
+    ? solicitud.is("imagen_url", null)
+    : solicitud.eq("imagen_url", portadaEsperada.url);
+  solicitud = portadaEsperada.path === null
+    ? solicitud.is("imagen_storage_path", null)
+    : solicitud.eq("imagen_storage_path", portadaEsperada.path);
+  let resultado = await solicitud
     .select()
-    .single();
+    .maybeSingle();
 
   if (
     resultado.error &&
@@ -461,12 +502,19 @@ async function actualizarCurso(id, campos) {
     });
     disponibilidadCategoriasEnCursos = false;
     usarNormalizado = false;
-    resultado = await supabaseClient
+    let solicitudLegacy = supabaseClient
       .from("cursos")
       .update(normalizarCamposCurso(campos, usarNormalizado))
-      .eq("id", id)
+      .eq("id", id);
+    solicitudLegacy = portadaEsperada.url === null
+      ? solicitudLegacy.is("imagen_url", null)
+      : solicitudLegacy.eq("imagen_url", portadaEsperada.url);
+    solicitudLegacy = portadaEsperada.path === null
+      ? solicitudLegacy.is("imagen_storage_path", null)
+      : solicitudLegacy.eq("imagen_storage_path", portadaEsperada.path);
+    resultado = await solicitudLegacy
       .select()
-      .single();
+      .maybeSingle();
   }
 
   if (resultado.error) {
@@ -477,6 +525,13 @@ async function actualizarCurso(id, campos) {
       ok: false,
       codigo: resultado.error.code || "update_failed",
       mensaje: "No se pudo actualizar el curso.",
+    };
+  }
+  if (!resultado.data) {
+    return {
+      ok: false,
+      codigo: "cover_conflict",
+      mensaje: "La portada cambió en otra sesión. Recarga la página antes de guardar.",
     };
   }
   return { ok: true, data: resultado.data };

@@ -35,9 +35,4 @@
       transparent
     );
   }
-
-  .floating-menu__separator {
-    margin: 2px 4px 4px;
-    border-top: var(--border-subtle);
-  }
 }

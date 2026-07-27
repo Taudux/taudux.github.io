@@ -294,16 +294,8 @@ function crearFallbackCurso(media, curso) {
   media.append(mediaLabel, mediaTopic);
 }
 
-// Gate de sesión para el detalle del curso: sin sesión, avisa y manda a login;
-// con sesión, el detalle real todavía no existe (placeholder, ver F-008).
-async function verMasInformacion() {
-  const session = await obtenerSesion();
-  if (!session) {
-    mostrarToast("Inicia sesión para ver más información.", "error");
-    const destino = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    window.location.href = urlLoginConDestino(destino);
-    return;
-  }
+// El detalle real todavía no existe; la tarjeta pública muestra este placeholder (ver F-008).
+function verMasInformacion() {
   mostrarToast("El detalle del curso estará disponible pronto.");
 }
 

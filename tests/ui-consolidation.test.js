@@ -48,13 +48,13 @@ function find(root, predicate) {
   return null;
 }
 
-function createCatalogHarness({ admin = false } = {}) {
+function createCatalogHarness({ admin = false, authenticated = true } = {}) {
   const elements = Object.fromEntries([
     "cursosLista", "adminControls", "cursosEstado", "cursosEstadoMensaje", "cursosReintentar",
   ].map((id) => [id, new Element("div")]));
   elements.adminControls.hidden = true;
   elements.cursosEstado.hidden = true;
-  const calls = { details: 0, deleted: [] };
+  const calls = { deleted: [], sessions: 0, toasts: [], loginUrls: 0 };
   const course = { id: "course/id", titulo: "Node práctico", modalidad: "remoto", costo: 0 };
   const window = {
     location: { href: "https://taudux.test/cursos.html", pathname: "/cursos.html", search: "", hash: "" },
@@ -69,17 +69,20 @@ function createCatalogHarness({ admin = false } = {}) {
       getElementById: (id) => elements[id],
       createElement: (tag) => new Element(tag),
     },
-    obtenerSesion: async () => ({ user: { id: "user" } }),
+    obtenerSesion: async () => {
+      calls.sessions += 1;
+      return authenticated ? { user: { id: "user" } } : null;
+    },
     esAdmin: async () => admin,
     listarCursos: async () => ({ ok: true, data: [course] }),
     eliminarCurso: async (id) => { calls.deleted.push(id); return { ok: true }; },
-    mostrarToast(message) { if (message.includes("disponible pronto")) calls.details += 1; },
+    mostrarToast: (...args) => calls.toasts.push(args),
     etiquetaModalidad: () => "En línea",
     formatearRangoFechas: () => null,
     formatearHorario: () => null,
     formatearCosto: () => "Gratis",
     esUrlSegura: () => false,
-    urlLoginConDestino: () => "/login",
+    urlLoginConDestino: () => { calls.loginUrls += 1; return "/login"; },
   };
   window.window = window;
   vm.runInNewContext(read("src/app/features/courses/cursos.js"), context);
@@ -110,9 +113,30 @@ test("admin card uses the edit route and deletion without activating details", a
   assert.equal(remove.type, "button");
   await remove.click();
   assert.deepEqual(calls.deleted, [course.id]);
-  assert.equal(calls.details, 0);
+  assert.deepEqual(calls.toasts, [["Curso eliminado.", "success"]]);
   await hitArea.click();
-  assert.equal(calls.details, 1);
+  assert.deepEqual(calls.toasts.at(-1), ["El detalle del curso estará disponible pronto."]);
+});
+
+test("public course details behave identically without an authentication gate", async () => {
+  const contexts = [
+    createCatalogHarness({ authenticated: false }),
+    createCatalogHarness({ authenticated: true }),
+  ];
+
+  for (const { calls, elements, window } of contexts) {
+    await window.tauduxCursosCatalog.ready;
+    const sessionsBeforeActivation = calls.sessions;
+    const hrefBeforeActivation = window.location.href;
+    const hitArea = find(elements.cursosLista, (element) => element.className === "courses__card-hit-area");
+
+    await hitArea.click();
+
+    assert.equal(calls.sessions, sessionsBeforeActivation);
+    assert.equal(calls.loginUrls, 0);
+    assert.equal(window.location.href, hrefBeforeActivation);
+    assert.deepEqual(calls.toasts, [["El detalle del curso estará disponible pronto."]]);
+  }
 });
 
 test("operation failures get one visible generic report unless an alert is already visible", async () => {

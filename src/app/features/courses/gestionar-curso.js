@@ -35,11 +35,117 @@
       costo,
       instructor: instructor.trim(),
       imagen_url: cursoActual?.imagen_url || "",
+      imagen_storage_path: cursoActual?.imagen_storage_path || null,
     };
   }
 
+  function crearEstadoPortadaEdicion(cursoActual = null) {
+    let actual = {
+      url: cursoActual?.imagen_url || null,
+      path: cursoActual?.imagen_storage_path || null,
+    };
+    let archivo = null;
+    return Object.freeze({
+      seleccionarArchivo(nuevoArchivo) {
+        archivo = nuevoArchivo || null;
+        return archivo ? "replacement" : actual.url ? "retain" : "empty";
+      },
+      confirmarRetiro() {
+        actual = { url: null, path: null };
+        archivo = null;
+      },
+      obtenerActual: () => ({ ...actual }),
+      obtenerArchivo: () => archivo,
+      tieneActual: () => Boolean(actual.url),
+    });
+  }
+
+  function crearManejadorRetiroPortada({
+    obtenerCursoId,
+    obtenerEstadoEdicion,
+    confirmar,
+    quitar,
+    bloquearControles,
+    elementosFormulario,
+    controlesPortada,
+    boton,
+    inputArchivo,
+    accionesActuales,
+    estado,
+    ocultarError,
+    reportarFallo,
+    mostrarToast,
+    mostrarError,
+    iniciarTiempo,
+    confirmarEstadoLocal,
+  }) {
+    let enCurso = false;
+
+    function mensajeExito(resultado) {
+      const status = resultado?.cleanup?.status;
+      if (status === "deleted") return "La imagen se quitó del curso y de Storage.";
+      if (status === "retained_shared") {
+        return "La imagen se quitó del curso; el archivo se conserva porque otra portada lo usa.";
+      }
+      if (status === "queued" || resultado?.cleanup?.pending) {
+        return "La imagen se quitó del curso. La limpieza de Storage quedó pendiente.";
+      }
+      return "La imagen actual se quitó del curso.";
+    }
+
+    const manejarRetiro = async () => {
+      const cursoIdActual = obtenerCursoId();
+      const estadoEdicion = obtenerEstadoEdicion();
+      if (enCurso || !cursoIdActual || !estadoEdicion.tieneActual()) {
+        return { ok: false, codigo: enCurso ? "removal_in_progress" : "no_current_cover" };
+      }
+      const reemplazoSeleccionado = Boolean(estadoEdicion.obtenerArchivo());
+      const mensaje = reemplazoSeleccionado
+        ? "Se quitará la imagen actual y se descartará el archivo seleccionado. ¿Deseas continuar?"
+        : "¿Deseas quitar la imagen actual de este curso?";
+      if (!confirmar(mensaje)) return { ok: false, codigo: "cancelled" };
+
+      enCurso = true;
+      controlesPortada.setAttribute("aria-busy", "true");
+      const restaurar = bloquearControles(elementosFormulario);
+      const textoBoton = boton.textContent;
+      boton.textContent = "Quitando imagen...";
+      estado.textContent = "Quitando la imagen actual.";
+      ocultarError();
+      const inicio = iniciarTiempo();
+      try {
+        const resultado = await quitar(cursoIdActual, estadoEdicion.obtenerActual());
+        estadoEdicion.confirmarRetiro();
+        confirmarEstadoLocal();
+        inputArchivo.value = "";
+        accionesActuales.hidden = true;
+        estado.textContent = mensajeExito(resultado);
+        estado.focus();
+        if (resultado?.cleanup?.pending) mostrarToast(estado.textContent, "warning");
+        return { ok: true, resultado };
+      } catch (error) {
+        const mensajeUsuario = error?.message || "No se pudo quitar la imagen actual.";
+        reportarFallo("course_cover_remove", error, inicio, error?.code || "removal_failed");
+        mostrarToast(mensajeUsuario, "error");
+        mostrarError(mensajeUsuario);
+        return { ok: false, codigo: error?.code || "removal_failed", error };
+      } finally {
+        restaurar();
+        boton.textContent = textoBoton;
+        controlesPortada.setAttribute("aria-busy", "false");
+        enCurso = false;
+      }
+    };
+    manejarRetiro.estaEnCurso = () => enCurso;
+    return manejarRetiro;
+  }
+
   if (typeof module === "object" && module.exports) {
-    module.exports = Object.freeze({ crearDatosEnvioCurso });
+    module.exports = Object.freeze({
+      crearDatosEnvioCurso,
+      crearEstadoPortadaEdicion,
+      crearManejadorRetiroPortada,
+    });
     return;
   }
 
@@ -81,6 +187,9 @@
   const inputCosto = document.getElementById("cursoCosto");
   const inputInstructor = document.getElementById("cursoInstructor");
   const inputPortada = document.getElementById("cursoPortada");
+  const controlesPortada = document.getElementById("cursoPortadaControles");
+  const accionesPortadaActual = document.getElementById("cursoPortadaActualAcciones");
+  const botonQuitarPortadaActual = document.getElementById("cursoQuitarPortadaActual");
   const estadoPortada = document.getElementById("cursoPortadaEstado");
   const botonEnviar = document.getElementById("cursoEnviar");
   const botonCancelar = document.getElementById("cursoCancelar");
@@ -96,11 +205,34 @@
   let modoCategorias = "cargando";
   let cargaCategoriasEnCurso = false;
   let secuenciaCargaCategorias = 0;
+  let estadoPortadaEdicion = crearEstadoPortadaEdicion();
   const flujoMutacionCurso = window.portadasCurso.crearFlujoMutacionCurso({
     subirPortada: window.portadasCurso.subir,
     crearCurso,
     actualizarCurso,
     generarOperacionId: generarIdOperacionCurso,
+  });
+  const quitarPortadaActual = crearManejadorRetiroPortada({
+    obtenerCursoId: () => cursoId,
+    obtenerEstadoEdicion: () => estadoPortadaEdicion,
+    confirmar: (mensaje) => window.confirm(mensaje),
+    quitar: (id, portada) => window.portadasCurso.quitar(id, portada),
+    bloquearControles: window.portadasCurso.bloquearControles,
+    elementosFormulario: form.elements,
+    controlesPortada,
+    boton: botonQuitarPortadaActual,
+    inputArchivo: inputPortada,
+    accionesActuales: accionesPortadaActual,
+    estado: estadoPortada,
+    ocultarError: ocultarErrorOperacion,
+    reportarFallo,
+    mostrarToast,
+    mostrarError: mostrarErrorOperacion,
+    iniciarTiempo,
+    confirmarEstadoLocal: () => {
+      cursoEditando.imagen_url = null;
+      cursoEditando.imagen_storage_path = null;
+    },
   });
 
   form.addEventListener("submit", enviarFormulario);
@@ -114,6 +246,7 @@
   startupReintentar.addEventListener("click", () => window.location.reload());
   inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
   inputPortada.addEventListener("change", seleccionarPortadaLocal);
+  botonQuitarPortadaActual.addEventListener("click", quitarPortadaActual);
 
   const inicioStartup = iniciarTiempo();
   try {
@@ -228,6 +361,7 @@
     }
 
     cursoEditando = resultado.data;
+    estadoPortadaEdicion = crearEstadoPortadaEdicion(cursoEditando);
     modoCategorias = resultado.modoCategorias;
     tituloPagina.textContent = "Editar curso";
     contextoPagina.textContent = `Editando el curso: ${cursoEditando.titulo || "curso sin título"}.`;
@@ -259,8 +393,11 @@
 
   function seleccionarPortadaLocal() {
     const archivo = inputPortada.files?.[0];
+    estadoPortadaEdicion.seleccionarArchivo(archivo || null);
     if (!archivo) {
-      estadoPortada.textContent = "";
+      estadoPortada.textContent = estadoPortadaEdicion.tieneActual()
+        ? "Se conservará la imagen actual."
+        : "";
       return;
     }
     estadoPortada.textContent = `Se usará el archivo ${archivo.name}.`;
@@ -468,6 +605,10 @@
     inputCupo.value = curso.cupo_maximo || "";
     inputCosto.value = curso.costo ?? "";
     inputInstructor.value = curso.instructor || "";
+    accionesPortadaActual.hidden = !estadoPortadaEdicion.tieneActual();
+    estadoPortada.textContent = estadoPortadaEdicion.tieneActual()
+      ? "Se conservará la imagen actual si no eliges otro archivo."
+      : "";
   }
 
   function obtenerDatosFormulario() {
@@ -527,6 +668,7 @@
 
   async function enviarFormulario(evento) {
     evento.preventDefault();
+    if (quitarPortadaActual.estaEnCurso()) return;
     const datos = obtenerDatosFormulario();
     const archivoPortada = inputPortada.files?.[0] || null;
     if (!inputProximamente.checked && datos.dias_semana.length === 0) {
@@ -541,6 +683,7 @@
       cursoId,
       datos,
       archivoPortada,
+      portadaEsperada: cursoId ? estadoPortadaEdicion.obtenerActual() : null,
       firma: firmaSolicitud(datos, archivoPortada),
       controles: form.elements,
       alCambiarEtapa: (etapa) => {

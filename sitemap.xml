@@ -6,7 +6,7 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://taudux.com/src/app/features/auth/login.html</loc>
+    <loc>https://taudux.com/src/app/features/auth/login/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

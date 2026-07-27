@@ -3,7 +3,11 @@
   const MAX_BYTES = 5 * 1024 * 1024;
   const TIMEOUT_MS = 15_000;
   const MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
+  const RUTA_GESTIONADA = /^sha256\/[0-9a-f]{64}\.(?:jpg|png|webp)$/;
+  const TOKEN_ASOCIACION = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const URL_PORTADAS = "https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/";
   const MENSAJE_GENERICO = "No se pudo subir la portada. Revisa tu conexión e inténtalo de nuevo.";
+  const MENSAJE_RETIRO_GENERICO = "No se pudo quitar la imagen actual. Inténtalo de nuevo.";
   const MENSAJES = {
     auth_required: "Tu sesión expiró. Inicia sesión nuevamente.",
     forbidden: "No tienes permisos para subir portadas.",
@@ -11,7 +15,16 @@
     invalid_request: "La portada no es una imagen JPG, PNG o WebP válida de hasta 5 MiB.",
     payload_too_large: "La portada debe pesar más de 0 bytes y hasta 5 MiB.",
     decoder_unavailable: "El servicio de portadas no está disponible temporalmente. Inténtalo de nuevo.",
+    upload_unavailable: "La carga segura de portadas no está disponible temporalmente. Inténtalo de nuevo.",
+    upload_confirmation_pending: "No se pudo confirmar la portada de forma segura. Reintenta el mismo archivo.",
     upload_timeout: "La carga tardó demasiado. Revisa tu conexión e inténtalo de nuevo.",
+    removal_timeout: "La operación tardó demasiado. Revisa tu conexión e inténtalo de nuevo.",
+    cover_conflict: "La portada cambió en otra sesión. Recarga la página antes de continuar.",
+    course_not_found: "El curso ya no existe.",
+  };
+  const MENSAJES_RETIRO = {
+    ...MENSAJES,
+    forbidden: "No tienes permisos para quitar portadas.",
   };
   const ADVERTENCIA_HUERFANA = "La portada se conservó y puede requerir limpieza manual en Supabase.";
 
@@ -46,6 +59,24 @@
     }
   }
 
+  function crearErrorPortada(mensaje, codigo) {
+    const error = new Error(mensaje);
+    error.code = codigo;
+    return error;
+  }
+
+  function validarPortadaGestionada(data) {
+    const ruta = typeof data?.path === "string" && RUTA_GESTIONADA.test(data.path)
+      ? data.path
+      : null;
+    const url = validarUrlPublica(data?.url);
+    const associationToken = typeof data?.associationToken === "string" &&
+      TOKEN_ASOCIACION.test(data.associationToken) ? data.associationToken : null;
+    return ruta && associationToken && url === `${URL_PORTADAS}${ruta}`
+      ? { url, path: ruta, associationToken }
+      : null;
+  }
+
   function crearClientePortadas({
     client,
     timeoutMs = TIMEOUT_MS,
@@ -64,9 +95,7 @@
         const limite = new Promise((_, reject) => {
           timer = setTimer(() => {
             controller.abort();
-            const error = new Error(MENSAJES.upload_timeout);
-            error.code = "upload_timeout";
-            reject(error);
+            reject(crearErrorPortada(MENSAJES.upload_timeout, "upload_timeout"));
           }, timeoutMs);
         });
         respuesta = await Promise.race([
@@ -84,11 +113,52 @@
         const codigo = await obtenerCodigo(error, data);
         throw new Error(MENSAJES[codigo] || MENSAJE_GENERICO);
       }
-      const url = validarUrlPublica(data.url);
-      if (!url) throw new Error(MENSAJE_GENERICO);
-      return url;
+      const portada = validarPortadaGestionada(data);
+      if (!portada) throw new Error(MENSAJE_GENERICO);
+      return portada;
     }
-    return Object.freeze({ subir });
+
+    async function quitar(cursoId, portadaEsperada) {
+      const controller = new AbortControllerImpl();
+      let timer;
+      let respuesta;
+      try {
+        const limite = new Promise((_, reject) => {
+          timer = setTimer(() => {
+            controller.abort();
+            reject(crearErrorPortada(MENSAJES.removal_timeout, "removal_timeout"));
+          }, timeoutMs);
+        });
+        respuesta = await Promise.race([
+          client.functions.invoke("remove-course-cover", {
+            body: {
+              courseId: cursoId,
+              expected: {
+                url: portadaEsperada?.url || null,
+                path: portadaEsperada?.path || null,
+              },
+            },
+            signal: controller.signal,
+          }),
+          limite,
+        ]);
+      } catch (error) {
+        if (error?.code === "removal_timeout") throw error;
+        throw crearErrorPortada(MENSAJE_RETIRO_GENERICO, "removal_failed");
+      } finally {
+        clearTimer(timer);
+      }
+      const { data, error } = respuesta;
+      if (error || data?.ok !== true) {
+        const codigo = await obtenerCodigo(error, data);
+        throw crearErrorPortada(
+          MENSAJES_RETIRO[codigo] || MENSAJE_RETIRO_GENERICO,
+          codigo || "removal_failed"
+        );
+      }
+      return data;
+    }
+    return Object.freeze({ subir, quitar });
   }
 
   function bloquearControles(controles) {
@@ -112,7 +182,7 @@
       return true;
     }
 
-    async function ejecutar({ cursoId, datos, archivoPortada, firma, controles, alCambiarEtapa }) {
+    async function ejecutar({ cursoId, datos, archivoPortada, portadaEsperada, firma, controles, alCambiarEtapa }) {
       if (mutacionEnCurso) {
         return { ok: false, codigo: "mutation_in_progress", mensajeUsuario: "Espera a que termine la operación actual." };
       }
@@ -137,13 +207,16 @@
         const campos = { ...datos };
         if (archivoPortada) {
           alCambiarEtapa?.("upload");
-          campos.imagen_url = await subirPortada(archivoPortada);
+          const portada = await subirPortada(archivoPortada);
+          campos.imagen_url = portada.url;
+          campos.imagen_storage_path = portada.path;
+          campos.imagen_upload_token = portada.associationToken;
           portadaSubida = true;
         }
         etapa = "save";
         alCambiarEtapa?.("save");
         const resultado = cursoId
-          ? await actualizarCurso(cursoId, campos)
+          ? await actualizarCurso(cursoId, campos, portadaEsperada)
           : await crearCurso(campos, operacionId);
         if (resultado?.ok) operacionCreacion = null;
         const mensaje = resultado?.mensaje || "No se pudo guardar el curso.";
@@ -184,5 +257,5 @@
     return;
   }
   const cliente = crearClientePortadas({ client: supabaseClient });
-  window.portadasCurso = Object.freeze({ ...api, subir: cliente.subir });
+  window.portadasCurso = Object.freeze({ ...api, subir: cliente.subir, quitar: cliente.quitar });
 })();

@@ -296,28 +296,6 @@
   border-radius: 0;
 }
 
-.courses__badge {
-  display: inline-block;
-  align-self: flex-start;
-  padding: 0.2rem 0.7rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-field);
-  color: var(--color-text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-.courses__badge--en_linea {
-  color: var(--color-accent);
-}
-
-.courses__badge--categoria {
-  margin-left: 0.4rem;
-  background: transparent;
-  border: 1px solid var(--color-border);
-}
-
 .courses__card-title {
   color: var(--color-text);
   font-size: 1.15rem;
@@ -416,16 +394,6 @@
   color: var(--color-accent);
 }
 
-.courses__card-meta,
-.courses__card-dates,
-.courses__card-instructor,
-.courses__card-extra {
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-  margin-bottom: 0.4rem;
-  overflow-wrap: anywhere;
-}
-
 .courses__card-description {
   color: var(--color-text-muted);
   font-size: 0.9rem;
@@ -483,12 +451,6 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-}
-
-.courses__badge--proximamente {
-  background: transparent;
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
 }
 
 /* Acciones administrativas independientes del hit-area de la tarjeta. */

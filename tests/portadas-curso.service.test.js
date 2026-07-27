@@ -10,6 +10,7 @@ const SERVICE_PATH = "src/app/core/cursos/portadas-curso.service.js";
 const FUNCTION_PATH = "supabase/functions/upload-course-cover/index.ts";
 const VALIDATION_PATH = "supabase/functions/upload-course-cover/validation.mjs";
 const MIGRATION_PATH = "supabase/migrations/0011_portadas_cursos_storage.sql";
+const CLEANUP_MIGRATION_PATH = "supabase/migrations/0012_secure_course_cover_cleanup.sql";
 const MIGRATIONS_PATH = "supabase/migrations";
 const OLD_MIGRATIONS_PATH = ".kiro/supabase/migrations";
 const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
@@ -23,13 +24,15 @@ const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0006_cursos_detalles.sql": "12981517187212fb28a7068b59820c03d96f398678e4cdca70c74caa94306dd1",
   "0007_cursos_recurrentes.sql": "5240c6f7c81d1d475168d513c0002bab8d780408668a911aef0bf91b11929855",
   "0008_cursos_proximamente.sql": "3e384a48eb1ffd49fb14d2884853c0b71eea8f68da1808564e9a0d0b8bb15931",
-  "0009_cursos_categoria_valida.sql": "be9f6bb2eb72dfdd8302ed9d923793468bd52314cf81b16a49f07a8351e21637",
+  "0009_cursos_categoria_valida.sql": "a5959b843cd51bb9eba28161932aab4a4f96ca36fd2e19aabcc231fa9e68705d",
   "0010_normalizar_categorias_cursos.sql": "dd9dee6da65b5fa1d264a5c2ab878109404be973b2eb46d40e6ae4f101a0b099",
   "0011_portadas_cursos_storage.sql": "d95ee0e59eb896c76f43b9a8f276b19748341566830816b7eb3a655981d22bea",
+  "0012_secure_course_cover_cleanup.sql": "cb449a48c4dfcfad4da34dd0272fbe87bc1d30656a53b660e5e8c53abf63ac59",
 });
 const SERVICE_SOURCE = fs.readFileSync(SERVICE_PATH, "utf8");
 const FUNCTION_SOURCE = fs.readFileSync(FUNCTION_PATH, "utf8");
 const MIGRATION_SOURCE = fs.readFileSync(MIGRATION_PATH, "utf8");
+const CLEANUP_MIGRATION_SOURCE = fs.readFileSync(CLEANUP_MIGRATION_PATH, "utf8");
 const FORM_SOURCE = fs.readFileSync(FORM_PATH, "utf8");
 const FORM_HTML_SOURCE = fs.readFileSync(FORM_HTML_PATH, "utf8");
 const BROWSER_SOURCE = fs.readdirSync("src", { recursive: true })
@@ -38,10 +41,13 @@ const BROWSER_SOURCE = fs.readdirSync("src", { recursive: true })
 const validation = import(pathToFileURL(path.resolve(VALIDATION_PATH)).href);
 const endpoint = import(pathToFileURL(path.resolve(FUNCTION_PATH)).href);
 const { crearClientePortadas, crearFlujoMutacionCurso } = require(path.resolve(SERVICE_PATH));
-const { crearDatosEnvioCurso } = require(path.resolve(FORM_PATH));
+const { crearDatosEnvioCurso, crearEstadoPortadaEdicion } = require(path.resolve(FORM_PATH));
 
 const ORIGIN = "https://taudux.com";
-const PROJECT_URL = "https://project.supabase.co";
+const PROJECT_URL = "https://yqkvgfqplmbbcebrivpt.supabase.co";
+const MANAGED_PATH = `sha256/${"a".repeat(64)}.png`;
+const MANAGED_URL = `${PROJECT_URL}/storage/v1/object/public/course-covers/${MANAGED_PATH}`;
+const ASSOCIATION_TOKEN = "123e4567-e89b-42d3-a456-426614174222";
 const PNG = Uint8Array.from(Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
   "base64"
@@ -88,7 +94,7 @@ async function json(response) {
 
 async function createEndpointHarness(options = {}) {
   const { createUploadCourseCoverHandler } = await endpoint;
-  const calls = { order: [], uploads: [], publicPaths: [], decoded: 0, closed: 0, logs: [], fetches: [] };
+  const calls = { order: [], uploads: [], publicPaths: [], decoded: 0, closed: 0, logs: [], fetches: [], rpc: [] };
   const uploadError = options.uploadError || null;
   const bucket = {
     async upload(objectPath, bytes, uploadOptions) {
@@ -116,11 +122,27 @@ async function createEndpointHarness(options = {}) {
     async createServiceClient() {
       calls.order.push("service");
       if (options.serviceThrows) throw new Error("provider Bearer secret path sha256/deadbeef");
-      return { storage: { from(name) {
-        calls.order.push("storage");
-        assert.equal(name, "course-covers");
-        return bucket;
-      } } };
+      return {
+        async rpc(name, args) {
+          calls.order.push(name);
+          calls.rpc.push({ name, args });
+          if (name === "begin_course_cover_upload") {
+            return options.beginError
+              ? { data: null, error: true }
+              : { data: [{ association_token: ASSOCIATION_TOKEN }], error: null };
+          }
+          if (name === "complete_course_cover_upload") {
+            return { data: options.completeResult ?? true, error: options.completeError || null };
+          }
+          if (name === "cancel_course_cover_upload") return { data: true, error: null };
+          throw new Error(`unexpected RPC ${name}`);
+        },
+        storage: { from(name) {
+          calls.order.push("storage");
+          assert.equal(name, "course-covers");
+          return bucket;
+        } },
+      };
     },
     async decodeImage(bytes, mime) {
       calls.order.push("decode");
@@ -176,12 +198,12 @@ function assertTelemetry(calls, level, code, status) {
   assert.equal(calls.logs.length, 1);
   assert.equal(calls.logs[0].level, level);
   const event = JSON.parse(calls.logs[0].value);
-  assert.deepEqual(Object.keys(event).sort(), ["code", "durationMs", "errorRateThresholdsPercent", "event", "status"].sort());
+  assert.deepEqual(Object.keys(event).sort(), ["code", "durationMs", "event", "status"].sort());
   assert.equal(event.event, "upload_course_cover");
   assert.equal(event.code, code);
   assert.equal(event.status, status);
   assert.equal(event.durationMs, 7);
-  assert.deepEqual(event.errorRateThresholdsPercent, [1, 2, 5]);
+  assert.equal(Object.hasOwn(event, "errorRateThresholdsPercent"), false);
 }
 
 test("validates structural JPEG, PNG, and all required WebP headers with deterministic paths", async () => {
@@ -257,13 +279,17 @@ test("browser successful invocation sends FormData, signal, and clears its timer
     client: { functions: { async invoke(name, invocationOptions) {
       assert.equal(name, "upload-course-cover");
       options = invocationOptions;
-      return { data: { ok: true, url: "https://project.supabase.co/cover.png" }, error: null };
+      return { data: { ok: true, url: MANAGED_URL, path: MANAGED_PATH, associationToken: ASSOCIATION_TOKEN }, error: null };
     } } },
     setTimer: () => 37,
     clearTimer: (id) => { cleared = id; },
     AbortControllerImpl: AbortController,
   });
-  assert.equal(await service.subir(selectedFile()), "https://project.supabase.co/cover.png");
+  assert.deepEqual(await service.subir(selectedFile()), {
+    url: MANAGED_URL,
+    path: MANAGED_PATH,
+    associationToken: ASSOCIATION_TOKEN,
+  });
   assert.ok(options.body instanceof FormData);
   assert.equal(options.body.getAll("file").length, 1);
   assert.equal(options.signal.aborted, false);
@@ -345,6 +371,7 @@ test("admin edit submission preserves its loaded cover without consulting extern
     cursoId: "course-1",
     datos,
     archivoPortada: null,
+    portadaEsperada: { url: portadaExistente, path: null },
     firma: "edit-without-selected-file",
     controles: [],
   });
@@ -354,6 +381,7 @@ test("admin edit submission preserves its loaded cover without consulting extern
   assert.equal(actualizaciones.length, 1);
   assert.equal(actualizaciones[0].id, "course-1");
   assert.equal(actualizaciones[0].campos.imagen_url, portadaExistente);
+  assert.equal(actualizaciones[0].campos.imagen_storage_path, null);
   assert.equal(Object.hasOwn(actualizaciones[0].campos, "cursoImagen"), false);
 });
 
@@ -364,7 +392,7 @@ test("shared form workflow uploads local covers and preserves an existing cover 
     subirPortada: async () => {
       assert.ok(controls.every((control) => control.disabled));
       calls.push("upload");
-      return "https://project.supabase.co/local.png";
+      return { url: MANAGED_URL, path: MANAGED_PATH, associationToken: ASSOCIATION_TOKEN };
     },
     crearCurso: async (datos, id) => {
       assert.ok(controls.every((control) => control.disabled));
@@ -388,7 +416,9 @@ test("shared form workflow uploads local covers and preserves an existing cover 
   assert.equal(created.ok, true);
   assert.equal(calls[0], "upload");
   assert.equal(calls[1].action, "create");
-  assert.equal(calls[1].datos.imagen_url, "https://project.supabase.co/local.png");
+  assert.equal(calls[1].datos.imagen_url, MANAGED_URL);
+  assert.equal(calls[1].datos.imagen_storage_path, MANAGED_PATH);
+  assert.equal(calls[1].datos.imagen_upload_token, ASSOCIATION_TOKEN);
   assert.equal(calls[1].id, "operation-1");
   assert.deepEqual(controls.map((control) => control.disabled), [false, true, false]);
   calls.length = 0;
@@ -396,17 +426,20 @@ test("shared form workflow uploads local covers and preserves an existing cover 
     cursoId: "course-1",
     datos: { titulo: "Editado", imagen_url: "https://legacy.example/cover.png" },
     archivoPortada: selectedFile(),
+    portadaEsperada: { url: "https://legacy.example/cover.png", path: null },
     firma: "edit-local",
     controles: controls,
   });
   assert.equal(calls[0], "upload");
   assert.equal(calls[1].action, "update");
-  assert.equal(calls[1].datos.imagen_url, "https://project.supabase.co/local.png");
+  assert.equal(calls[1].datos.imagen_url, MANAGED_URL);
+  assert.equal(calls[1].datos.imagen_storage_path, MANAGED_PATH);
   calls.length = 0;
   await flow.ejecutar({
     cursoId: "course-1",
     datos: { titulo: "Editado", imagen_url: "https://legacy.example/cover.png" },
     archivoPortada: null,
+    portadaEsperada: { url: "https://legacy.example/cover.png", path: null },
     firma: "edit-without-cover",
     controles: controls,
   });
@@ -433,7 +466,7 @@ test("shared form workflow blocks DB after upload failure and warns after DB fai
   assert.deepEqual(controls.map((control) => control.disabled), [false, true]);
 
   const databaseFailure = crearFlujoMutacionCurso({
-    subirPortada: async () => "https://project.supabase.co/cover.png",
+    subirPortada: async () => ({ url: MANAGED_URL, path: MANAGED_PATH, associationToken: ASSOCIATION_TOKEN }),
     crearCurso: async () => ({ ok: false, ambigua: true, mensaje: "No se confirmó el curso." }),
     actualizarCurso: async () => ({ ok: false }),
     generarOperacionId: () => "operation-2",
@@ -603,14 +636,25 @@ test("Edge decoder is mandatory, rejects failures/mismatches, and always closes 
   });
 });
 
-test("Edge success uses caller context before service role, decodes, uploads, and logs denominator", async () => {
+test("Edge success creates and completes a server upload intent around Storage upload", async () => {
   const { calls, handler } = await createEndpointHarness({ defaultCaller: true });
   const response = await handler(uploadRequest());
   assert.equal(response.status, 200);
   const body = await json(response);
   assert.equal(body.ok, true);
-  assert.match(body.url, /^https:\/\/project\.supabase\.co\/storage\/v1\/object\/public\/course-covers\/sha256\/[0-9a-f]{64}\.png$/);
-  assert.deepEqual(calls.order, ["getUser", "es_admin", "decode", "service", "storage", "upload"]);
+  assert.match(body.url, /^https:\/\/yqkvgfqplmbbcebrivpt\.supabase\.co\/storage\/v1\/object\/public\/course-covers\/sha256\/[0-9a-f]{64}\.png$/);
+  assert.match(body.path, /^sha256\/[0-9a-f]{64}\.png$/);
+  assert.equal(body.associationToken, ASSOCIATION_TOKEN);
+  assert.deepEqual(calls.order, [
+    "getUser",
+    "es_admin",
+    "decode",
+    "service",
+    "storage",
+    "begin_course_cover_upload",
+    "upload",
+    "complete_course_cover_upload",
+  ]);
   assert.equal(calls.fetches.length, 2);
   assert.equal(calls.fetches[0].init.headers.Authorization, "Bearer current-user");
   assert.equal(calls.fetches[1].init.headers.Authorization, "Bearer current-user");
@@ -618,6 +662,8 @@ test("Edge success uses caller context before service role, decodes, uploads, an
   assert.equal(calls.uploads[0].uploadOptions.upsert, false);
   assert.equal(calls.uploads[0].uploadOptions.cacheControl, "31536000");
   assert.equal(calls.uploads[0].uploadOptions.contentType, "image/png");
+  assert.equal(calls.rpc[0].args.upload_storage_path, body.path);
+  assert.equal(calls.rpc[1].args.upload_association_token, ASSOCIATION_TOKEN);
   assertTelemetry(calls, "info", "upload_ok", 200);
 });
 
@@ -635,7 +681,25 @@ test("Edge exact duplicate succeeds, Storage failure is sanitized, and unexpecte
     assert.equal(response.status, 502);
     assert.deepEqual(await json(response), { ok: false, code: "upload_failed", message: "The image could not be stored." });
     assertTelemetry(calls, "error", "upload_failed", 502);
+    assert.ok(calls.rpc.some((call) => call.name === "cancel_course_cover_upload"));
     assert.doesNotMatch(calls.logs[0].value, /provider|secret/);
+  });
+  await t.test("upload intent completion failure is fail-closed", async () => {
+    const { calls, handler } = await createEndpointHarness({ completeResult: false });
+    const response = await handler(uploadRequest());
+    assert.equal(response.status, 503);
+    assert.equal((await json(response)).code, "upload_confirmation_pending");
+    assert.ok(calls.order.indexOf("upload") < calls.order.indexOf("complete_course_cover_upload"));
+    assertTelemetry(calls, "error", "upload_confirmation_pending", 503);
+  });
+  await t.test("public URL with a query is rejected", async () => {
+    const { calls, handler } = await createEndpointHarness({
+      publicUrl: `${PROJECT_URL}/storage/v1/object/public/course-covers/${MANAGED_PATH}?token=unexpected`,
+    });
+    const response = await handler(uploadRequest());
+    assert.equal(response.status, 500);
+    assert.equal((await json(response)).code, "internal_error");
+    assertTelemetry(calls, "error", "internal_error", 500);
   });
   await t.test("unexpected failure", async () => {
     const { calls, handler } = await createEndpointHarness({ serviceThrows: true });
@@ -649,7 +713,7 @@ test("Edge exact duplicate succeeds, Storage failure is sanitized, and unexpecte
   });
 });
 
-test("migration layout and 0011 preflight remain fail-closed", () => {
+test("migration layout and 0011/0012 contracts remain fail-closed", () => {
   const expectedFiles = Object.keys(EXPECTED_MIGRATION_HASHES);
   const entries = fs.readdirSync(MIGRATIONS_PATH, { withFileTypes: true });
   assert.ok(entries.every((entry) => entry.isFile()), "migration directory must contain only files");
@@ -658,7 +722,7 @@ test("migration layout and 0011 preflight remain fail-closed", () => {
 
   const versions = actualFiles.map((file) => file.slice(0, 4));
   assert.equal(new Set(versions).size, versions.length, "migration versions must be unique");
-  assert.deepEqual(versions, Array.from({ length: 11 }, (_, index) => String(index + 1).padStart(4, "0")));
+  assert.deepEqual(versions, Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(4, "0")));
 
   if (fs.existsSync(OLD_MIGRATIONS_PATH)) {
     const oldSqlFiles = fs.readdirSync(OLD_MIGRATIONS_PATH).filter((file) => file.endsWith(".sql"));
@@ -671,7 +735,7 @@ test("migration layout and 0011 preflight remain fail-closed", () => {
   }
 
   assert.equal(MIGRATION_PATH, "supabase/migrations/0011_portadas_cursos_storage.sql");
-  assert.equal(path.resolve(MIGRATION_PATH), path.resolve(MIGRATIONS_PATH, expectedFiles.at(-1)));
+  assert.equal(path.resolve(CLEANUP_MIGRATION_PATH), path.resolve(MIGRATIONS_PATH, expectedFiles.at(-1)));
 
   const executableSql = MIGRATION_SOURCE.replace(/^--.*$/gm, "").trim();
   assert.equal((executableSql.match(/^begin\s*;/gim) || []).length, 1);
@@ -685,6 +749,30 @@ test("migration layout and 0011 preflight remain fail-closed", () => {
   assert.doesNotMatch(executableSql, /on\s+conflict[\s\S]*do\s+update/i);
   assert.doesNotMatch(executableSql, /\bdrop\s+policy\b/i);
   assert.doesNotMatch(executableSql, /\bcreate\s+policy\b/i);
+
+  const cleanupSql = CLEANUP_MIGRATION_SOURCE.replace(/^--.*$/gm, "").trim();
+  assert.match(cleanupSql, /add\s+column\s+imagen_storage_path\s+text/i);
+  assert.match(cleanupSql, /sha256\/\[0-9a-f\]\{64\}/i);
+  assert.match(cleanupSql, /yqkvgfqplmbbcebrivpt\\\.supabase\\\.co/i);
+  assert.match(cleanupSql, /create\s+table\s+public\.course_cover_cleanup_queue/i);
+  assert.match(cleanupSql, /create\s+table\s+public\.course_cover_objects/i);
+  assert.match(cleanupSql, /create\s+table\s+public\.course_cover_upload_intents/i);
+  assert.match(cleanupSql, /force\s+row\s+level\s+security/i);
+  assert.match(cleanupSql, /revoke\s+all[\s\S]*from\s+public,\s*anon,\s*authenticated/i);
+  assert.match(cleanupSql, /create\s+trigger\s+cursos_enqueue_cover_cleanup[\s\S]*after\s+update[\s\S]*or\s+delete/i);
+  assert.match(cleanupSql, /pg_advisory_xact_lock/i);
+  assert.match(cleanupSql, /claim_token\s+uuid/i);
+  assert.match(cleanupSql, /claim_generation\s+bigint/i);
+  assert.match(cleanupSql, /state\s*=\s*'deleted'/i);
+  assert.match(cleanupSql, /from\s+storage\.objects[\s\S]*bucket_id\s*=\s*'course-covers'/i);
+  assert.match(cleanupSql, /derived_path\s*:=\s*substring/i);
+  assert.match(cleanupSql, /begin_course_cover_upload/i);
+  assert.match(cleanupSql, /complete_course_cover_upload/i);
+  assert.match(cleanupSql, /claim_course_cover_cleanup/i);
+  assert.match(cleanupSql, /retry_course_cover_cleanup/i);
+  assert.match(cleanupSql, /complete_course_cover_cleanup/i);
+  assert.doesNotMatch(cleanupSql, /delete\s+from\s+storage\.objects/i);
+  assert.doesNotMatch(cleanupSql, /grant[\s\S]*to\s+(?:anon|authenticated)/i);
 });
 
 test("static contracts preserve scope, dynamic server import, CORS, and tested form wiring", () => {
@@ -694,7 +782,7 @@ test("static contracts preserve scope, dynamic server import, CORS, and tested f
   const dynamicImport = FUNCTION_SOURCE.indexOf('import("@supabase/supabase-js")');
   assert.ok(user >= 0 && user < admin && admin < serviceRole && serviceRole < dynamicImport);
   assert.match(FUNCTION_SOURCE, /globalThis\.Deno.*Deno\.serve/s);
-  assert.match(FUNCTION_SOURCE, /ERROR_RATE_THRESHOLDS_PERCENT = Object\.freeze\(\[1, 2, 5\]\)/);
+  assert.doesNotMatch(FUNCTION_SOURCE, /ERROR_RATE_THRESHOLDS_PERCENT|errorRateThresholdsPercent/);
   assert.match(FUNCTION_SOURCE, /https:\/\/taudux\.com/);
   assert.match(FUNCTION_SOURCE, /https:\/\/taudux\.github\.io/);
   assert.match(FUNCTION_SOURCE, /localhost.*127\.0\.0\.1/s);
@@ -707,7 +795,26 @@ test("static contracts preserve scope, dynamic server import, CORS, and tested f
   assert.match(FORM_SOURCE, /controles: form\.elements/);
   assert.doesNotMatch(FORM_SOURCE, /inputImagen|seleccionarUrlExterna|URL externa/);
   assert.match(FORM_HTML_SOURCE, /id="cursoPortada"\s+type="file"/);
+  assert.match(FORM_HTML_SOURCE, />Quitar imagen actual<\/button>/);
+  assert.match(FORM_SOURCE, /window\.confirm\(/);
+  assert.match(FORM_SOURCE, /portadaEsperada:/);
   assert.doesNotMatch(FORM_HTML_SOURCE, /cursoImagen|URL externa de imagen|una URL externa|se descarta la otra/);
-  assert.doesNotMatch(FORM_SOURCE, /operacionCreacion|localStorage|sessionStorage/);
+  assert.match(SERVICE_SOURCE, /let\s+operacionCreacion\s*=\s*null/);
+  assert.doesNotMatch(FORM_SOURCE + SERVICE_SOURCE, /localStorage|sessionStorage|indexedDB/);
   assert.match(fs.readFileSync("supabase/functions/upload-course-cover/deno.json", "utf8"), /2\.110\.8/);
+});
+
+test("cover edit state has explicit retain, replacement, and confirmed-removal transitions", () => {
+  const current = crearEstadoPortadaEdicion({ imagen_url: MANAGED_URL, imagen_storage_path: MANAGED_PATH });
+  assert.equal(current.tieneActual(), true);
+  assert.equal(current.seleccionarArchivo(null), "retain");
+  const file = selectedFile();
+  assert.equal(current.seleccionarArchivo(file), "replacement");
+  assert.equal(current.obtenerArchivo(), file);
+  assert.deepEqual(current.obtenerActual(), { url: MANAGED_URL, path: MANAGED_PATH });
+  current.confirmarRetiro();
+  assert.equal(current.tieneActual(), false);
+  assert.equal(current.obtenerArchivo(), null);
+  assert.deepEqual(current.obtenerActual(), { url: null, path: null });
+  assert.equal(current.seleccionarArchivo(file), "replacement");
 });

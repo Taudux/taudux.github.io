@@ -3,7 +3,6 @@ import { contentPath, inspectImage, MAX_FILE_BYTES } from "./validation.mjs";
 const BUCKET = "course-covers";
 const MAX_BODY_BYTES = MAX_FILE_BYTES + 64 * 1024;
 const PRODUCTION_ORIGINS = new Set(["https://taudux.com", "https://taudux.github.io"]);
-export const ERROR_RATE_THRESHOLDS_PERCENT = Object.freeze([1, 2, 5]);
 
 class ClientError extends Error {
   constructor(status, code) {
@@ -81,12 +80,28 @@ function duplicate(error) {
     /duplicate|already exists/i.test(`${error?.code || ""} ${error?.message || ""}`);
 }
 
+function firstRow(data) {
+  return Array.isArray(data) ? data[0] : data;
+}
+
+async function cancelUploadIntent(serviceClient, associationToken) {
+  if (!associationToken) return;
+  try {
+    await serviceClient.rpc("cancel_course_cover_upload", {
+      upload_association_token: associationToken,
+    });
+  } catch {
+    // The expiring intent remains fail-closed if cancellation cannot be persisted.
+  }
+}
+
 function safePublicUrl(value, projectUrl, path) {
   try {
     const candidate = new URL(value || "");
     const project = new URL(projectUrl);
     const expectedPath = `/storage/v1/object/public/${BUCKET}/${path}`;
     return candidate.origin === project.origin && candidate.pathname === expectedPath &&
+      !candidate.search && !candidate.hash && !candidate.username && !candidate.password &&
       (candidate.protocol === "https:" || candidate.protocol === "http:") ? candidate.href : null;
   } catch {
     return null;
@@ -131,7 +146,6 @@ export function createUploadCourseCoverHandler(overrides = {}) {
         code,
         status,
         durationMs: Math.max(0, Math.round(dependencies.now() - started)),
-        errorRateThresholdsPercent: ERROR_RATE_THRESHOLDS_PERCENT,
       };
       dependencies.logger[status >= 400 ? "error" : "info"](JSON.stringify(event));
       return new Response(payload === null ? null : JSON.stringify(payload), {
@@ -209,19 +223,45 @@ export function createUploadCourseCoverHandler(overrides = {}) {
       }
       const serviceClient = await dependencies.createServiceClient({ projectUrl, serviceRole });
       const bucket = serviceClient.storage.from(BUCKET);
-      const { error: uploadError } = await bucket.upload(path, bytes, {
-        contentType: image.mime,
-        cacheControl: "31536000",
-        upsert: false,
+      const intent = await serviceClient.rpc("begin_course_cover_upload", {
+        upload_storage_path: path,
       });
+      const associationToken = firstRow(intent.data)?.association_token;
+      if (intent.error || typeof associationToken !== "string") {
+        return finish(503, "upload_unavailable", { ok: false, code: "upload_unavailable", message: "Upload is temporarily unavailable." }, origin);
+      }
+
+      let uploadError;
+      try {
+        ({ error: uploadError } = await bucket.upload(path, bytes, {
+          contentType: image.mime,
+          cacheControl: "31536000",
+          upsert: false,
+        }));
+      } catch {
+        await cancelUploadIntent(serviceClient, associationToken);
+        return finish(502, "upload_failed", { ok: false, code: "upload_failed", message: "The image could not be stored." }, origin);
+      }
       if (uploadError && !duplicate(uploadError)) {
+        await cancelUploadIntent(serviceClient, associationToken);
         return finish(502, "upload_failed", { ok: false, code: "upload_failed", message: "The image could not be stored." }, origin);
       }
       const url = safePublicUrl(bucket.getPublicUrl(path).data.publicUrl, projectUrl, path);
       if (!url) {
+        await cancelUploadIntent(serviceClient, associationToken);
         return finish(500, "internal_error", { ok: false, code: "internal_error", message: "Upload is unavailable." }, origin);
       }
-      return finish(200, "upload_ok", { ok: true, url }, origin);
+      const completion = await serviceClient.rpc("complete_course_cover_upload", {
+        upload_association_token: associationToken,
+      });
+      if (completion.error || completion.data !== true) {
+        return finish(503, "upload_confirmation_pending", {
+          ok: false,
+          code: "upload_confirmation_pending",
+          message: "The upload could not be confirmed safely. Retry the same file.",
+        }, origin);
+      }
+      return finish(200, "upload_ok", { ok: true, url, path, associationToken }, origin);
     } catch {
       return finish(500, "internal_error", { ok: false, code: "internal_error", message: "Upload is unavailable." }, responseOrigin);
     }

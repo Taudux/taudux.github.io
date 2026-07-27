@@ -207,6 +207,24 @@
     line-height: 1.5;
   }
 
+  .courses__cover-actions {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+
+  .courses__cover-actions[hidden] {
+    display: none;
+  }
+
+  .courses__cover-action {
+    color: var(--color-error);
+  }
+
+  .courses__cover-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
   .courses__categories-status {
     display: flex;
     align-items: center;

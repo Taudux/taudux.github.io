@@ -14,7 +14,6 @@
     invalid_image: "La portada generada no es un JPEG válido de 1200 × 900.",
     invalid_request: "No se pudo procesar la solicitud de portada. Inténtalo de nuevo.",
     payload_too_large: "La portada generada debe pesar más de 0 bytes y hasta 10 MB.",
-    decoder_unavailable: "El servicio de portadas no está disponible temporalmente. Inténtalo de nuevo.",
     upload_unavailable: "La carga segura de portadas no está disponible temporalmente. Inténtalo de nuevo.",
     upload_confirmation_pending: "No se pudo confirmar la portada de forma segura. Reintenta el mismo archivo.",
     upload_timeout: "La carga tardó demasiado. Revisa tu conexión e inténtalo de nuevo.",

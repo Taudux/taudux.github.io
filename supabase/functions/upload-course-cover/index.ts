@@ -108,30 +108,12 @@ function safePublicUrl(value, projectUrl, path) {
   }
 }
 
-async function verifyDecodedImage(bytes, image, decodeImage) {
-  let bitmap;
-  try {
-    bitmap = await decodeImage(bytes, image.mime);
-    if (!bitmap || typeof bitmap.close !== "function" || !Number.isInteger(bitmap.width) || !Number.isInteger(bitmap.height) ||
-        bitmap.width !== image.width || bitmap.height !== image.height) {
-      throw new ClientError(400, "invalid_image");
-    }
-  } catch (error) {
-    if (error?.code === "decoder_unavailable") throw new ClientError(503, "decoder_unavailable");
-    if (error instanceof ClientError) throw error;
-    throw new ClientError(400, "invalid_image");
-  } finally {
-    if (bitmap && typeof bitmap.close === "function") bitmap.close();
-  }
-}
-
 export function createUploadCourseCoverHandler(overrides = {}) {
   const dependencies = {
     getEnv: (name) => globalThis.Deno?.env?.get(name),
     fetchImpl: globalThis.fetch?.bind(globalThis),
     createCallerClient: createFetchCallerClient,
     createServiceClient: createSupabaseServiceClient,
-    decodeImage: decodeWithImageBitmap,
     logger: globalThis.console,
     now: () => globalThis.performance?.now?.() ?? Date.now(),
     ...overrides,
@@ -140,14 +122,13 @@ export function createUploadCourseCoverHandler(overrides = {}) {
   return async function handleUploadCourseCover(request) {
     const started = dependencies.now();
     let responseOrigin = null;
-    const finish = (status, code, payload, origin, stage) => {
+    const finish = (status, code, payload, origin) => {
       const event = {
         event: "upload_course_cover",
         code,
         status,
         durationMs: Math.max(0, Math.round(dependencies.now() - started)),
       };
-      if (code === "invalid_image" && (stage === "inspect" || stage === "decode")) event.stage = stage;
       dependencies.logger[status >= 400 ? "error" : "info"](JSON.stringify(event));
       return new Response(payload === null ? null : JSON.stringify(payload), {
         status,
@@ -202,22 +183,17 @@ export function createUploadCourseCoverHandler(overrides = {}) {
         return finish(known.status, known.code, { ok: false, code: known.code, message }, origin);
       }
 
+      // Structural inspection is the whole server-side defense: the edge runtime's
+      // createImageBitmap cannot decode JPEG, so a decode step rejects valid covers.
       let bytes;
       let image;
       let path;
-      let validationStage = "inspect";
       try {
         bytes = new Uint8Array(await file.arrayBuffer());
         image = inspectGeneratedCover(bytes, file.type);
-        validationStage = "decode";
-        await verifyDecodedImage(bytes, image, dependencies.decodeImage);
         path = await contentPath(bytes, image.extension);
-      } catch (error) {
-        const unavailable = error?.code === "decoder_unavailable";
-        const status = unavailable ? 503 : 400;
-        const code = unavailable ? "decoder_unavailable" : "invalid_image";
-        const message = unavailable ? "Image decoding is unavailable." : "The image is invalid.";
-        return finish(status, code, { ok: false, code, message }, origin, unavailable ? undefined : validationStage);
+      } catch {
+        return finish(400, "invalid_image", { ok: false, code: "invalid_image", message: "The image is invalid." }, origin);
       }
 
       const serviceRole = dependencies.getEnv("SUPABASE_SERVICE_ROLE_KEY");
@@ -292,15 +268,6 @@ function createFetchCallerClient({ projectUrl, anonKey, authorization, fetchImpl
       return response.ok ? { data: await response.json(), error: null } : { data: null, error: true };
     },
   };
-}
-
-async function decodeWithImageBitmap(bytes, mime) {
-  if (typeof globalThis.createImageBitmap !== "function") {
-    const error = new Error("decoder_unavailable");
-    error.code = "decoder_unavailable";
-    throw error;
-  }
-  return globalThis.createImageBitmap(new Blob([bytes], { type: mime }));
 }
 
 async function createSupabaseServiceClient({ projectUrl, serviceRole }) {

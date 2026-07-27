@@ -108,7 +108,7 @@ async function json(response) {
 
 async function createEndpointHarness(options = {}) {
   const { createUploadCourseCoverHandler } = await endpoint;
-  const calls = { order: [], uploads: [], publicPaths: [], decoded: 0, closed: 0, logs: [], fetches: [], rpc: [] };
+  const calls = { order: [], uploads: [], publicPaths: [], logs: [], fetches: [], rpc: [] };
   const uploadError = options.uploadError || null;
   const bucket = {
     async upload(objectPath, bytes, uploadOptions) {
@@ -157,19 +157,6 @@ async function createEndpointHarness(options = {}) {
           return bucket;
         } },
       };
-    },
-    async decodeImage(bytes, mime) {
-      calls.order.push("decode");
-      calls.decoded++;
-      if (options.decoderError) throw options.decoderError;
-      const bitmap = {
-        width: options.bitmapWidth ?? 1200,
-        height: options.bitmapHeight ?? 900,
-        close() { calls.closed++; },
-      };
-      assert.equal(mime, "image/jpeg");
-      assert.ok(bytes.byteLength > 0);
-      return bitmap;
     },
     logger: {
       info(value) { calls.logs.push({ level: "info", value }); },
@@ -220,7 +207,7 @@ function assertTelemetry(calls, level, code, status) {
   assert.equal(Object.hasOwn(event, "errorRateThresholdsPercent"), false);
 }
 
-function assertValidationTelemetry(calls, stage) {
+function assertValidationTelemetry(calls) {
   assert.equal(calls.logs.length, 1);
   assert.equal(calls.logs[0].level, "error");
   const event = JSON.parse(calls.logs[0].value);
@@ -229,7 +216,6 @@ function assertValidationTelemetry(calls, stage) {
     code: "invalid_image",
     status: 400,
     durationMs: 7,
-    stage,
   });
   assert.doesNotMatch(calls.logs[0].value,
     /bytes|file|name|mime|width|height|authorization|auth|session|user|url|email|phone|address|Bearer|course-cover\.jpg/i);
@@ -331,7 +317,6 @@ test("browser maps function outcomes without exposing remote details", async () 
     [{ data: { ok: false, code: "forbidden" }, error: null }, "forbidden", "No tienes permisos para subir portadas."],
     [{ data: { ok: false, code: "invalid_request" }, error: null }, "invalid_request", "No se pudo procesar la solicitud de portada. Inténtalo de nuevo."],
     [{ data: { ok: false, code: "invalid_image" }, error: null }, "invalid_image", "La portada generada no es un JPEG válido de 1200 × 900."],
-    [{ data: { ok: false, code: "decoder_unavailable" }, error: null }, "decoder_unavailable", "El servicio de portadas no está disponible temporalmente. Inténtalo de nuevo."],
     [{ data: { ok: false, code: "upload_failed" }, error: null }, "upload_failed", "No se pudo subir la portada. Revisa tu conexión e inténtalo de nuevo."],
   ];
   for (const [response, expectedCode, expectedMessage] of responses) {
@@ -660,7 +645,6 @@ test("Edge handler rejects invalid bodies and files before decoding or service a
   assert.equal(response.status, 400);
   assert.equal((await json(response)).code, "invalid_image");
   assert.ok(!pngHarness.calls.order.includes("service"));
-  assert.equal(calls.decoded, 0);
   assert.ok(!calls.order.includes("service"));
 
   const emptyHarness = await createEndpointHarness();
@@ -681,7 +665,6 @@ test("native multipart preserves realistic Canvas acceptance and rejects invalid
   }));
   assert.equal(acceptedResponse.status, 200);
   assert.equal((await json(acceptedResponse)).ok, true);
-  assert.ok(accepted.calls.order.includes("decode"));
   assert.ok(accepted.calls.order.includes("upload"));
 
   const dimensionMismatch = CHROME_CANVAS_JPEG.slice();
@@ -700,80 +683,38 @@ test("native multipart preserves realistic Canvas acceptance and rejects invalid
     const response = await rejected.handler(uploadRequest({ file: selectedFile("course-cover.jpg", type, bytes) }));
     assert.equal(response.status, 400, name);
     assert.equal((await json(response)).code, "invalid_image", name);
-    assert.equal(rejected.calls.decoded, 0, name);
     assert.ok(!rejected.calls.order.includes("service"), name);
     assert.ok(!rejected.calls.order.includes("upload"), name);
   }
 });
 
-test("Edge invalid-image telemetry attributes only fixed validation stages without changing responses", async (t) => {
+test("structural inspection is the whole server-side defense and never leaks details", async (t) => {
   const expectedResponse = { ok: false, code: "invalid_image", message: "The image is invalid." };
+  const dimensionMismatch = CHROME_CANVAS_JPEG.slice();
+  const sof = dimensionMismatch.findIndex((byte, index) => byte === 0xff && dimensionMismatch[index + 1] === 0xc0);
+  assert.ok(sof > 0, "fixture must contain a baseline JPEG SOF marker");
+  dimensionMismatch[sof + 5] = 0x03;
+  dimensionMismatch[sof + 6] = 0x83;
 
-  await t.test("structural inspection failure", async () => {
-    const { calls, handler } = await createEndpointHarness();
-    const response = await handler(uploadRequest({
-      file: selectedFile("private-name.jpg", "image/jpeg", Uint8Array.of(0xff, 0xd8, 0xff, 0xd9)),
-    }));
-    assert.equal(response.status, 400);
-    assert.deepEqual(await json(response), expectedResponse);
-    assertValidationTelemetry(calls, "inspect");
-  });
-
-  await t.test("decoder rejection", async () => {
-    const { calls, handler } = await createEndpointHarness({ decoderError: new Error("person@example.com") });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 400);
-    assert.deepEqual(await json(response), expectedResponse);
-    assertValidationTelemetry(calls, "decode");
-  });
-
-  await t.test("decoded dimension mismatch", async () => {
-    const { calls, handler } = await createEndpointHarness({ bitmapWidth: 1199 });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 400);
-    assert.deepEqual(await json(response), expectedResponse);
-    assertValidationTelemetry(calls, "decode");
-  });
-
-  await t.test("decoder unavailable preserves its public 503 contract without stage attribution", async () => {
-    const error = new Error("unavailable"); error.code = "decoder_unavailable";
-    const { calls, handler } = await createEndpointHarness({ decoderError: error });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 503);
-    assert.deepEqual(await json(response), {
-      ok: false,
-      code: "decoder_unavailable",
-      message: "Image decoding is unavailable.",
+  for (const [name, type, bytes] of [
+    ["malformed", "image/jpeg", Uint8Array.of(0xff, 0xd8, 0xff, 0xd9)],
+    ["trailing bytes after EOI", "image/jpeg", Uint8Array.from([...CHROME_CANVAS_JPEG, 0x00])],
+    ["truncated", "image/jpeg", CHROME_CANVAS_JPEG.slice(0, -1)],
+    ["MIME mismatch", "image/png", CHROME_CANVAS_JPEG],
+    ["dimension mismatch", "image/jpeg", dimensionMismatch],
+  ]) {
+    await t.test(name, async () => {
+      const { calls, handler } = await createEndpointHarness();
+      const response = await handler(uploadRequest({
+        file: selectedFile("private-name.jpg", type, bytes),
+      }));
+      assert.equal(response.status, 400);
+      assert.deepEqual(await json(response), expectedResponse);
+      assertValidationTelemetry(calls);
+      assert.ok(!calls.order.includes("service"));
+      assert.ok(!calls.order.includes("upload"));
     });
-    assertTelemetry(calls, "error", "decoder_unavailable", 503);
-  });
-});
-
-test("Edge decoder is mandatory, rejects failures/mismatches, and always closes bitmaps", async (t) => {
-  await t.test("non-decodable structural image", async () => {
-    const { calls, handler } = await createEndpointHarness({ decoderError: new Error("decode failed provider payload") });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 400);
-    assert.equal((await json(response)).code, "invalid_image");
-    assert.equal(calls.decoded, 1);
-    assert.ok(!calls.order.includes("service"));
-  });
-  await t.test("decoder unavailable", async () => {
-    const error = new Error("unavailable"); error.code = "decoder_unavailable";
-    const { calls, handler } = await createEndpointHarness({ decoderError: error });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 503);
-    assert.equal((await json(response)).code, "decoder_unavailable");
-    assertTelemetry(calls, "error", "decoder_unavailable", 503);
-  });
-  await t.test("dimension mismatch", async () => {
-    const { calls, handler } = await createEndpointHarness({ bitmapWidth: 2 });
-    const response = await handler(uploadRequest());
-    assert.equal(response.status, 400);
-    assert.equal((await json(response)).code, "invalid_image");
-    assert.equal(calls.closed, 1);
-    assert.ok(!calls.order.includes("service"));
-  });
+  }
 });
 
 test("Edge success creates and completes a server upload intent around Storage upload", async () => {
@@ -788,7 +729,6 @@ test("Edge success creates and completes a server upload intent around Storage u
   assert.deepEqual(calls.order, [
     "getUser",
     "es_admin",
-    "decode",
     "service",
     "storage",
     "begin_course_cover_upload",
@@ -798,7 +738,6 @@ test("Edge success creates and completes a server upload intent around Storage u
   assert.equal(calls.fetches.length, 2);
   assert.equal(calls.fetches[0].init.headers.Authorization, "Bearer current-user");
   assert.equal(calls.fetches[1].init.headers.Authorization, "Bearer current-user");
-  assert.equal(calls.closed, 1);
   assert.equal(calls.uploads[0].uploadOptions.upsert, false);
   assert.equal(calls.uploads[0].uploadOptions.cacheControl, "31536000");
   assert.equal(calls.uploads[0].uploadOptions.contentType, "image/jpeg");

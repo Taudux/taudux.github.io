@@ -1,20 +1,16 @@
 /*
   Administración exclusiva de categorías: alta, renombrado, activación y retiro
   seguro. Requiere sesión y rol admin; RLS sigue siendo el gate real. Depende de
-  auth.service.js, categorias.service.js, telemetry/operaciones.js y toast.js.
+  auth.service.js, categorias.service.js, admin-startup.js, telemetry/operaciones.js
+  y toast.js.
 */
 
 (async () => {
-  const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones("course_admin_categories");
-  const startup = document.getElementById("adminStartup");
-  const startupTitulo = document.getElementById("adminStartupTitle");
-  const startupMensaje = document.getElementById("adminStartupMessage");
-  const startupReintentar = document.getElementById("adminStartupRetry");
-  const startupLoader = document.getElementById("adminStartupLoader");
-  const startupLoadingMessage = document.getElementById("adminStartupLoadingMessage");
-  const startupError = document.getElementById("adminStartupError");
-  const navbar = document.getElementById("adminNavbar");
-  const contenido = document.getElementById("adminContent");
+  const arranque = crearArranqueAdmin({
+    pagina: "course_admin_categories",
+    tituloError: "No se pudo abrir la administración de categorías",
+  });
+  const { iniciarTiempo, reportarFallo } = arranque;
   const panel = document.querySelector(".courses__categories-panel");
   const form = document.getElementById("categoriaForm");
   const inputNombre = document.getElementById("categoriaNombre");
@@ -23,6 +19,7 @@
   const mensajeEstado = document.getElementById("categoriasEstadoMensaje");
   const botonReintentar = document.getElementById("categoriasReintentar");
   const lista = document.getElementById("categoriasLista");
+  const panelEstado = crearPanelEstadoCategorias(estado, mensajeEstado);
 
   let categorias = [];
   let modoCategorias = "cargando";
@@ -33,57 +30,17 @@
 
   form.addEventListener("submit", agregarCategoria);
   botonReintentar.addEventListener("click", reintentarCategorias);
-  startupReintentar.addEventListener("click", () => window.location.reload());
 
   const inicioStartup = iniciarTiempo();
-  try {
-    const session = await requerirSesion();
-    if (!session) return;
-    if (!(await esAdmin(session))) {
-      window.location.href = "/src/app/features/courses/cursos.html";
-      return;
-    }
-  } catch (error) {
-    reportarFallo("admin_startup", error, inicioStartup, "startup_failed");
-    mostrarErrorStartup(
-      "No pudimos verificar tu acceso. Revisa tu conexión y vuelve a intentarlo."
-    );
-    return;
-  }
+  if (!(await arranque.asegurarAdmin(inicioStartup))) return;
 
   try {
     await cargarCategorias();
-    revelarAdministracion();
+    arranque.revelar();
   } catch (error) {
     reportarFallo("category_startup", error, inicioStartup, "category_startup_exception");
-    mostrarErrorStartup("No se pudieron preparar las categorías. Vuelve a intentarlo.");
+    arranque.mostrarError("No se pudieron preparar las categorías. Vuelve a intentarlo.");
     return;
-  }
-
-  function mostrarErrorStartup(mensaje) {
-    startup.classList.add("courses__startup-status--error");
-    startupTitulo.textContent = "No se pudo abrir la administración de categorías";
-    startupMensaje.textContent = mensaje;
-    startupLoader.hidden = true;
-    startupLoadingMessage.hidden = true;
-    startupError.hidden = false;
-    startupReintentar.hidden = false;
-    startup.setAttribute("aria-busy", "false");
-    startup.focus();
-  }
-
-  function revelarAdministracion() {
-    startup.setAttribute("aria-busy", "false");
-    startup.hidden = true;
-    navbar.hidden = false;
-    contenido.hidden = false;
-  }
-
-  function crearCategoriasLegacy() {
-    return CATEGORIAS_LEGACY_CURSO
-      .slice()
-      .sort((a, b) => a.localeCompare(b, "es-MX"))
-      .map((nombre) => ({ id: null, nombre, activo: null, legacy: true }));
   }
 
   async function cargarCategorias({ focoId = null } = {}) {
@@ -107,15 +64,15 @@
     if (resultado.ok) {
       categorias = resultado.data.map((categoria) => ({ ...categoria, legacy: false }));
       modoCategorias = "normalizado";
-      ocultarEstado();
+      panelEstado.ocultar();
       pintarCategorias();
     } else if (resultado.migracionRequerida) {
       reportarFallo("category_list_load", null, inicio, "migration_required");
       falloReportado = true;
       modoCategorias = "migracion";
-      categorias = crearCategoriasLegacy();
+      categorias = categoriasLegacy();
       pintarCategorias();
-      mostrarEstado(
+      panelEstado.mostrar(
         "migration",
         "Se requiere aplicar la migración 0010 en Supabase. La administración de categorías queda deshabilitada hasta completarla."
       );
@@ -125,10 +82,10 @@
       }
       modoCategorias = "error";
       if (!habiaDatos) {
-        categorias = crearCategoriasLegacy();
+        categorias = categoriasLegacy();
         pintarCategorias();
       }
-      mostrarEstado(
+      panelEstado.mostrar(
         "error",
         "No se pudieron actualizar las categorías. Se conserva la última lista disponible; reintenta cuando tengas conexión."
       );
@@ -144,25 +101,6 @@
     if (cargaEnCurso || mutacionEnCurso) return;
     const cargadas = await cargarCategorias();
     restaurarFoco(cargadas ? "categoriaNombre" : "categoriasEstado");
-  }
-
-  function mostrarEstado(tipo, mensaje) {
-    estado.hidden = false;
-    estado.classList.remove(
-      "courses__categories-status--migration",
-      "courses__categories-status--error"
-    );
-    estado.classList.add(`courses__categories-status--${tipo}`);
-    mensajeEstado.textContent = mensaje;
-  }
-
-  function ocultarEstado() {
-    estado.hidden = true;
-    mensajeEstado.textContent = "";
-    estado.classList.remove(
-      "courses__categories-status--migration",
-      "courses__categories-status--error"
-    );
   }
 
   function actualizarDisponibilidad() {

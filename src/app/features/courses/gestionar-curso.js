@@ -150,23 +150,18 @@
     return;
   }
 
-  const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones("course_admin_form");
-  const RUTA_LISTA = "/src/app/features/courses/cursos.html";
+  const arranque = crearArranqueAdmin({
+    pagina: "course_admin_form",
+    tituloError: "No se pudo abrir el formulario",
+  });
+  const { iniciarTiempo, reportarFallo } = arranque;
+  const RUTA_LISTA = RUTA_CATALOGO_CURSOS;
   const VALOR_CATEGORIA_SIN_ASIGNAR = "__sin_categoria__";
   const PREFIJO_CATEGORIA_LEGACY = "__categoria_legacy__:";
   // Un curso puede tener cualquier UUID v1-v8; comparte forma con el token de
   // portada, que también lo emite el servidor.
   const UUID_CURSO = UUID_TOKEN_PORTADA;
 
-  const startup = document.getElementById("adminStartup");
-  const startupTitulo = document.getElementById("adminStartupTitle");
-  const startupMensaje = document.getElementById("adminStartupMessage");
-  const startupReintentar = document.getElementById("adminStartupRetry");
-  const startupLoader = document.getElementById("adminStartupLoader");
-  const startupLoadingMessage = document.getElementById("adminStartupLoadingMessage");
-  const startupError = document.getElementById("adminStartupError");
-  const navbar = document.getElementById("adminNavbar");
-  const contenido = document.getElementById("adminContent");
   const form = document.getElementById("cursoForm");
   const panel = document.getElementById("cursoPanel");
   const estadoRuta = document.getElementById("cursoRutaEstado");
@@ -202,6 +197,7 @@
   const botonCancelar = document.getElementById("cursoCancelar");
   const estadoCategorias = document.getElementById("categoriasEstado");
   const mensajeEstadoCategorias = document.getElementById("categoriasEstadoMensaje");
+  const panelEstadoCategorias = crearPanelEstadoCategorias(estadoCategorias, mensajeEstadoCategorias);
   const botonReintentarCategorias = document.getElementById("categoriasReintentar");
   const estadoOperacion = document.getElementById("cursoOperacionEstado");
   const mensajeOperacion = document.getElementById("cursoOperacionMensaje");
@@ -258,7 +254,6 @@
   });
   botonReintentarCategorias.addEventListener("click", reintentarCategorias);
   botonReintentarRuta.addEventListener("click", () => window.location.reload());
-  startupReintentar.addEventListener("click", () => window.location.reload());
   inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
   inputPortada.addEventListener("change", seleccionarPortadaLocal);
   zoomPortada.addEventListener("input", () => cropperPortada.setZoom(zoomPortada.value));
@@ -282,31 +277,18 @@
   }, { once: true });
 
   const inicioStartup = iniciarTiempo();
-  try {
-    const session = await requerirSesion();
-    if (!session) return;
-    if (!(await esAdmin(session))) {
-      window.location.href = "/src/app/features/courses/cursos.html";
-      return;
-    }
-  } catch (error) {
-    reportarFallo("admin_startup", error, inicioStartup, "startup_failed");
-    mostrarErrorStartup(
-      "No pudimos verificar tu acceso. Revisa tu conexión y vuelve a intentarlo."
-    );
-    return;
-  }
+  if (!(await arranque.asegurarAdmin(inicioStartup))) return;
 
   let rutaValida;
   try {
     rutaValida = await configurarModo();
   } catch (error) {
     reportarFallo("course_form_startup", error, inicioStartup, "form_startup_exception");
-    mostrarErrorStartup("No se pudo preparar el formulario. Vuelve a intentarlo.");
+    arranque.mostrarError("No se pudo preparar el formulario. Vuelve a intentarlo.");
     return;
   }
   if (!rutaValida) {
-    revelarAdministracion();
+    arranque.revelar();
     estadoRuta.focus();
     return;
   }
@@ -316,30 +298,11 @@
     if (cursoEditando) poblarFormulario(cursoEditando);
     actualizarEstadoProgramacion();
     panel.hidden = false;
-    revelarAdministracion();
+    arranque.revelar();
   } catch (error) {
     reportarFallo("course_form_startup", error, inicioStartup, "form_startup_exception");
-    mostrarErrorStartup("No se pudo preparar el formulario. Vuelve a intentarlo.");
+    arranque.mostrarError("No se pudo preparar el formulario. Vuelve a intentarlo.");
     return;
-  }
-
-  function mostrarErrorStartup(mensaje) {
-    startup.classList.add("courses__startup-status--error");
-    startupTitulo.textContent = "No se pudo abrir el formulario";
-    startupMensaje.textContent = mensaje;
-    startupLoader.hidden = true;
-    startupLoadingMessage.hidden = true;
-    startupError.hidden = false;
-    startupReintentar.hidden = false;
-    startup.setAttribute("aria-busy", "false");
-    startup.focus();
-  }
-
-  function revelarAdministracion() {
-    startup.setAttribute("aria-busy", "false");
-    startup.hidden = true;
-    navbar.hidden = false;
-    contenido.hidden = false;
   }
 
   async function configurarModo() {
@@ -463,17 +426,6 @@
     }
   }
 
-  function crearCategoriasLegacy(nombresExtra = []) {
-    const nombres = [...CATEGORIAS_LEGACY_CURSO, ...nombresExtra]
-      .map((nombre) => (typeof nombre === "string" ? nombre.trim() : ""))
-      .filter(Boolean);
-    return Array.from(new Map(
-      nombres.map((nombre) => [nombre.toLocaleLowerCase("es-MX"), nombre])
-    ).values())
-      .sort((a, b) => a.localeCompare(b, "es-MX"))
-      .map((nombre) => ({ id: null, nombre, activo: null, legacy: true }));
-  }
-
   async function cargarCategorias() {
     const solicitud = ++secuenciaCargaCategorias;
     const seleccionPrevia = obtenerSeleccionCategoria();
@@ -496,7 +448,7 @@
     if (resultado.ok) {
       categorias = resultado.data.map((categoria) => ({ ...categoria, legacy: false }));
       modoCategorias = "normalizado";
-      ocultarEstadoCategorias();
+      panelEstadoCategorias.ocultar();
     } else {
       if (!falloReportado) {
         reportarFallo(
@@ -506,16 +458,16 @@
           resultado.migracionRequerida ? "migration_required" : "category_load_failed"
         );
       }
-      categorias = crearCategoriasLegacy(cursoEditando?.categoria ? [cursoEditando.categoria] : []);
+      categorias = categoriasLegacy(cursoEditando?.categoria ? [cursoEditando.categoria] : []);
       if (resultado.migracionRequerida) {
         modoCategorias = "legacy";
-        mostrarEstadoCategorias(
+        panelEstadoCategorias.mostrar(
           "migration",
           "Se requiere aplicar la migración 0010 en Supabase. Puedes guardar el curso con las opciones heredadas."
         );
       } else {
         modoCategorias = modoCategorias === "normalizado" ? "normalizado" : "legacy";
-        mostrarEstadoCategorias(
+        panelEstadoCategorias.mostrar(
           "error",
           "No se pudieron actualizar las categorías. Se muestran las opciones heredadas; reintenta cuando tengas conexión."
         );
@@ -532,25 +484,6 @@
     if (cargaCategoriasEnCurso) return;
     const cargadas = await cargarCategorias();
     (cargadas ? inputCategoria : estadoCategorias).focus();
-  }
-
-  function mostrarEstadoCategorias(tipo, mensaje) {
-    estadoCategorias.hidden = false;
-    estadoCategorias.classList.remove(
-      "courses__categories-status--migration",
-      "courses__categories-status--error"
-    );
-    estadoCategorias.classList.add(`courses__categories-status--${tipo}`);
-    mensajeEstadoCategorias.textContent = mensaje;
-  }
-
-  function ocultarEstadoCategorias() {
-    estadoCategorias.hidden = true;
-    mensajeEstadoCategorias.textContent = "";
-    estadoCategorias.classList.remove(
-      "courses__categories-status--migration",
-      "courses__categories-status--error"
-    );
   }
 
   function crearOpcionCategoria(valor, nombre, modo, texto = nombre) {

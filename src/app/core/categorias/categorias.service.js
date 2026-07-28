@@ -14,6 +14,21 @@ function obtenerDisponibilidadCategoriasNormalizadas() {
   return disponibilidadCategoriasNormalizadas;
 }
 
+/*
+  Opciones que se ofrecen cuando public.categorias no está disponible: las
+  heredadas más las que ya traiga el curso en edición, sin repetir nombres que
+  solo difieran en mayúsculas y ordenadas como las vería un lector en español.
+*/
+function categoriasLegacy(nombresExtra = []) {
+  const nombres = [...CATEGORIAS_LEGACY_CURSO, ...nombresExtra]
+    .map((nombre) => (typeof nombre === "string" ? nombre.trim() : ""))
+    .filter(Boolean);
+  const unicas = new Map(nombres.map((nombre) => [nombre.toLocaleLowerCase("es-MX"), nombre]));
+  return [...unicas.values()]
+    .sort((a, b) => a.localeCompare(b, "es-MX"))
+    .map((nombre) => ({ id: null, nombre, activo: null, legacy: true }));
+}
+
 function datosErrorSupabase(error) {
   return {
     code: error?.code || null,

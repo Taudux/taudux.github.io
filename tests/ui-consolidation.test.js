@@ -115,7 +115,8 @@ test("admin card uses the edit route and deletion without activating details", a
   assert.deepEqual(calls.deleted, [course.id]);
   assert.deepEqual(calls.toasts, [["Curso eliminado.", "success"]]);
   await hitArea.click();
-  assert.deepEqual(calls.toasts.at(-1), ["El detalle del curso estará disponible pronto."]);
+  assert.equal(window.location.href, "/index.html#contacto");
+  assert.deepEqual(calls.toasts, [["Curso eliminado.", "success"]]);
 });
 
 test("public course details behave identically without an authentication gate", async () => {
@@ -127,15 +128,14 @@ test("public course details behave identically without an authentication gate", 
   for (const { calls, elements, window } of contexts) {
     await window.tauduxCursosCatalog.ready;
     const sessionsBeforeActivation = calls.sessions;
-    const hrefBeforeActivation = window.location.href;
     const hitArea = find(elements.cursosLista, (element) => element.className === "courses__card-hit-area");
 
     await hitArea.click();
 
     assert.equal(calls.sessions, sessionsBeforeActivation);
     assert.equal(calls.loginUrls, 0);
-    assert.equal(window.location.href, hrefBeforeActivation);
-    assert.deepEqual(calls.toasts, [["El detalle del curso estará disponible pronto."]]);
+    assert.equal(window.location.href, "/index.html#contacto");
+    assert.deepEqual(calls.toasts, []);
   }
 });
 

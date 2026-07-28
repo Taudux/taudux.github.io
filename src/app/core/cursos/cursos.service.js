@@ -54,105 +54,75 @@ function esErrorEsquemaCategoriasCursoAusente(error) {
   );
 }
 
-// Lista todos los cursos, del más reciente al más antiguo.
-async function listarCursos() {
-  const resultadoNormalizado = await supabaseClient
-    .from("cursos")
-    .select(CAMPOS_CURSO_NORMALIZADO)
-    .order("creado_en", { ascending: false });
-
-  if (!resultadoNormalizado.error) {
+/*
+  Toda lectura de cursos sigue la misma máquina: intenta el SELECT normalizado y,
+  solo si el error es la ausencia del esquema de 0010, retrocede al SELECT
+  legado. Cualquier otro error se propaga tal cual. `consultar` recibe la lista
+  de campos y devuelve la promesa de Supabase; `adaptar` traduce cada fila.
+*/
+async function leerCursosConFallbackCategorias({
+  consultar,
+  adaptar,
+  contexto,
+  mensajeError,
+  codigoNormalizado,
+  codigoLegacy,
+  datosRegistro = {},
+}) {
+  const normalizado = await consultar(CAMPOS_CURSO_NORMALIZADO);
+  if (!normalizado.error) {
     disponibilidadCategoriasEnCursos = true;
-    return {
-      ok: true,
-      data: (resultadoNormalizado.data || []).map(normalizarCategoriaCurso),
-      modoCategorias: "normalizado",
-    };
+    return { ok: true, data: adaptar(normalizado.data, normalizarCategoriaCurso), modoCategorias: "normalizado" };
   }
 
-  registrarErrorSupabaseCursos("listar-normalizado", resultadoNormalizado.error);
-  if (!esErrorEsquemaCategoriasCursoAusente(resultadoNormalizado.error)) {
-    return {
-      ok: false,
-      codigo: resultadoNormalizado.error.code || "list_failed",
-      mensaje: "No se pudieron cargar los cursos.",
-    };
+  registrarErrorSupabaseCursos(`${contexto}-normalizado`, normalizado.error, datosRegistro);
+  if (!esErrorEsquemaCategoriasCursoAusente(normalizado.error)) {
+    return { ok: false, codigo: normalizado.error.code || codigoNormalizado, mensaje: mensajeError };
   }
 
   disponibilidadCategoriasEnCursos = false;
-  const resultadoLegacy = await supabaseClient
-    .from("cursos")
-    .select(CAMPOS_CURSO_BASE)
-    .order("creado_en", { ascending: false });
-  if (resultadoLegacy.error) {
-    registrarErrorSupabaseCursos("listar-legacy", resultadoLegacy.error);
-    return {
-      ok: false,
-      codigo: resultadoLegacy.error.code || "legacy_list_failed",
-      mensaje: "No se pudieron cargar los cursos.",
-    };
+  const legacy = await consultar(CAMPOS_CURSO_BASE);
+  if (legacy.error) {
+    registrarErrorSupabaseCursos(`${contexto}-legacy`, legacy.error, datosRegistro);
+    return { ok: false, codigo: legacy.error.code || codigoLegacy, mensaje: mensajeError };
   }
-  return {
-    ok: true,
-    data: (resultadoLegacy.data || []).map(normalizarCategoriaCursoLegacy),
-    modoCategorias: "legacy",
-  };
+  return { ok: true, data: adaptar(legacy.data, normalizarCategoriaCursoLegacy), modoCategorias: "legacy" };
+}
+
+const adaptarLista = (data, normalizar) => (data || []).map(normalizar);
+const adaptarFila = (data, normalizar) => (data ? normalizar(data) : null);
+
+// Lista todos los cursos, del más reciente al más antiguo.
+function listarCursos() {
+  return leerCursosConFallbackCategorias({
+    consultar: (campos) => supabaseClient
+      .from("cursos")
+      .select(campos)
+      .order("creado_en", { ascending: false }),
+    adaptar: adaptarLista,
+    contexto: "listar",
+    mensajeError: "No se pudieron cargar los cursos.",
+    codigoNormalizado: "list_failed",
+    codigoLegacy: "legacy_list_failed",
+  });
 }
 
 // Obtiene exactamente un curso para la pantalla de edición. `data: null` indica
 // que el ID no existe; solo retrocede al SELECT legado si falta el esquema de 0010.
-async function obtenerCursoPorId(id) {
-  const resultadoNormalizado = await supabaseClient
-    .from("cursos")
-    .select(CAMPOS_CURSO_NORMALIZADO)
-    .eq("id", id)
-    .maybeSingle();
-
-  if (!resultadoNormalizado.error) {
-    disponibilidadCategoriasEnCursos = true;
-    return {
-      ok: true,
-      data: resultadoNormalizado.data
-        ? normalizarCategoriaCurso(resultadoNormalizado.data)
-        : null,
-      modoCategorias: "normalizado",
-    };
-  }
-
-  registrarErrorSupabaseCursos("obtener-por-id-normalizado", resultadoNormalizado.error, {
-    consulta: "exacta",
+function obtenerCursoPorId(id) {
+  return leerCursosConFallbackCategorias({
+    consultar: (campos) => supabaseClient
+      .from("cursos")
+      .select(campos)
+      .eq("id", id)
+      .maybeSingle(),
+    adaptar: adaptarFila,
+    contexto: "obtener-por-id",
+    mensajeError: "No se pudo cargar el curso.",
+    codigoNormalizado: "course_load_failed",
+    codigoLegacy: "legacy_course_load_failed",
+    datosRegistro: { consulta: "exacta" },
   });
-  if (!esErrorEsquemaCategoriasCursoAusente(resultadoNormalizado.error)) {
-    return {
-      ok: false,
-      codigo: resultadoNormalizado.error.code || "course_load_failed",
-      mensaje: "No se pudo cargar el curso.",
-    };
-  }
-
-  disponibilidadCategoriasEnCursos = false;
-  const resultadoLegacy = await supabaseClient
-    .from("cursos")
-    .select(CAMPOS_CURSO_BASE)
-    .eq("id", id)
-    .maybeSingle();
-  if (resultadoLegacy.error) {
-    registrarErrorSupabaseCursos("obtener-por-id-legacy", resultadoLegacy.error, {
-      consulta: "exacta-legacy",
-    });
-    return {
-      ok: false,
-      codigo: resultadoLegacy.error.code || "legacy_course_load_failed",
-      mensaje: "No se pudo cargar el curso.",
-    };
-  }
-  return {
-    ok: true,
-    data: resultadoLegacy.data
-      ? normalizarCategoriaCursoLegacy(resultadoLegacy.data)
-      : null,
-    modoCategorias: "legacy",
-  };
 }
 
 function normalizarCategoriaCurso(curso) {
@@ -220,36 +190,46 @@ function valorCursoComparable(campo, valor) {
   return valor === undefined ? null : valor;
 }
 
+const CAMPOS_RECONCILIABLES = Object.freeze([
+  "titulo",
+  "descripcion",
+  "imagen_url",
+  "imagen_storage_path",
+  "modalidad",
+  "fecha_inicio",
+  "fecha_fin",
+  "dias_semana",
+  "hora_inicio",
+  "duracion_horas",
+  "cupo_maximo",
+  "costo",
+  "instructor",
+  "proximamente",
+]);
+
+/*
+  `undefined` significa "hora que no supe canonicalizar", no "hora ausente": dos
+  valores incomparables nunca deben leerse como iguales, así que ese campo exige
+  ambos lados canonicalizados antes de comparar.
+*/
+function campoCursoCoincide(campo, curso, camposEsperados) {
+  const valorActual = valorCursoComparable(campo, curso[campo]);
+  const valorEsperado = valorCursoComparable(campo, camposEsperados[campo]);
+  if (campo === "hora_inicio" && (valorActual === undefined || valorEsperado === undefined)) {
+    return false;
+  }
+  return valorActual === valorEsperado;
+}
+
+function categoriaCursoCoincide(curso, camposEsperados, usarNormalizado) {
+  const campo = usarNormalizado ? "categoria_id" : "categoria";
+  return (curso[campo] || null) === (camposEsperados[campo] || null);
+}
+
 function cursoCoincideConOperacion(curso, camposEsperados, usarNormalizado) {
-  const campos = [
-    "titulo",
-    "descripcion",
-    "imagen_url",
-    "imagen_storage_path",
-    "modalidad",
-    "fecha_inicio",
-    "fecha_fin",
-    "dias_semana",
-    "hora_inicio",
-    "duracion_horas",
-    "cupo_maximo",
-    "costo",
-    "instructor",
-    "proximamente",
-  ];
-  const mismosCampos = campos.every((campo) => {
-    const valorActual = valorCursoComparable(campo, curso[campo]);
-    const valorEsperado = valorCursoComparable(campo, camposEsperados[campo]);
-    return (
-      (campo !== "hora_inicio" ||
-        (valorActual !== undefined && valorEsperado !== undefined)) &&
-      valorActual === valorEsperado
-    );
-  });
-  if (!mismosCampos) return false;
-  return usarNormalizado
-    ? (curso.categoria_id || null) === (camposEsperados.categoria_id || null)
-    : (curso.categoria || null) === (camposEsperados.categoria || null);
+  const mismosCampos = CAMPOS_RECONCILIABLES
+    .every((campo) => campoCursoCoincide(campo, curso, camposEsperados));
+  return mismosCampos && categoriaCursoCoincide(curso, camposEsperados, usarNormalizado);
 }
 
 async function reconciliarCreacionCurso(id, camposEsperados, usarNormalizado) {
@@ -306,12 +286,13 @@ async function insertarCursoConReconciliacion(id, campos, usarNormalizado) {
   return { ok: false, error: resultado.error };
 }
 
-// Crea un curso con un UUID de operación estable (solo admins; RLS es autoritativa).
-async function crearCurso(campos, operacionId) {
-  const { titulo, imagen_url, imagen_storage_path, imagen_upload_token } = campos;
-  if (!titulo) {
-    return { ok: false, codigo: "title_required", mensaje: "El título es obligatorio." };
-  }
+/*
+  Defensa en capa sobre la portada, idéntica al crear y al actualizar: la URL
+  debe ser navegable, una portada gestionada debe apuntar exactamente a su ruta
+  de Storage, y el token de asociación solo vale acompañado de esa ruta.
+  Devuelve null cuando no hay objeción.
+*/
+function validarPortadaEnCampos({ imagen_url, imagen_storage_path, imagen_upload_token }) {
   if (imagen_url && !esUrlSegura(imagen_url)) {
     return {
       ok: false,
@@ -326,13 +307,24 @@ async function crearCurso(campos, operacionId) {
       mensaje: "La portada administrada no es válida.",
     };
   }
-  if (imagen_upload_token && (!imagen_storage_path || !UUID_TOKEN_PORTADA.test(imagen_upload_token))) {
+  const tokenSinRuta = !imagen_storage_path || !UUID_TOKEN_PORTADA.test(imagen_upload_token);
+  if (imagen_upload_token && tokenSinRuta) {
     return {
       ok: false,
       codigo: "invalid_cover_intent",
       mensaje: "No se pudo asociar la portada de forma segura. Vuelve a subirla.",
     };
   }
+  return null;
+}
+
+// Crea un curso con un UUID de operación estable (solo admins; RLS es autoritativa).
+async function crearCurso(campos, operacionId) {
+  if (!campos.titulo) {
+    return { ok: false, codigo: "title_required", mensaje: "El título es obligatorio." };
+  }
+  const portadaInvalida = validarPortadaEnCampos(campos);
+  if (portadaInvalida) return portadaInvalida;
   if (!esUuidOperacionValido(operacionId)) {
     return {
       ok: false,
@@ -367,6 +359,10 @@ async function crearCurso(campos, operacionId) {
     };
   }
   return resultado;
+}
+
+function esValorCapturado(valor) {
+  return valor !== "" && valor !== null && valor !== undefined;
 }
 
 // Convierte strings vacíos del form en null y normaliza los campos numéricos/array,
@@ -404,7 +400,8 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     hora_inicio: esProximamente ? null : hora_inicio || null,
     duracion_horas: esProximamente || !duracion_horas ? null : parseFloat(duracion_horas),
     cupo_maximo: cupo_maximo ? parseInt(cupo_maximo, 10) : null,
-    costo: costo !== "" && costo !== null && costo !== undefined ? parseFloat(costo) : null,
+    // El costo 0 es significativo ("Gratis"), así que solo el vacío es null.
+    costo: esValorCapturado(costo) ? parseFloat(costo) : null,
     instructor: instructor || null,
     proximamente: esProximamente,
   };
@@ -419,37 +416,42 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
   return normalizados;
 }
 
-// Actualiza un curso existente (solo admins).
-async function actualizarCurso(id, campos, portadaEsperada) {
-  if (campos.imagen_url && !esUrlSegura(campos.imagen_url)) {
-    return { ok: false, mensaje: "La imagen debe ser una URL http o https válida." };
-  }
-  if (!portadaEsperada || !Object.hasOwn(portadaEsperada, "url") || !Object.hasOwn(portadaEsperada, "path")) {
-    return { ok: false, codigo: "cover_conflict", mensaje: "La portada cambió. Recarga la página." };
-  }
-  if (campos.imagen_storage_path &&
-      campos.imagen_url !== urlPublicaPortada(campos.imagen_storage_path)) {
-    return { ok: false, codigo: "invalid_managed_cover", mensaje: "La portada administrada no es válida." };
-  }
-  if (campos.imagen_upload_token && (
-    !campos.imagen_storage_path || !UUID_TOKEN_PORTADA.test(campos.imagen_upload_token)
-  )) {
-    return { ok: false, codigo: "invalid_cover_intent", mensaje: "No se pudo asociar la portada de forma segura. Vuelve a subirla." };
-  }
-  let usarNormalizado = usarCategoriasNormalizadas(campos);
-  let solicitud = supabaseClient
+// Filtra por el valor esperado, distinguiendo "es null" de "es igual a".
+function filtrarPorValorEsperado(solicitud, columna, esperado) {
+  return esperado === null ? solicitud.is(columna, null) : solicitud.eq(columna, esperado);
+}
+
+/*
+  UPDATE optimista: solo modifica la fila si la portada sigue siendo exactamente
+  la que el formulario cargó. Si el par no coincide, Postgres no toca nada y
+  Supabase devuelve data null, que traducimos a cover_conflict.
+*/
+function construirActualizacionCurso(id, campos, portadaEsperada, usarNormalizado) {
+  const solicitud = supabaseClient
     .from("cursos")
     .update(normalizarCamposCurso(campos, usarNormalizado))
     .eq("id", id);
-  solicitud = portadaEsperada.url === null
-    ? solicitud.is("imagen_url", null)
-    : solicitud.eq("imagen_url", portadaEsperada.url);
-  solicitud = portadaEsperada.path === null
-    ? solicitud.is("imagen_storage_path", null)
-    : solicitud.eq("imagen_storage_path", portadaEsperada.path);
-  let resultado = await solicitud
-    .select()
-    .maybeSingle();
+  const conUrl = filtrarPorValorEsperado(solicitud, "imagen_url", portadaEsperada.url);
+  const conPar = filtrarPorValorEsperado(conUrl, "imagen_storage_path", portadaEsperada.path);
+  return conPar.select().maybeSingle();
+}
+
+function esPortadaEsperadaCompleta(portadaEsperada) {
+  return Boolean(portadaEsperada) &&
+    Object.hasOwn(portadaEsperada, "url") &&
+    Object.hasOwn(portadaEsperada, "path");
+}
+
+// Actualiza un curso existente (solo admins).
+async function actualizarCurso(id, campos, portadaEsperada) {
+  const portadaInvalida = validarPortadaEnCampos(campos);
+  if (portadaInvalida) return portadaInvalida;
+  if (!esPortadaEsperadaCompleta(portadaEsperada)) {
+    return { ok: false, codigo: "cover_conflict", mensaje: "La portada cambió. Recarga la página." };
+  }
+
+  let usarNormalizado = usarCategoriasNormalizadas(campos);
+  let resultado = await construirActualizacionCurso(id, campos, portadaEsperada, usarNormalizado);
 
   if (
     resultado.error &&
@@ -462,19 +464,7 @@ async function actualizarCurso(id, campos, portadaEsperada) {
     });
     disponibilidadCategoriasEnCursos = false;
     usarNormalizado = false;
-    let solicitudLegacy = supabaseClient
-      .from("cursos")
-      .update(normalizarCamposCurso(campos, usarNormalizado))
-      .eq("id", id);
-    solicitudLegacy = portadaEsperada.url === null
-      ? solicitudLegacy.is("imagen_url", null)
-      : solicitudLegacy.eq("imagen_url", portadaEsperada.url);
-    solicitudLegacy = portadaEsperada.path === null
-      ? solicitudLegacy.is("imagen_storage_path", null)
-      : solicitudLegacy.eq("imagen_storage_path", portadaEsperada.path);
-    resultado = await solicitudLegacy
-      .select()
-      .maybeSingle();
+    resultado = await construirActualizacionCurso(id, campos, portadaEsperada, usarNormalizado);
   }
 
   if (resultado.error) {
@@ -509,68 +499,4 @@ async function eliminarCurso(id) {
     };
   }
   return { ok: true };
-}
-
-// Etiqueta de modalidad para el badge de la tarjeta. null si no se capturó.
-function etiquetaModalidad(curso) {
-  if (curso.modalidad === "presencial") return "Presencial";
-  if (curso.modalidad === "en_linea") return "En línea";
-  return null;
-}
-
-// Parseo manual por partes: new Date("YYYY-MM-DD") interpreta UTC y puede mostrar
-// el día anterior según la zona horaria del navegador.
-function parsearFechaLocal(fecha) {
-  const [anio, mes, dia] = fecha.split("-").map(Number);
-  return new Date(anio, mes - 1, dia);
-}
-
-// "1 mar – 30 abr". null si no hay al menos una fecha.
-function formatearRangoFechas(curso) {
-  const opciones = { day: "numeric", month: "short" };
-  if (curso.fecha_inicio && curso.fecha_fin) {
-    const inicio = parsearFechaLocal(curso.fecha_inicio).toLocaleDateString("es-MX", opciones);
-    const fin = parsearFechaLocal(curso.fecha_fin).toLocaleDateString("es-MX", opciones);
-    return `${inicio} – ${fin}`;
-  }
-  if (curso.fecha_inicio) {
-    return parsearFechaLocal(curso.fecha_inicio).toLocaleDateString("es-MX", opciones);
-  }
-  return null;
-}
-
-// Rango en formato de 24 horas, calculado con la hora inicial y la duración.
-// La duración se captura en el formulario, pero no se muestra en las tarjetas.
-function formatearHorario(curso) {
-  if (typeof curso.hora_inicio !== "string") return null;
-
-  const partesHora = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.exec(
-    curso.hora_inicio
-  );
-  if (!partesHora) return null;
-
-  const horaInicio = Number(partesHora[1]);
-  const minutoInicio = Number(partesHora[2]);
-
-  const formatearMinutos = (minutosTotales) => {
-    const minutosDelDia = ((minutosTotales % 1440) + 1440) % 1440;
-    const hora = Math.floor(minutosDelDia / 60);
-    const minuto = minutosDelDia % 60;
-    return `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
-  };
-
-  const inicioEnMinutos = horaInicio * 60 + minutoInicio;
-  const duracionEnMinutos = Math.round(Number(curso.duracion_horas) * 60);
-  const inicio = formatearMinutos(inicioEnMinutos);
-
-  if (!Number.isFinite(duracionEnMinutos) || duracionEnMinutos <= 0) return inicio;
-
-  return `${inicio} - ${formatearMinutos(inicioEnMinutos + duracionEnMinutos)}`;
-}
-
-// "Gratis" si el costo es 0, "$500.00 MXN" si es mayor, null si no se capturó.
-function formatearCosto(costo) {
-  if (costo === null || costo === undefined) return null;
-  if (Number(costo) === 0) return "Gratis";
-  return `$${Number(costo).toFixed(2)} MXN`;
 }

@@ -196,18 +196,14 @@ function mensajeErrorEnlace(parametros) {
   return "El enlace no es válido. Solicita uno nuevo.";
 }
 
-async function destinoDespuesDeAuth(session) {
-  const destino = obtenerDestinoAuth();
-  if (destino) return destino;
-  return (await esAdmin(session))
-    ? "/src/app/features/courses/cursos.html"
-    : "/index.html";
+function destinoDespuesDeAuth() {
+  return obtenerDestinoAuth() || "/index.html";
 }
 
 async function redirigirSiSesionActiva() {
   const session = await obtenerSesion();
   if (!session) return false;
-  window.location.replace(await destinoDespuesDeAuth(session));
+  window.location.replace(destinoDespuesDeAuth());
   return true;
 }
 

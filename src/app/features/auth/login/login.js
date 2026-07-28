@@ -34,7 +34,7 @@ loginForm.addEventListener("submit", async (evento) => {
       return;
     }
 
-    const destino = await destinoDespuesDeAuth(resultado.data.session);
+    const destino = destinoDespuesDeAuth();
     limpiarDestinoAuth();
     window.location.replace(destino);
   } finally {

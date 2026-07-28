@@ -207,6 +207,14 @@
       color-mix(in srgb, var(--color-accent) 60%, transparent);
   }
 
+  .nav-menu__link--disabled {
+    padding: 10px 14px;
+    color: var(--color-text-muted);
+    opacity: 0.55;
+    cursor: default;
+    user-select: none;
+  }
+
   @media (max-width: 768px) {
     .navbar {
       flex-wrap: wrap;

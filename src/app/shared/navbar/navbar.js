@@ -3,9 +3,12 @@
   cargarse después de ese servicio.
 */
 
-const ENLACES_NAVEGACION = [
-  { texto: "Cursos", href: "/src/app/features/courses/cursos.html" },
-  { texto: "Detector IA", href: "/src/app/features/detector/detector.html" },
+const ENLACES_NAVEGACION_BASE = [
+  { texto: "Cursos", href: "/src/app/features/courses/cursos.html", habilitado: true },
+  { texto: "Portal", habilitado: false },
+  { texto: "Publicaciones", habilitado: false },
+  { texto: "Proyectos", habilitado: false },
+  { texto: "Herramientas", habilitado: false },
 ];
 
 async function salirYVolver(evento) {
@@ -73,7 +76,15 @@ function configurarMenuMovil() {
   });
 }
 
-function crearEnlaceMenu({ texto, href, alHacerClick, destacado }) {
+function crearItemMenu({ texto, href, alHacerClick, destacado, habilitado = true }) {
+  if (!habilitado) {
+    const item = document.createElement("span");
+    item.className = "nav-menu__link nav-menu__link--disabled";
+    item.setAttribute("aria-disabled", "true");
+    item.textContent = texto;
+    return item;
+  }
+
   const enlace = document.createElement("a");
   enlace.href = href;
   enlace.className = "nav-menu__link floating-menu__link";
@@ -101,6 +112,18 @@ async function montarMenuNavegacion() {
   if (!boton) return;
 
   const session = await obtenerSesion();
+  const esAdministrador = Boolean(session && await esAdmin(session));
+
+  const enlacesNavegacion = ENLACES_NAVEGACION_BASE.map((enlace) => {
+    if (enlace.texto === "Herramientas" && esAdministrador) {
+      return {
+        ...enlace,
+        href: "/src/app/features/detector/detector.html",
+        habilitado: true,
+      };
+    }
+    return enlace;
+  });
 
   const menu = document.createElement("div");
   menu.className = "nav-menu";
@@ -116,8 +139,8 @@ async function montarMenuNavegacion() {
   const lista = document.createElement("div");
   lista.className = "nav-menu__list floating-menu";
 
-  [...ENLACES_NAVEGACION, enlaceDeSesion(session)].forEach((enlace) => {
-    lista.appendChild(crearEnlaceMenu(enlace));
+  [...enlacesNavegacion, enlaceDeSesion(session)].forEach((enlace) => {
+    lista.appendChild(crearItemMenu(enlace));
   });
 
   menu.appendChild(toggle);

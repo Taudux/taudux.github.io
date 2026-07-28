@@ -22,44 +22,6 @@ const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_
 const TOKEN_ASOCIACION_PORTADA = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let disponibilidadCategoriasEnCursos = null;
 
-function iniciarMedicionOperacion() {
-  return typeof performance !== "undefined" && typeof performance.now === "function"
-    ? performance.now()
-    : Date.now();
-}
-
-function duracionOperacion(inicio) {
-  const fin = typeof performance !== "undefined" && typeof performance.now === "function"
-    ? performance.now()
-    : Date.now();
-  return Math.max(0, Math.round((fin - inicio) * 100) / 100);
-}
-
-function valorTelemetriaSeguro(valor, predeterminado) {
-  const texto = typeof valor === "string" ? valor : "";
-  return /^[a-zA-Z0-9:_-]{1,64}$/.test(texto) ? texto : predeterminado;
-}
-
-// Contrato local y sanitizado para que un listener de producción pueda recolectar
-// errores sin recibir títulos, IDs, nombres, payloads ni mensajes de Supabase.
-function reportarErrorOperacion({ operacion, pagina, error = null, codigo = null, inicio }) {
-  const detalle = Object.freeze({
-    operation: valorTelemetriaSeguro(operacion, "unknown_operation"),
-    page: valorTelemetriaSeguro(pagina, "unknown_page"),
-    code: valorTelemetriaSeguro(codigo || error?.code, "unknown_error"),
-    durationMs: duracionOperacion(inicio),
-  });
-  console.error("[taudux:operation-error]", detalle);
-  if (
-    typeof window !== "undefined" &&
-    typeof window.dispatchEvent === "function" &&
-    typeof CustomEvent === "function"
-  ) {
-    window.dispatchEvent(new CustomEvent("taudux:operation-error", { detail: detalle }));
-  }
-  return detalle;
-}
-
 function registrarErrorSupabaseCursos(contexto, error, datos = {}) {
   console.error("[cursos.service]", {
     contexto,

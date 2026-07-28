@@ -1,11 +1,11 @@
 /*
   Catálogo público de cursos con controles de administración revelados solo al rol
   admin. RLS sigue siendo el gate real para las escrituras. Depende de auth.service.js,
-  cursos.service.js y toast.js.
+  cursos.service.js, telemetry/operaciones.js y toast.js.
 */
 
 async function iniciarCatalogoCursos() {
-  const PAGINA = "course_catalog";
+  const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones("course_catalog");
   const lista = document.getElementById("cursosLista");
   const controlesAdmin = document.getElementById("adminControls");
   const estado = document.getElementById("cursosEstado");
@@ -62,18 +62,6 @@ async function iniciarCatalogoCursos() {
       lista.appendChild(crearTarjetaCurso(curso, usuarioAdmin, borrarCurso));
     });
     return true;
-  }
-
-  function iniciarTiempo() {
-    return typeof iniciarMedicionOperacion === "function" ? iniciarMedicionOperacion() : Date.now();
-  }
-
-  function reportarFallo(operacion, error, inicio, codigo) {
-    if (typeof reportarErrorOperacion === "function") {
-      reportarErrorOperacion({ operacion, pagina: PAGINA, error, codigo, inicio });
-      return;
-    }
-    console.error("[cursos]", { operacion, codigo: codigo || "unknown_error" });
   }
 
   function mostrarErrorLista(mensaje) {

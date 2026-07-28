@@ -1,7 +1,8 @@
 /*
   Formulario reutilizable para crear o editar un curso. La presencia de un único
   `id` UUID activa edición y exige cargar ese curso; nunca degrada a creación.
-  Requiere sesión y rol admin. Depende de auth, categorías, cursos y toast.
+  Requiere sesión y rol admin. Depende de auth, categorías, cursos, telemetría y
+  toast.
 */
 
 (async () => {
@@ -149,7 +150,7 @@
     return;
   }
 
-  const PAGINA = "course_admin_form";
+  const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones("course_admin_form");
   const RUTA_LISTA = "/src/app/features/courses/cursos.html";
   const VALOR_CATEGORIA_SIN_ASIGNAR = "__sin_categoria__";
   const PREFIJO_CATEGORIA_LEGACY = "__categoria_legacy__:";
@@ -319,20 +320,6 @@
     reportarFallo("course_form_startup", error, inicioStartup, "form_startup_exception");
     mostrarErrorStartup("No se pudo preparar el formulario. Vuelve a intentarlo.");
     return;
-  }
-
-  function iniciarTiempo() {
-    return typeof iniciarMedicionOperacion === "function"
-      ? iniciarMedicionOperacion()
-      : Date.now();
-  }
-
-  function reportarFallo(operacion, error, inicio, codigo) {
-    if (typeof reportarErrorOperacion === "function") {
-      reportarErrorOperacion({ operacion, pagina: PAGINA, error, codigo, inicio });
-      return;
-    }
-    console.error("[gestionar-curso]", { operacion, codigo: codigo || "unknown_error" });
   }
 
   function mostrarErrorStartup(mensaje) {

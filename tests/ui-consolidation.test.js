@@ -85,6 +85,7 @@ function createCatalogHarness({ admin = false, authenticated = true } = {}) {
     urlLoginConDestino: () => { calls.loginUrls += 1; return "/login"; },
   };
   window.window = window;
+  vm.runInNewContext(read("src/app/core/telemetry/operaciones.js"), context);
   vm.runInNewContext(read("src/app/features/courses/cursos.js"), context);
   return { calls, course, elements, window };
 }

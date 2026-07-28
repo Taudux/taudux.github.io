@@ -1,11 +1,11 @@
 /*
   Administración exclusiva de categorías: alta, renombrado, activación y retiro
   seguro. Requiere sesión y rol admin; RLS sigue siendo el gate real. Depende de
-  auth.service.js, categorias.service.js, cursos.service.js (telemetría) y toast.js.
+  auth.service.js, categorias.service.js, telemetry/operaciones.js y toast.js.
 */
 
 (async () => {
-  const PAGINA = "course_admin_categories";
+  const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones("course_admin_categories");
   const startup = document.getElementById("adminStartup");
   const startupTitulo = document.getElementById("adminStartupTitle");
   const startupMensaje = document.getElementById("adminStartupMessage");
@@ -58,23 +58,6 @@
     reportarFallo("category_startup", error, inicioStartup, "category_startup_exception");
     mostrarErrorStartup("No se pudieron preparar las categorías. Vuelve a intentarlo.");
     return;
-  }
-
-  function iniciarTiempo() {
-    return typeof iniciarMedicionOperacion === "function"
-      ? iniciarMedicionOperacion()
-      : Date.now();
-  }
-
-  function reportarFallo(operacion, error, inicio, codigo) {
-    if (typeof reportarErrorOperacion === "function") {
-      reportarErrorOperacion({ operacion, pagina: PAGINA, error, codigo, inicio });
-      return;
-    }
-    console.error("[gestionar-categorias]", {
-      operacion,
-      codigo: codigo || "unknown_error",
-    });
   }
 
   function mostrarErrorStartup(mensaje) {

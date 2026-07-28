@@ -92,9 +92,8 @@
   .navbar__brand:focus-visible,
   .navbar__link:not(.button):focus-visible,
   .navbar__toggle:not(.button):focus-visible,
-  .nav-dropdown__toggle:not(.button):focus-visible,
   .floating-menu__link:not(.button):focus-visible,
-  .user-menu__toggle:not(.button):focus-visible {
+  .nav-menu__toggle:not(.button):focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
@@ -112,73 +111,14 @@
     z-index: var(--z-mobile-toggle);
   }
 
-  .nav-dropdown,
-  .user-menu {
+  .nav-menu {
     position: relative;
     display: inline-block;
-  }
-
-  .user-menu {
     margin-inline-start: 0.75rem;
     vertical-align: middle;
   }
 
-  .nav-dropdown__toggle {
-    color: var(--color-text);
-    background: none;
-    border: none;
-    padding: 8px 16px;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    animation: explore-pulse 2.4s ease-in-out infinite;
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease,
-      box-shadow 0.3s ease;
-  }
-
-  @keyframes explore-pulse {
-    0%,
-    100% {
-      box-shadow: 0 0 8px
-        color-mix(in srgb, var(--color-accent) 40%, transparent);
-      text-shadow: 0 0 4px
-        color-mix(in srgb, var(--color-accent) 40%, transparent);
-    }
-
-    50% {
-      box-shadow: 0 0 22px 2px
-        color-mix(in srgb, var(--color-accent) 85%, transparent);
-      text-shadow: 0 0 10px
-        color-mix(in srgb, var(--color-accent) 90%, transparent);
-    }
-  }
-
-  .nav-dropdown__toggle:hover,
-  .nav-dropdown--open .nav-dropdown__toggle {
-    color: var(--color-text-inverse);
-    background-color: var(--color-text);
-    box-shadow: none;
-    text-shadow: none;
-    animation: none;
-  }
-
-  .nav-dropdown__menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 170px;
-    margin-top: 8px;
-  }
-
-  .nav-dropdown--open .nav-dropdown__menu {
-    display: flex;
-  }
-
-  .user-menu__toggle {
+  .nav-menu__toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,25 +137,52 @@
       box-shadow 0.25s ease;
   }
 
-  .user-menu__toggle:hover,
-  .user-menu--open .user-menu__toggle {
+  @keyframes nav-menu-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 10px
+        color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
+
+    50% {
+      transform: scale(1.08);
+      box-shadow: 0 0 28px 4px
+        color-mix(in srgb, var(--color-accent) 95%, transparent);
+    }
+  }
+
+  .nav-menu__toggle--pulsing {
+    /* El pulso se corta con `animation: none` al hacer hover/abrir (regla de
+       abajo) para que este `scale` nunca corra a la vez que el `scale(1.18)`
+       del hover. Si se quita ese corte, hay que resolver el choque de transforms. */
+    animation: nav-menu-pulse 1.8s ease-in-out infinite;
+  }
+
+  .nav-menu__toggle:hover,
+  .nav-menu--open .nav-menu__toggle {
     transform: scale(1.18);
     box-shadow: 0 0 20px 2px
       color-mix(in srgb, var(--color-accent) 75%, transparent);
+    animation: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .user-menu__toggle {
+    .nav-menu__toggle {
       transition: none;
     }
 
-    .user-menu__toggle:hover,
-    .user-menu--open .user-menu__toggle {
+    .nav-menu__toggle--pulsing {
+      animation: none;
+    }
+
+    .nav-menu__toggle:hover,
+    .nav-menu--open .nav-menu__toggle {
       transform: none;
     }
   }
 
-  .user-menu__list {
+  .nav-menu__list {
     position: absolute;
     top: 100%;
     right: 0;
@@ -223,28 +190,21 @@
     margin-top: 8px;
   }
 
-  .user-menu--open .user-menu__list {
+  .nav-menu--open .nav-menu__list {
     display: flex;
   }
 
-  @media (hover: hover) and (min-width: 769px) {
-    .nav-dropdown:hover .nav-dropdown__menu {
-      display: flex;
-    }
+  .nav-menu__link--cta {
+    color: var(--color-background);
+    background-color: var(--color-accent);
+    font-weight: 700;
+  }
 
-    .nav-dropdown:hover .nav-dropdown__toggle {
-      color: var(--color-text-inverse);
-      background-color: var(--color-text);
-    }
-
-    .nav-dropdown__menu::before {
-      content: "";
-      position: absolute;
-      top: -8px;
-      right: 0;
-      left: 0;
-      height: 8px;
-    }
+  .nav-menu__link--cta:hover {
+    color: var(--color-background);
+    background-color: var(--color-accent);
+    box-shadow: 0 0 12px
+      color-mix(in srgb, var(--color-accent) 60%, transparent);
   }
 
   @media (max-width: 768px) {
@@ -280,7 +240,7 @@
       overflow-wrap: anywhere;
     }
 
-    .user-menu {
+    .nav-menu {
       margin-inline-start: 0;
     }
 
@@ -294,15 +254,6 @@
       width: auto;
       padding: 0;
       background: none;
-    }
-
-    .nav-dropdown__menu.floating-menu {
-      position: static;
-      margin-top: 4px;
-      padding: 0 0 0 12px;
-      background-color: transparent;
-      border: none;
-      box-shadow: none;
     }
   }
 

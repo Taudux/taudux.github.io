@@ -3,6 +3,11 @@
   cargarse después de ese servicio.
 */
 
+const ENLACES_NAVEGACION = [
+  { texto: "Cursos", href: "/src/app/features/courses/cursos.html" },
+  { texto: "Detector IA", href: "/src/app/features/detector/detector.html" },
+];
+
 async function salirYVolver(evento) {
   if (evento) evento.preventDefault();
   const resultado = await cerrarSesion();
@@ -68,70 +73,65 @@ function configurarMenuMovil() {
   });
 }
 
-function configurarDropdownExplorar() {
-  const dropdown = document.getElementById("explorarDropdown");
-  const boton = document.getElementById("explorarToggle");
-  if (!dropdown || !boton) return;
-
-  boton.addEventListener("click", (evento) => {
-    evento.stopPropagation();
-    dropdown.classList.toggle("nav-dropdown--open");
-  });
-
-  document.addEventListener("click", (evento) => {
-    if (!dropdown.contains(evento.target)) {
-      dropdown.classList.remove("nav-dropdown--open");
-    }
-  });
+function crearEnlaceMenu({ texto, href, alHacerClick, destacado }) {
+  const enlace = document.createElement("a");
+  enlace.href = href;
+  enlace.className = "nav-menu__link floating-menu__link";
+  if (destacado) enlace.classList.add("nav-menu__link--cta");
+  enlace.textContent = texto;
+  if (alHacerClick) enlace.addEventListener("click", alHacerClick);
+  return enlace;
 }
 
-async function actualizarBotonAcceso() {
+function enlaceDeSesion(session) {
+  if (!session) {
+    return { texto: "Acceder", href: RUTAS_AUTH.login, destacado: true };
+  }
+  return { texto: "Salir", href: "#", alHacerClick: salirYVolver };
+}
+
+async function etiquetaDelMenu(session) {
+  if (!session) return "Menú";
+  const nombre = await nombreUsuario(session);
+  return nombre || "Mi cuenta";
+}
+
+async function montarMenuNavegacion() {
   const boton = document.getElementById("accessBtn");
   if (!boton) return;
 
   const session = await obtenerSesion();
 
-  if (!session) {
-    boton.textContent = "Acceder";
-    boton.href = RUTAS_AUTH.login;
-    boton.onclick = null;
-    return;
-  }
-
-  const nombre = await nombreUsuario(session);
-
   const menu = document.createElement("div");
-  menu.className = "user-menu";
+  menu.className = "nav-menu";
 
   const toggle = document.createElement("button");
   toggle.type = "button";
-  toggle.className = "user-menu__toggle";
-  toggle.setAttribute("aria-label", nombre || "Mi cuenta");
+  toggle.className = "nav-menu__toggle";
+  toggle.classList.toggle("nav-menu__toggle--pulsing", !session);
+  toggle.setAttribute("aria-label", await etiquetaDelMenu(session));
   toggle.setAttribute("aria-haspopup", "menu");
   toggle.setAttribute("aria-expanded", "false");
 
   const lista = document.createElement("div");
-  lista.className = "user-menu__list floating-menu";
+  lista.className = "nav-menu__list floating-menu";
 
-  const salir = document.createElement("a");
-  salir.href = "#";
-  salir.className = "user-menu__link floating-menu__link";
-  salir.textContent = "Salir";
-  salir.addEventListener("click", salirYVolver);
+  [...ENLACES_NAVEGACION, enlaceDeSesion(session)].forEach((enlace) => {
+    lista.appendChild(crearEnlaceMenu(enlace));
+  });
 
-  lista.appendChild(salir);
   menu.appendChild(toggle);
   menu.appendChild(lista);
   boton.replaceWith(menu);
 
   function establecerMenuAbierto(abierto) {
-    menu.classList.toggle("user-menu--open", abierto);
+    menu.classList.toggle("nav-menu--open", abierto);
     toggle.setAttribute("aria-expanded", String(abierto));
   }
 
   toggle.addEventListener("click", (evento) => {
     evento.stopPropagation();
-    establecerMenuAbierto(!menu.classList.contains("user-menu--open"));
+    establecerMenuAbierto(!menu.classList.contains("nav-menu--open"));
   });
 
   document.addEventListener("click", (evento) => {
@@ -141,7 +141,7 @@ async function actualizarBotonAcceso() {
   });
 
   menu.addEventListener("keydown", (evento) => {
-    if (evento.key === "Escape" && menu.classList.contains("user-menu--open")) {
+    if (evento.key === "Escape" && menu.classList.contains("nav-menu--open")) {
       establecerMenuAbierto(false);
       toggle.focus();
     }
@@ -150,10 +150,9 @@ async function actualizarBotonAcceso() {
 
 document.addEventListener("DOMContentLoaded", () => {
   configurarMenuMovil();
-  configurarDropdownExplorar();
   actualizarEstadoVisualNavbar();
   actualizarEnlaceActivo();
-  actualizarBotonAcceso();
+  montarMenuNavegacion();
 });
 
 window.addEventListener("scroll", () => {

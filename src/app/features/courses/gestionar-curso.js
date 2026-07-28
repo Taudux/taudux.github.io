@@ -154,8 +154,9 @@
   const RUTA_LISTA = "/src/app/features/courses/cursos.html";
   const VALOR_CATEGORIA_SIN_ASIGNAR = "__sin_categoria__";
   const PREFIJO_CATEGORIA_LEGACY = "__categoria_legacy__:";
-  const UUID_CURSO = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const UUID_OPERACION_CURSO = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+  // Un curso puede tener cualquier UUID v1-v8; comparte forma con el token de
+  // portada, que también lo emite el servidor.
+  const UUID_CURSO = UUID_TOKEN_PORTADA;
 
   const startup = document.getElementById("adminStartup");
   const startupTitulo = document.getElementById("adminStartupTitle");

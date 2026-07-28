@@ -1,11 +1,17 @@
-/* Envía portadas a la función autenticada; el navegador nunca accede a Storage. */
+/*
+  Envía portadas a la función autenticada; el navegador nunca accede a Storage.
+  Depende de core/cursos/portadas.constantes.js.
+*/
 (() => {
+  // En el navegador las constantes llegan por el scope léxico global del script
+  // anterior; bajo Node (tests) se resuelven por require.
+  const PORTADAS = typeof module === "object" && module.exports
+    ? require("./portadas.constantes.js")
+    : { RUTA_PORTADA_GESTIONADA, UUID_TOKEN_PORTADA, urlPublicaPortada };
+
   const MAX_BYTES = 10_000_000;
   const TIMEOUT_MS = 15_000;
   const MIME_GENERADO = "image/jpeg";
-  const RUTA_GESTIONADA = /^sha256\/[0-9a-f]{64}\.(?:jpg|png|webp)$/;
-  const TOKEN_ASOCIACION = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const URL_PORTADAS = "https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/";
   const MENSAJE_GENERICO = "No se pudo subir la portada. Revisa tu conexión e inténtalo de nuevo.";
   const MENSAJE_RETIRO_GENERICO = "No se pudo quitar la imagen actual. Inténtalo de nuevo.";
   const MENSAJES = {
@@ -64,16 +70,23 @@
     return error;
   }
 
+  function esRutaGestionada(valor) {
+    return typeof valor === "string" && PORTADAS.RUTA_PORTADA_GESTIONADA.test(valor);
+  }
+
+  function esTokenAsociacion(valor) {
+    return typeof valor === "string" && PORTADAS.UUID_TOKEN_PORTADA.test(valor);
+  }
+
+  // Solo aceptamos la terna completa y coherente: ruta gestionada, token de
+  // asociación, y una URL pública que sea exactamente la de esa ruta.
   function validarPortadaGestionada(data) {
-    const ruta = typeof data?.path === "string" && RUTA_GESTIONADA.test(data.path)
-      ? data.path
-      : null;
+    if (!esRutaGestionada(data?.path) || !esTokenAsociacion(data?.associationToken)) {
+      return null;
+    }
     const url = validarUrlPublica(data?.url);
-    const associationToken = typeof data?.associationToken === "string" &&
-      TOKEN_ASOCIACION.test(data.associationToken) ? data.associationToken : null;
-    return ruta && associationToken && url === `${URL_PORTADAS}${ruta}`
-      ? { url, path: ruta, associationToken }
-      : null;
+    if (url !== PORTADAS.urlPublicaPortada(data.path)) return null;
+    return { url, path: data.path, associationToken: data.associationToken };
   }
 
   function crearClientePortadas({

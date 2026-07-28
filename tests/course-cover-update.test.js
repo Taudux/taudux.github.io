@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 
+const CONSTANTS_SOURCE = fs.readFileSync("src/app/core/cursos/portadas.constantes.js", "utf8");
 const SOURCE = fs.readFileSync("src/app/core/cursos/cursos.service.js", "utf8");
 const COURSE_ID = "123e4567-e89b-42d3-a456-426614174000";
 const OLD_URL = "https://legacy.example/old.jpg";
@@ -24,6 +25,7 @@ function createHarness(data) {
     console: { error() {} },
     supabaseClient: { from(name) { assert.equal(name, "cursos"); return query; } },
   };
+  vm.runInNewContext(CONSTANTS_SOURCE, context);
   vm.runInNewContext(SOURCE, context);
   return { calls, actualizarCurso: context.actualizarCurso };
 }

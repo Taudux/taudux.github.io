@@ -19,7 +19,6 @@ function esUrlSegura(url) {
 const CAMPOS_CURSO_BASE =
   "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en";
 const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_rel:categorias!cursos_categoria_id_fkey(id, nombre, activo)`;
-const TOKEN_ASOCIACION_PORTADA = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let disponibilidadCategoriasEnCursos = null;
 
 function registrarErrorSupabaseCursos(contexto, error, datos = {}) {
@@ -193,7 +192,7 @@ function usarCategoriasNormalizadas(campos) {
 }
 
 function esUuidOperacionValido(id) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+  return UUID_OPERACION_CURSO.test(id);
 }
 
 function esErrorInsercionAmbigua(error) {
@@ -320,15 +319,14 @@ async function crearCurso(campos, operacionId) {
       mensaje: "La imagen debe ser una URL http o https válida.",
     };
   }
-  if (imagen_storage_path && imagen_url !==
-      `https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/${imagen_storage_path}`) {
+  if (imagen_storage_path && imagen_url !== urlPublicaPortada(imagen_storage_path)) {
     return {
       ok: false,
       codigo: "invalid_managed_cover",
       mensaje: "La portada administrada no es válida.",
     };
   }
-  if (imagen_upload_token && (!imagen_storage_path || !TOKEN_ASOCIACION_PORTADA.test(imagen_upload_token))) {
+  if (imagen_upload_token && (!imagen_storage_path || !UUID_TOKEN_PORTADA.test(imagen_upload_token))) {
     return {
       ok: false,
       codigo: "invalid_cover_intent",
@@ -429,12 +427,12 @@ async function actualizarCurso(id, campos, portadaEsperada) {
   if (!portadaEsperada || !Object.hasOwn(portadaEsperada, "url") || !Object.hasOwn(portadaEsperada, "path")) {
     return { ok: false, codigo: "cover_conflict", mensaje: "La portada cambió. Recarga la página." };
   }
-  if (campos.imagen_storage_path && campos.imagen_url !==
-      `https://yqkvgfqplmbbcebrivpt.supabase.co/storage/v1/object/public/course-covers/${campos.imagen_storage_path}`) {
+  if (campos.imagen_storage_path &&
+      campos.imagen_url !== urlPublicaPortada(campos.imagen_storage_path)) {
     return { ok: false, codigo: "invalid_managed_cover", mensaje: "La portada administrada no es válida." };
   }
   if (campos.imagen_upload_token && (
-    !campos.imagen_storage_path || !TOKEN_ASOCIACION_PORTADA.test(campos.imagen_upload_token)
+    !campos.imagen_storage_path || !UUID_TOKEN_PORTADA.test(campos.imagen_upload_token)
   )) {
     return { ok: false, codigo: "invalid_cover_intent", mensaje: "No se pudo asociar la portada de forma segura. Vuelve a subirla." };
   }

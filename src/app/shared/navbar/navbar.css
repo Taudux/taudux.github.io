@@ -89,6 +89,13 @@
     color: var(--color-text-inverse);
   }
 
+  /* Placeholder que reemplaza navbar.js por el menú del avatar. Arranca oculto
+     para no parpadear el "Acceder" plano mientras se resuelve la sesión; si el
+     JS falla antes de reemplazarlo, navbar.js lo revela como respaldo. */
+  #accessBtn {
+    visibility: hidden;
+  }
+
   .navbar__brand:focus-visible,
   .navbar__link:not(.button):focus-visible,
   .navbar__toggle:not(.button):focus-visible,

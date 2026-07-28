@@ -111,64 +111,72 @@ async function montarMenuNavegacion() {
   const boton = document.getElementById("accessBtn");
   if (!boton) return;
 
-  const session = await obtenerSesion();
-  const esAdministrador = Boolean(session && await esAdmin(session));
+  // #accessBtn arranca oculto por CSS (navbar.css) para no parpadear el
+  // "Acceder" plano mientras se resuelve la sesión. Si algo de acá adentro
+  // falla antes del replaceWith, el finally lo revela como respaldo en vez
+  // de dejarlo invisible para siempre.
+  try {
+    const session = await obtenerSesion();
+    const esAdministrador = Boolean(session && await esAdmin(session));
 
-  const enlacesNavegacion = ENLACES_NAVEGACION_BASE.map((enlace) => {
-    if (enlace.texto === "Herramientas" && esAdministrador) {
-      return {
-        ...enlace,
-        href: "/src/app/features/detector/detector.html",
-        habilitado: true,
-      };
+    const enlacesNavegacion = ENLACES_NAVEGACION_BASE.map((enlace) => {
+      if (enlace.texto === "Herramientas" && esAdministrador) {
+        return {
+          ...enlace,
+          href: "/src/app/features/detector/detector.html",
+          habilitado: true,
+        };
+      }
+      return enlace;
+    });
+
+    const menu = document.createElement("div");
+    menu.className = "nav-menu";
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "nav-menu__toggle";
+    toggle.classList.toggle("nav-menu__toggle--pulsing", !session);
+    toggle.setAttribute("aria-label", await etiquetaDelMenu(session));
+    toggle.setAttribute("aria-haspopup", "menu");
+    toggle.setAttribute("aria-expanded", "false");
+
+    const lista = document.createElement("div");
+    lista.className = "nav-menu__list floating-menu";
+
+    [...enlacesNavegacion, enlaceDeSesion(session)].forEach((enlace) => {
+      lista.appendChild(crearItemMenu(enlace));
+    });
+
+    menu.appendChild(toggle);
+    menu.appendChild(lista);
+    boton.replaceWith(menu);
+
+    function establecerMenuAbierto(abierto) {
+      menu.classList.toggle("nav-menu--open", abierto);
+      toggle.setAttribute("aria-expanded", String(abierto));
     }
-    return enlace;
-  });
 
-  const menu = document.createElement("div");
-  menu.className = "nav-menu";
+    toggle.addEventListener("click", (evento) => {
+      evento.stopPropagation();
+      establecerMenuAbierto(!menu.classList.contains("nav-menu--open"));
+    });
 
-  const toggle = document.createElement("button");
-  toggle.type = "button";
-  toggle.className = "nav-menu__toggle";
-  toggle.classList.toggle("nav-menu__toggle--pulsing", !session);
-  toggle.setAttribute("aria-label", await etiquetaDelMenu(session));
-  toggle.setAttribute("aria-haspopup", "menu");
-  toggle.setAttribute("aria-expanded", "false");
+    document.addEventListener("click", (evento) => {
+      if (!menu.contains(evento.target)) {
+        establecerMenuAbierto(false);
+      }
+    });
 
-  const lista = document.createElement("div");
-  lista.className = "nav-menu__list floating-menu";
-
-  [...enlacesNavegacion, enlaceDeSesion(session)].forEach((enlace) => {
-    lista.appendChild(crearItemMenu(enlace));
-  });
-
-  menu.appendChild(toggle);
-  menu.appendChild(lista);
-  boton.replaceWith(menu);
-
-  function establecerMenuAbierto(abierto) {
-    menu.classList.toggle("nav-menu--open", abierto);
-    toggle.setAttribute("aria-expanded", String(abierto));
+    menu.addEventListener("keydown", (evento) => {
+      if (evento.key === "Escape" && menu.classList.contains("nav-menu--open")) {
+        establecerMenuAbierto(false);
+        toggle.focus();
+      }
+    });
+  } finally {
+    if (boton.isConnected) boton.style.visibility = "visible";
   }
-
-  toggle.addEventListener("click", (evento) => {
-    evento.stopPropagation();
-    establecerMenuAbierto(!menu.classList.contains("nav-menu--open"));
-  });
-
-  document.addEventListener("click", (evento) => {
-    if (!menu.contains(evento.target)) {
-      establecerMenuAbierto(false);
-    }
-  });
-
-  menu.addEventListener("keydown", (evento) => {
-    if (evento.key === "Escape" && menu.classList.contains("nav-menu--open")) {
-      establecerMenuAbierto(false);
-      toggle.focus();
-    }
-  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

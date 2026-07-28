@@ -16,6 +16,8 @@ const BUCKET_LIMIT_TEST_PATH = "supabase/tests/0013_course_cover_bucket_limit.te
 const MIGRATIONS_PATH = "supabase/migrations";
 const OLD_MIGRATIONS_PATH = ".kiro/supabase/migrations";
 const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
+const FORM_COVER_PATH = "src/app/features/courses/gestionar-curso.portada.js";
+const FORM_CATEGORIES_PATH = "src/app/features/courses/gestionar-curso.categorias.js";
 const FORM_HTML_PATH = "src/app/features/courses/editar-curso.html";
 const DECISIONS_PATH = ".kiro/steering/decisions.md";
 const EXPECTED_MIGRATION_HASHES = Object.freeze({
@@ -37,7 +39,15 @@ const SERVICE_SOURCE = fs.readFileSync(SERVICE_PATH, "utf8");
 const FUNCTION_SOURCE = fs.readFileSync(FUNCTION_PATH, "utf8");
 const MIGRATION_SOURCE = fs.readFileSync(MIGRATION_PATH, "utf8");
 const CLEANUP_MIGRATION_SOURCE = fs.readFileSync(CLEANUP_MIGRATION_PATH, "utf8");
-const FORM_SOURCE = fs.readFileSync(FORM_PATH, "utf8");
+const CONTROLLER_SOURCE = fs.readFileSync(FORM_PATH, "utf8");
+const FORM_COVER_SOURCE = fs.readFileSync(FORM_COVER_PATH, "utf8");
+// The form is split across a controller and its cover/category modules; the
+// contracts below hold over the screen as a whole.
+const FORM_SOURCE = [
+  CONTROLLER_SOURCE,
+  FORM_COVER_SOURCE,
+  fs.readFileSync(FORM_CATEGORIES_PATH, "utf8"),
+].join("\n");
 const FORM_HTML_SOURCE = fs.readFileSync(FORM_HTML_PATH, "utf8");
 const BROWSER_SOURCE = fs.readdirSync("src", { recursive: true })
   .filter((file) => /\.(?:html|js)$/.test(file))
@@ -45,7 +55,8 @@ const BROWSER_SOURCE = fs.readdirSync("src", { recursive: true })
 const validation = import(pathToFileURL(path.resolve(VALIDATION_PATH)).href);
 const endpoint = import(pathToFileURL(path.resolve(FUNCTION_PATH)).href);
 const { crearClientePortadas, crearFlujoMutacionCurso } = require(path.resolve(SERVICE_PATH));
-const { crearDatosEnvioCurso, crearEstadoPortadaEdicion } = require(path.resolve(FORM_PATH));
+const { crearDatosEnvioCurso } = require(path.resolve(FORM_PATH));
+const { crearEstadoPortadaEdicion } = require(path.resolve(FORM_COVER_PATH));
 
 const ORIGIN = "https://taudux.com";
 const PROJECT_URL = "https://yqkvgfqplmbbcebrivpt.supabase.co";
@@ -935,10 +946,11 @@ test("course form exposes the accessible crop workflow and loads it before the c
 });
 
 test("course submit generates the cover before upload and preserves retain/removal bypasses", () => {
-  const exportCall = FORM_SOURCE.indexOf("cropperPortada.exportFile()");
-  const mutationCall = FORM_SOURCE.indexOf("const resultado = await flujoMutacionCurso.ejecutar");
+  const exportCall = CONTROLLER_SOURCE.indexOf("await portada.generarArchivo()");
+  const mutationCall = CONTROLLER_SOURCE.indexOf("const resultado = await flujoMutacionCurso.ejecutar");
   assert.ok(exportCall > 0 && exportCall < mutationCall);
-  assert.match(FORM_SOURCE, /estadoPortadaEdicion\.tieneActual\(\)/);
+  assert.match(FORM_COVER_SOURCE, /cropper\.exportFile\(\)/);
+  assert.match(FORM_SOURCE, /estadoEdicion\.tieneActual\(\)/);
   assert.match(FORM_SOURCE, /estadoEdicion\.confirmarRetiro\(\)/);
-  assert.match(FORM_SOURCE, /errorPortada\.focus\(\)/);
+  assert.match(FORM_COVER_SOURCE, /error\.focus\(\)/);
 });

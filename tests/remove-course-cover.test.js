@@ -276,7 +276,7 @@ test("remove browser client sends only course ID and expected pair and maps conf
 });
 
 test("real form removal handler confirms, prevents duplicate clicks, clears selection, and focuses success", async () => {
-  const formModule = require(path.resolve("src/app/features/courses/gestionar-curso.js"));
+  const formModule = require(path.resolve("src/app/features/courses/gestionar-curso.portada.js"));
   const coverService = require(path.resolve("src/app/core/cursos/portadas-curso.service.js"));
   const editState = formModule.crearEstadoPortadaEdicion({
     imagen_url: MANAGED_URL,
@@ -336,7 +336,7 @@ test("real form removal handler confirms, prevents duplicate clicks, clears sele
 });
 
 test("real form removal handler preserves state and selection on cancellation or failure", async () => {
-  const formModule = require(path.resolve("src/app/features/courses/gestionar-curso.js"));
+  const formModule = require(path.resolve("src/app/features/courses/gestionar-curso.portada.js"));
   const coverService = require(path.resolve("src/app/core/cursos/portadas-curso.service.js"));
   const editState = formModule.crearEstadoPortadaEdicion({
     imagen_url: MANAGED_URL,

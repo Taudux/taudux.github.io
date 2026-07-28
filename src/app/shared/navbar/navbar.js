@@ -100,20 +100,15 @@ async function actualizarBotonAcceso() {
 
   const nombre = await nombreUsuario(session);
 
-  if (!nombre) {
-    boton.textContent = "Salir";
-    boton.href = "#";
-    boton.onclick = salirYVolver;
-    return;
-  }
-
   const menu = document.createElement("div");
   menu.className = "user-menu";
 
   const toggle = document.createElement("button");
   toggle.type = "button";
-  toggle.className = "user-menu__toggle button button--access";
-  toggle.textContent = `${nombre} ▾`;
+  toggle.className = "user-menu__toggle";
+  toggle.setAttribute("aria-label", nombre || "Mi cuenta");
+  toggle.setAttribute("aria-haspopup", "menu");
+  toggle.setAttribute("aria-expanded", "false");
 
   const lista = document.createElement("div");
   lista.className = "user-menu__list floating-menu";
@@ -129,14 +124,26 @@ async function actualizarBotonAcceso() {
   menu.appendChild(lista);
   boton.replaceWith(menu);
 
+  function establecerMenuAbierto(abierto) {
+    menu.classList.toggle("user-menu--open", abierto);
+    toggle.setAttribute("aria-expanded", String(abierto));
+  }
+
   toggle.addEventListener("click", (evento) => {
     evento.stopPropagation();
-    menu.classList.toggle("user-menu--open");
+    establecerMenuAbierto(!menu.classList.contains("user-menu--open"));
   });
 
   document.addEventListener("click", (evento) => {
     if (!menu.contains(evento.target)) {
-      menu.classList.remove("user-menu--open");
+      establecerMenuAbierto(false);
+    }
+  });
+
+  menu.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && menu.classList.contains("user-menu--open")) {
+      establecerMenuAbierto(false);
+      toggle.focus();
     }
   });
 }

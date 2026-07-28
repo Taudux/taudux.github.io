@@ -595,6 +595,10 @@ html {
   max-inline-size: 100%;
 }
 
+.footer__column--wide {
+  flex-basis: 230px;
+}
+
 .footer__heading {
   font-size: 0.95rem;
   color: var(--color-text);

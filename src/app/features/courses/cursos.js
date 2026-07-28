@@ -294,9 +294,8 @@ function crearFallbackCurso(media, curso) {
   media.append(mediaLabel, mediaTopic);
 }
 
-// El detalle real todavía no existe; la tarjeta pública muestra este placeholder (ver F-008).
 function verMasInformacion() {
-  mostrarToast("El detalle del curso estará disponible pronto.");
+  window.location.href = "/index.html#contacto";
 }
 
 window.tauduxCursosCatalog = {

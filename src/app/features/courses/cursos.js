@@ -55,13 +55,12 @@ async function iniciarCatalogoCursos() {
     mensajeEstado.textContent = "";
     lista.replaceChildren();
     if (resultado.data.length === 0) {
-      const vacio = document.createElement("p");
-      vacio.className = "courses__empty";
-      vacio.textContent = "Aún no hay cursos publicados.";
-      lista.appendChild(vacio);
+      lista.appendChild(crearEstadoVacio());
       return true;
     }
-    resultado.data.forEach((curso) => lista.appendChild(crearTarjetaCurso(curso, usuarioAdmin, borrarCurso)));
+    resultado.data.forEach((curso) => {
+      lista.appendChild(crearTarjetaCurso(curso, usuarioAdmin, borrarCurso));
+    });
     return true;
   }
 
@@ -124,12 +123,15 @@ async function iniciarCatalogoCursos() {
   function retirarTarjetaEliminada(boton) {
     const tarjeta = typeof boton.closest === "function" ? boton.closest(".courses__card") : null;
     if (tarjeta) tarjeta.remove();
-    if (lista.childElementCount > 0) return;
-    const vacio = document.createElement("p");
-    vacio.className = "courses__empty";
-    vacio.textContent = "Aún no hay cursos publicados.";
-    lista.appendChild(vacio);
+    if (lista.childElementCount === 0) lista.appendChild(crearEstadoVacio());
   }
+}
+
+function crearEstadoVacio() {
+  const vacio = document.createElement("p");
+  vacio.className = "courses__empty";
+  vacio.textContent = "Aún no hay cursos publicados.";
+  return vacio;
 }
 
 // Tarjeta pública de solo lectura y activable: imagen, título, descripción,
@@ -300,7 +302,6 @@ function verMasInformacion() {
 
 window.tauduxCursosCatalog = {
   iniciar: iniciarCatalogoCursos,
-  crearTarjeta: crearTarjetaCurso,
 };
 window.tauduxCursosCatalog.ready = window.tauduxCursosCatalog.iniciar();
 Object.freeze(window.tauduxCursosCatalog);

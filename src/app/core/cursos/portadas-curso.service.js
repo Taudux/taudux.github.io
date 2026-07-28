@@ -184,6 +184,18 @@
     };
   }
 
+  // La portada ya está en Storage pero el curso no quedó guardado: avisamos que
+  // el archivo puede requerir limpieza manual.
+  function advertirSiQuedoHuerfana(mensaje, quedoHuerfana) {
+    return quedoHuerfana ? `${mensaje} ${ADVERTENCIA_HUERFANA}` : mensaje;
+  }
+
+  function mensajeExcepcion(etapa, cursoId, error) {
+    if (etapa === "upload") return error?.message || "No se pudo subir la portada.";
+    if (cursoId) return "No se pudo guardar el curso.";
+    return "No se pudo confirmar si el curso fue publicado. Reintenta sin cambiar los datos.";
+  }
+
   function crearFlujoMutacionCurso({ subirPortada, crearCurso, actualizarCurso, generarOperacionId }) {
     let mutacionEnCurso = false;
     let operacionCreacion = null;
@@ -232,27 +244,26 @@
           : await crearCurso(campos, operacionId);
         if (resultado?.ok) operacionCreacion = null;
         const mensaje = resultado?.mensaje || "No se pudo guardar el curso.";
+        const fallo = !resultado?.ok;
         return {
           ...resultado,
           etapa,
           portadaSubida,
-          mensajeUsuario: !resultado?.ok && portadaSubida ? `${mensaje} ${ADVERTENCIA_HUERFANA}` : mensaje,
+          mensajeUsuario: advertirSiQuedoHuerfana(mensaje, fallo && portadaSubida),
         };
       } catch (error) {
-        const mensaje = etapa === "upload"
-          ? error?.message || "No se pudo subir la portada."
-          : cursoId
-            ? "No se pudo guardar el curso."
-            : "No se pudo confirmar si el curso fue publicado. Reintenta sin cambiar los datos.";
+        const mensaje = mensajeExcepcion(etapa, cursoId, error);
         return {
           ok: false,
+          // Sin cursoId no sabemos si el INSERT llegó a Postgres: el reintento
+          // debe reusar el mismo UUID de operación, no crear otro curso.
           ambigua: etapa === "save" && !cursoId,
           codigo: etapa === "upload" ? error?.code || "upload_failed" : "save_exception",
           error,
           etapa,
           portadaSubida,
           mensaje,
-          mensajeUsuario: portadaSubida ? `${mensaje} ${ADVERTENCIA_HUERFANA}` : mensaje,
+          mensajeUsuario: advertirSiQuedoHuerfana(mensaje, portadaSubida),
         };
       } finally {
         restaurar();

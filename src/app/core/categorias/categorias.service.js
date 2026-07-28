@@ -94,10 +94,35 @@ function mensajeErrorCategoria(error, mensajePredeterminado) {
   return mensajePredeterminado;
 }
 
+/*
+  Toda escritura de categorías cierra igual: si Supabase falló, se registra, se
+  detecta si la causa fue la migración 0010 pendiente y se traduce el error a un
+  mensaje para el usuario. Si salió bien, deja constancia de que el esquema
+  normalizado existe.
+*/
+function resolverMutacionCategoria({ contexto, resultado, mensajeError, datos = {}, traducirError = true }) {
+  const { data, error } = resultado;
+  if (!error) {
+    disponibilidadCategoriasNormalizadas = true;
+    return { ok: true, data };
+  }
+
+  registrarErrorSupabaseCategorias(contexto, error, datos);
+  const migracionRequerida = esErrorTablaCategoriasAusente(error);
+  if (migracionRequerida) disponibilidadCategoriasNormalizadas = false;
+  return {
+    ok: false,
+    mensaje: traducirError ? mensajeErrorCategoria(error, mensajeError) : mensajeError,
+    migracionRequerida,
+  };
+}
+
+const CAMPOS_CATEGORIA = "id, nombre, activo, creado_en, actualizado_en";
+
 async function listarCategorias({ incluirInactivas = false } = {}) {
   let consulta = supabaseClient
     .from("categorias")
-    .select("id, nombre, activo, creado_en, actualizado_en")
+    .select(CAMPOS_CATEGORIA)
     .order("nombre", { ascending: true });
 
   if (!incluirInactivas) consulta = consulta.eq("activo", true);
@@ -123,71 +148,49 @@ async function crearCategoria(nombre) {
   const validacion = validarNombreCategoria(nombre);
   if (!validacion.ok) return validacion;
 
-  const { data, error } = await supabaseClient
-    .from("categorias")
-    .insert({ nombre: validacion.nombre })
-    .select("id, nombre, activo, creado_en, actualizado_en")
-    .single();
-
-  if (error) {
-    registrarErrorSupabaseCategorias("crear", error);
-    const migracionRequerida = esErrorTablaCategoriasAusente(error);
-    if (migracionRequerida) disponibilidadCategoriasNormalizadas = false;
-    return {
-      ok: false,
-      mensaje: mensajeErrorCategoria(error, "No se pudo crear la categoría."),
-      migracionRequerida,
-    };
-  }
-  disponibilidadCategoriasNormalizadas = true;
-  return { ok: true, data };
+  return resolverMutacionCategoria({
+    contexto: "crear",
+    mensajeError: "No se pudo crear la categoría.",
+    resultado: await supabaseClient
+      .from("categorias")
+      .insert({ nombre: validacion.nombre })
+      .select(CAMPOS_CATEGORIA)
+      .single(),
+  });
 }
 
 async function renombrarCategoria(id, nombre) {
   const validacion = validarNombreCategoria(nombre);
   if (!validacion.ok) return validacion;
 
-  const { data, error } = await supabaseClient
-    .from("categorias")
-    .update({ nombre: validacion.nombre })
-    .eq("id", id)
-    .select("id, nombre, activo, creado_en, actualizado_en")
-    .single();
-
-  if (error) {
-    registrarErrorSupabaseCategorias("renombrar", error, { categoriaId: id });
-    const migracionRequerida = esErrorTablaCategoriasAusente(error);
-    if (migracionRequerida) disponibilidadCategoriasNormalizadas = false;
-    return {
-      ok: false,
-      mensaje: mensajeErrorCategoria(error, "No se pudo renombrar la categoría."),
-      migracionRequerida,
-    };
-  }
-  disponibilidadCategoriasNormalizadas = true;
-  return { ok: true, data };
+  return resolverMutacionCategoria({
+    contexto: "renombrar",
+    mensajeError: "No se pudo renombrar la categoría.",
+    datos: { categoriaId: id },
+    resultado: await supabaseClient
+      .from("categorias")
+      .update({ nombre: validacion.nombre })
+      .eq("id", id)
+      .select(CAMPOS_CATEGORIA)
+      .single(),
+  });
 }
 
 async function establecerCategoriaActiva(id, activo) {
-  const { data, error } = await supabaseClient
-    .from("categorias")
-    .update({ activo: Boolean(activo) })
-    .eq("id", id)
-    .select("id, nombre, activo, creado_en, actualizado_en")
-    .single();
-
-  if (error) {
-    registrarErrorSupabaseCategorias("cambiar-estado", error, { categoriaId: id, activo });
-    const migracionRequerida = esErrorTablaCategoriasAusente(error);
-    if (migracionRequerida) disponibilidadCategoriasNormalizadas = false;
-    return {
-      ok: false,
-      mensaje: "No se pudo cambiar el estado de la categoría.",
-      migracionRequerida,
-    };
-  }
-  disponibilidadCategoriasNormalizadas = true;
-  return { ok: true, data };
+  return resolverMutacionCategoria({
+    contexto: "cambiar-estado",
+    mensajeError: "No se pudo cambiar el estado de la categoría.",
+    datos: { categoriaId: id, activo },
+    // Cambiar el estado no puede chocar con el índice único de nombre, así que
+    // el mensaje predeterminado ya es el correcto.
+    traducirError: false,
+    resultado: await supabaseClient
+      .from("categorias")
+      .update({ activo: Boolean(activo) })
+      .eq("id", id)
+      .select(CAMPOS_CATEGORIA)
+      .single(),
+  });
 }
 
 async function desactivarCategoriaReferenciada(id, referencias, referenciasExactas = true) {

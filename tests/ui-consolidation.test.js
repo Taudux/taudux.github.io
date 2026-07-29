@@ -54,7 +54,7 @@ function createCatalogHarness({ admin = false, authenticated = true } = {}) {
   ].map((id) => [id, new Element("div")]));
   elements.adminControls.hidden = true;
   elements.cursosEstado.hidden = true;
-  const calls = { deleted: [], sessions: 0, toasts: [], loginUrls: 0 };
+  const calls = { sessions: 0, toasts: [], loginUrls: 0 };
   const course = { id: "course/id", titulo: "Node práctico", modalidad: "remoto", costo: 0 };
   const window = {
     location: { href: "https://taudux.test/cursos.html", pathname: "/cursos.html", search: "", hash: "" },
@@ -75,7 +75,6 @@ function createCatalogHarness({ admin = false, authenticated = true } = {}) {
     },
     esAdmin: async () => admin,
     listarCursos: async () => ({ ok: true, data: [course] }),
-    eliminarCurso: async (id) => { calls.deleted.push(id); return { ok: true }; },
     mostrarToast: (...args) => calls.toasts.push(args),
     etiquetaModalidad: () => "En línea",
     formatearRangoFechas: () => null,
@@ -90,7 +89,7 @@ function createCatalogHarness({ admin = false, authenticated = true } = {}) {
   return { calls, course, elements, window };
 }
 
-test("catalog renders admin controls and card actions only for admins", async () => {
+test("catalog renders admin controls for admins only; cards never show edit/delete", async () => {
   const nonAdmin = createCatalogHarness();
   await nonAdmin.window.tauduxCursosCatalog.ready;
   assert.equal(nonAdmin.elements.adminControls.hidden, true);
@@ -99,25 +98,8 @@ test("catalog renders admin controls and card actions only for admins", async ()
   const admin = createCatalogHarness({ admin: true });
   await admin.window.tauduxCursosCatalog.ready;
   assert.equal(admin.elements.adminControls.hidden, false);
-  assert.ok(find(admin.elements.cursosLista, (element) => element.textContent === "Editar"));
-});
-
-test("admin card uses the edit route and deletion without activating details", async () => {
-  const { calls, course, elements, window } = createCatalogHarness({ admin: true });
-  await window.tauduxCursosCatalog.ready;
-  const edit = find(elements.cursosLista, (element) => element.textContent === "Editar");
-  const remove = find(elements.cursosLista, (element) => element.textContent === "Eliminar");
-  const hitArea = find(elements.cursosLista, (element) => element.className === "courses__card-hit-area");
-
-  assert.equal(edit.href, "/src/app/features/courses/editar-curso.html?id=course%2Fid");
-  assert.equal(remove.tagName, "BUTTON");
-  assert.equal(remove.type, "button");
-  await remove.click();
-  assert.deepEqual(calls.deleted, [course.id]);
-  assert.deepEqual(calls.toasts, [["Curso eliminado.", "success"]]);
-  await hitArea.click();
-  assert.equal(window.location.href, "/index.html#contacto");
-  assert.deepEqual(calls.toasts, [["Curso eliminado.", "success"]]);
+  assert.equal(find(admin.elements.cursosLista, (element) => element.textContent === "Editar"), null);
+  assert.equal(find(admin.elements.cursosLista, (element) => element.textContent === "Eliminar"), null);
 });
 
 test("public course details behave identically without an authentication gate", async () => {

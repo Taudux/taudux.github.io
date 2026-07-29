@@ -11,7 +11,6 @@ async function iniciarCatalogoCursos() {
   const estado = document.getElementById("cursosEstado");
   const mensajeEstado = document.getElementById("cursosEstadoMensaje");
   const botonReintentar = document.getElementById("cursosReintentar");
-  const eliminacionesEnCurso = new Set();
   let usuarioAdmin = false;
 
   botonReintentar.addEventListener("click", async () => {
@@ -59,7 +58,7 @@ async function iniciarCatalogoCursos() {
       return true;
     }
     resultado.data.forEach((curso) => {
-      lista.appendChild(crearTarjetaCurso(curso, usuarioAdmin, borrarCurso));
+      lista.appendChild(crearTarjetaCurso(curso));
     });
     return true;
   }
@@ -80,39 +79,6 @@ async function iniciarCatalogoCursos() {
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
-  async function borrarCurso(curso, boton) {
-    if (eliminacionesEnCurso.has(curso.id)) return;
-    if (!window.confirm(`¿Eliminar "${curso.titulo}"?`)) return;
-
-    eliminacionesEnCurso.add(curso.id);
-    boton.disabled = true;
-    const inicio = iniciarTiempo();
-    try {
-      const resultado = await eliminarCurso(curso.id);
-      if (!resultado.ok) {
-        reportarFallo("course_delete", null, inicio, resultado.codigo || "delete_failed");
-        mostrarErrorLista(resultado.mensaje || "No se pudo eliminar el curso.");
-        estado.focus();
-        return;
-      }
-      mostrarToast("Curso eliminado.", "success");
-      retirarTarjetaEliminada(boton);
-      await pintarCursos();
-    } catch (error) {
-      reportarFallo("course_delete", error, inicio, "delete_exception");
-      mostrarErrorLista("No se pudo eliminar el curso. Puedes volver a intentarlo.");
-      estado.focus();
-    } finally {
-      eliminacionesEnCurso.delete(curso.id);
-      boton.disabled = false;
-    }
-  }
-
-  function retirarTarjetaEliminada(boton) {
-    const tarjeta = typeof boton.closest === "function" ? boton.closest(".courses__card") : null;
-    if (tarjeta) tarjeta.remove();
-    if (lista.childElementCount === 0) lista.appendChild(crearEstadoVacio());
-  }
 }
 
 function crearEstadoVacio() {
@@ -124,8 +90,9 @@ function crearEstadoVacio() {
 
 // Tarjeta pública de solo lectura y activable: imagen, título, descripción,
 // información de modalidad/fechas/horario y chips de cupo/costo/estado.
-// Fechas y horario se omiten si el curso es "próximamente".
-function crearTarjetaCurso(curso, usuarioAdmin = false, alEliminar = null) {
+// Fechas y horario se omiten si el curso es "próximamente". Editar/eliminar
+// viven en administrar-cursos.html, no en el catálogo.
+function crearTarjetaCurso(curso) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "courses__card courses__card--catalog panel";
 
@@ -201,25 +168,6 @@ function crearTarjetaCurso(curso, usuarioAdmin = false, alEliminar = null) {
   }
 
   tarjeta.appendChild(cuerpo);
-
-  if (usuarioAdmin) {
-    const acciones = document.createElement("div");
-    acciones.className = "courses__card-admin";
-
-    const editar = document.createElement("a");
-    editar.className = "button courses__action";
-    editar.href = `/src/app/features/courses/editar-curso.html?id=${encodeURIComponent(curso.id)}`;
-    editar.textContent = "Editar";
-
-    const eliminar = document.createElement("button");
-    eliminar.className = "button courses__action courses__action--danger";
-    eliminar.type = "button";
-    eliminar.textContent = "Eliminar";
-    eliminar.addEventListener("click", () => alEliminar(curso, eliminar));
-
-    acciones.append(editar, eliminar);
-    cuerpo.appendChild(acciones);
-  }
 
   const activador = document.createElement("button");
   activador.className = "courses__card-hit-area";

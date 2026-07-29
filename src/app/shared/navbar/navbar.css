@@ -126,6 +126,7 @@
   }
 
   .nav-menu__toggle {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,15 +134,27 @@
     block-size: 2.5rem;
     border: var(--border-subtle);
     border-radius: var(--radius-pill);
-    background-color: var(--color-text);
-    background-image: url("../../../assets/images/isotipo.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 78%;
+    background-color: var(--color-field);
     cursor: pointer;
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease;
+  }
+
+  /* El isotipo vive en un pseudo-elemento propio (sin fondo opaco detrás) para
+     que el drop-shadow siga el contorno del ícono, no el del círculo. */
+  .nav-menu__toggle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("../../../assets/images/isotipo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 78%;
+    filter: drop-shadow(
+      0 0 3px color-mix(in srgb, var(--color-accent) 85%, transparent)
+    );
+    pointer-events: none;
   }
 
   @keyframes nav-menu-pulse {

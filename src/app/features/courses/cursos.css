@@ -66,12 +66,18 @@
   max-width: 680px;
 }
 
+/*
+  En el catálogo vive dentro de .courses__header y su margen inferior colapsa con
+  el de 2.5rem del header. En la cuadrícula admin es hermano directo de la lista,
+  así que ese margen es lo único que la separa de las tarjetas.
+*/
 .courses__header-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .courses__header-actions[hidden],
@@ -139,9 +145,15 @@
   font-size: 0.85rem;
 }
 
+/*
+  auto-fill y no auto-fit: auto-fit colapsa las columnas vacías, así que con un
+  solo curso la tarjeta se estiraba a todo el ancho y su portada 4/3 crecía a
+  más de 600px de alto. auto-fill conserva las pistas y la tarjeta mantiene su
+  tamaño sin importar cuántos cursos queden.
+*/
 .courses__list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 1.5rem;
   min-width: 0;
 }
@@ -151,7 +163,9 @@
   gap: 1.25rem;
 }
 
+/* Con pistas fijas por auto-fill, el mensaje se centra a lo ancho de la grilla. */
 .courses__empty {
+  grid-column: 1 / -1;
   color: var(--color-text-muted);
   text-align: center;
 }

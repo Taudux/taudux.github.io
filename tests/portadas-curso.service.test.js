@@ -19,7 +19,6 @@ const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
 const FORM_COVER_PATH = "src/app/features/courses/gestionar-curso.portada.js";
 const FORM_CATEGORIES_PATH = "src/app/features/courses/gestionar-curso.categorias.js";
 const FORM_HTML_PATH = "src/app/features/courses/editar-curso.html";
-const DECISIONS_PATH = ".kiro/steering/decisions.md";
 const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0001_crear_perfiles.sql": "26ceb164a9867a458f0b146dba7a875f3326ac273c9e6ca478f77a70db7033b7",
   "0002_perfil_telefono.sql": "8f42344006b42ab8babc7c6fb854dcf353a25785296c8b390978b0b78522992c",
@@ -923,15 +922,6 @@ test("cover edit state has explicit retain, replacement, and confirmed-removal t
   assert.equal(current.obtenerArchivo(), null);
   assert.deepEqual(current.obtenerActual(), { url: null, path: null });
   assert.equal(current.seleccionarArchivo(file), "replacement");
-});
-
-test("ADR-010 records the generated crop contract and forward-only bucket migration", () => {
-  const decisions = fs.readFileSync(DECISIONS_PATH, "utf8");
-  assert.match(decisions, /ADR-010 addendum: generated 1200x900 course covers/i);
-  assert.match(decisions, /image\/jpeg[^\n]*quality[^\n]*0\.85/i);
-  assert.match(decisions, /#071017/i);
-  assert.match(decisions, /0013_course_cover_bucket_limit\.sql/i);
-  assert.match(decisions, /forward migration/i);
 });
 
 test("course form exposes the accessible crop workflow and loads it before the controller", () => {

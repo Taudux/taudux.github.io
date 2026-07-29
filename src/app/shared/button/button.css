@@ -104,4 +104,10 @@
     border-color: var(--color-accent);
     color: var(--color-text);
   }
+
+  .button--highlight {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 12px
+      color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
 }

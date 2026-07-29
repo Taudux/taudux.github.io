@@ -271,6 +271,19 @@
   overflow-wrap: anywhere;
 }
 
+/* Sello de última actualización por tarjeta, panel de administración de cursos. */
+.courses__card-updated-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: var(--z-content);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-background) 70%, transparent);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
 .courses__card-body {
   display: flex;
   flex: 1;

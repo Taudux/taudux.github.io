@@ -169,6 +169,44 @@ test("catalog cover uses the 35 percent 260px desktop target and stacks at exact
   assert.doesNotMatch(css, /@media\s*\(max-width:\s*761px\)/);
 });
 
+test("the course admin grid wires deletion through the typed confirmation dialog", () => {
+  const html = read("src/app/features/courses/administrar-cursos.html");
+  assert.match(html, /shared\/confirm-dialog\/confirm-dialog\.js/);
+  assert.match(html, /shared\/confirm-dialog\/confirm-dialog\.css/);
+  assert.match(html, /id="cursoNuevo"/);
+  assert.doesNotMatch(html, /Eliminar y el sello/);
+
+  /*
+    Storage nunca se muta desde el cliente: el trigger cursos_enqueue_cover_cleanup
+    encola la portada al borrar la fila, y las policies de storage.objects rechazan
+    cualquier mutación desde el navegador.
+  */
+  const js = read("src/app/features/courses/administrar-cursos.js");
+  assert.doesNotMatch(js, /portadasCurso/);
+  assert.doesNotMatch(html, /portadas-curso\.service\.js/);
+});
+
+test("the admin grid keeps its track width when only one course is left", () => {
+  const css = read("src/app/features/courses/cursos.css");
+  /*
+    auto-fit colapsaría las pistas vacías y estiraría la última tarjeta a todo el
+    ancho, con una portada 4/3 de más de 600px de alto.
+  */
+  assert.match(css, /\.courses__list\s*{[\s\S]*?repeat\(auto-fill,/);
+  assert.doesNotMatch(css, /\.courses__list\s*{[\s\S]*?repeat\(auto-fit,/);
+  assert.match(css, /\.courses__empty\s*{[\s\S]*?grid-column:\s*1\s*\/\s*-1/);
+});
+
+test("the confirmation dialog ships a backdrop and a reduced-motion fallback", () => {
+  const css = read("src/app/shared/confirm-dialog/confirm-dialog.css");
+  assert.match(css, /\.confirm-dialog::backdrop/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+
+  const catalogCss = read("src/app/features/courses/cursos.css");
+  assert.match(catalogCss, /\.courses__action:disabled/);
+  assert.match(catalogCss, /\.courses__action\[aria-disabled="true"\][\s\S]*?pointer-events:\s*none/);
+});
+
 test("catalog and crop controls retain focus and reduced-motion alternatives", () => {
   const catalogCss = read("src/app/features/courses/cursos.css");
   const adminCss = read("src/app/features/courses/gestionar-cursos.css");

@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/src/app/shared/field/field.css">
   <link rel="stylesheet" href="/src/app/shared/toast/toast.css">
+  <link rel="stylesheet" href="/src/app/shared/confirm-dialog/confirm-dialog.css">
   <link rel="stylesheet" href="/src/app/features/courses/cursos.css">
   <link rel="stylesheet" href="/src/app/features/courses/gestionar-cursos.css">
 </head>
@@ -55,13 +56,14 @@
         <header class="courses__header">
           <h1 class="courses__title">Administrar cursos</h1>
           <p class="courses__intro">
-            Vista general de los cursos publicados. Editar ya abre el curso real;
-            Eliminar y el sello de "Actualizado" todavía son de ejemplo.
+            Vista general de los cursos publicados. Editar abre el curso real y
+            Eliminar lo borra de forma definitiva, junto con su portada. El sello
+            de "Actualizado" todavía es de ejemplo.
           </p>
         </header>
 
         <div class="courses__header-actions">
-          <a class="button button--outline" href="/src/app/features/courses/editar-curso.html">Nuevo curso</a>
+          <a class="button button--outline" id="cursoNuevo" href="/src/app/features/courses/editar-curso.html">Nuevo curso</a>
         </div>
 
         <section class="courses__list" id="cursosAdminLista" aria-live="polite"></section>
@@ -76,6 +78,7 @@
   <script src="/src/app/core/cursos/cursos.service.js"></script>
   <script src="/src/app/shared/navbar/navbar.js"></script>
   <script src="/src/app/shared/toast/toast.js"></script>
+  <script src="/src/app/shared/confirm-dialog/confirm-dialog.js"></script>
   <script src="/src/app/features/courses/admin-startup.js"></script>
   <script src="/src/app/features/courses/administrar-cursos.js"></script>
 </body>

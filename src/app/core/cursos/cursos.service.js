@@ -487,9 +487,31 @@ async function actualizarCurso(id, campos, portadaEsperada) {
   return { ok: true, data: resultado.data };
 }
 
-// Elimina un curso (solo admins).
+/*
+  Elimina un curso (solo admins). El delete pide las filas afectadas con select():
+  sin él, un delete que la RLS filtra en silencio devolvía ok con cero filas
+  borradas. Cuando no vuelve ninguna fila, sondeamos su existencia para separar
+  "no tienes permiso" de un borrado idempotente; la policy cursos_select_autenticados
+  deja leer a cualquier autenticado, así que la sonda sí discrimina.
+
+  La portada no se toca desde acá: el trigger cursos_enqueue_cover_cleanup la encola
+  al borrar la fila, y storage.objects no acepta mutaciones desde el cliente.
+*/
 async function eliminarCurso(id) {
-  const { error } = await supabaseClient.from("cursos").delete().eq("id", id);
+  if (typeof id !== "string" || !id.trim()) {
+    return {
+      ok: false,
+      codigo: "invalid_course_id",
+      mensaje: "No se pudo identificar el curso. Recarga la página e inténtalo de nuevo.",
+    };
+  }
+
+  const { data, error } = await supabaseClient
+    .from("cursos")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
   if (error) {
     registrarErrorSupabaseCursos("eliminar", error);
     return {
@@ -498,5 +520,28 @@ async function eliminarCurso(id) {
       mensaje: "No se pudo eliminar el curso.",
     };
   }
-  return { ok: true };
+  if (data && data.length > 0) return { ok: true, id };
+
+  const verificacion = await supabaseClient
+    .from("cursos")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (verificacion.error) {
+    registrarErrorSupabaseCursos("eliminar-verificar", verificacion.error);
+    return {
+      ok: false,
+      codigo: "delete_unverified",
+      mensaje: "No se pudo confirmar la eliminación. Recarga la página para ver el estado real.",
+    };
+  }
+  if (verificacion.data) {
+    return {
+      ok: false,
+      codigo: "forbidden",
+      mensaje: "No tienes permisos para eliminar cursos.",
+    };
+  }
+  return { ok: true, id, yaNoExistia: true };
 }

@@ -1,0 +1,107 @@
+/*
+  Diálogo de confirmación para acciones destructivas; requiere confirm-dialog.js.
+
+  No lleva z-index: el <dialog> abierto con showModal() vive en el top layer y
+  queda por encima de cualquier valor, incluido --z-toast.
+*/
+
+@layer components {
+  .confirm-dialog {
+    /* El reset global pone margin: 0, que anula el centrado nativo del <dialog>. */
+    margin: auto;
+    inline-size: min(30rem, calc(100vw - 2rem));
+    max-block-size: calc(100vh - 4rem);
+    padding: 2rem;
+    color: var(--color-text);
+    background: var(--color-background);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .confirm-dialog--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .confirm-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+  }
+
+  .confirm-dialog__titulo {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    margin-block-end: 0.85rem;
+  }
+
+  .confirm-dialog__mensaje {
+    font-family: var(--font-body);
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-block-end: 1.25rem;
+  }
+
+  .confirm-dialog__etiqueta {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--color-text-subtle);
+    margin-block-end: 0.4rem;
+  }
+
+  .confirm-dialog__esperado {
+    display: block;
+    font-family: var(--font-body);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    margin-block-end: 0.6rem;
+  }
+
+  .confirm-dialog__entrada {
+    inline-size: 100%;
+  }
+
+  .confirm-dialog__ayuda {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--color-accent);
+    min-block-size: 1.2rem;
+    margin-block-start: 0.4rem;
+  }
+
+  .confirm-dialog__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-block-start: 1.5rem;
+  }
+
+  /* .button es solo la base: cada variante aporta su propio espaciado. */
+  .confirm-dialog__confirmar {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-button);
+    background: color-mix(in srgb, #e5484d 20%, transparent);
+    border: 1px solid rgba(255, 80, 80, 0.4);
+    color: #ffb4b4;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+  }
+
+  .confirm-dialog__confirmar:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .confirm-dialog {
+      transform: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .confirm-dialog--visible {
+      transform: none;
+    }
+  }
+}

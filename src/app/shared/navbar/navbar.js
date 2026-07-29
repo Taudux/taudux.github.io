@@ -101,8 +101,8 @@ function enlaceDeSesion(session) {
   return { texto: "Salir", href: "#", alHacerClick: salirYVolver };
 }
 
-async function etiquetaDelMenu(session) {
-  if (!session) return "Menú";
+async function nombreParaMenu(session) {
+  if (!session) return null;
   const nombre = await nombreUsuario(session);
   return nombre || "Mi cuenta";
 }
@@ -130,6 +130,8 @@ async function montarMenuNavegacion() {
       return enlace;
     });
 
+    const nombreCuenta = await nombreParaMenu(session);
+
     const menu = document.createElement("div");
     menu.className = "nav-menu";
 
@@ -137,16 +139,28 @@ async function montarMenuNavegacion() {
     toggle.type = "button";
     toggle.className = "nav-menu__toggle";
     toggle.classList.toggle("nav-menu__toggle--pulsing", !session);
-    toggle.setAttribute("aria-label", await etiquetaDelMenu(session));
+    toggle.setAttribute("aria-label", nombreCuenta || "Menú");
     toggle.setAttribute("aria-haspopup", "menu");
     toggle.setAttribute("aria-expanded", "false");
 
     const lista = document.createElement("div");
     lista.className = "nav-menu__list floating-menu";
 
-    [...enlacesNavegacion, enlaceDeSesion(session)].forEach((enlace) => {
+    if (nombreCuenta) {
+      const encabezado = document.createElement("div");
+      encabezado.className = "nav-menu__header";
+      encabezado.textContent = nombreCuenta;
+      lista.appendChild(encabezado);
+    }
+
+    enlacesNavegacion.forEach((enlace) => {
       lista.appendChild(crearItemMenu(enlace));
     });
+
+    const divisor = document.createElement("hr");
+    divisor.className = "nav-menu__divider";
+    lista.appendChild(divisor);
+    lista.appendChild(crearItemMenu(enlaceDeSesion(session)));
 
     menu.appendChild(toggle);
     menu.appendChild(lista);

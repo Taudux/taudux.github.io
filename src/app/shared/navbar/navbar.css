@@ -210,6 +210,20 @@
     margin-top: 8px;
   }
 
+  .nav-menu__header {
+    padding: 10px 14px 8px;
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+
+  .nav-menu__divider {
+    margin: 4px 8px;
+    border: none;
+    border-top: var(--border-subtle);
+  }
+
   .nav-menu--open .nav-menu__list {
     display: flex;
   }

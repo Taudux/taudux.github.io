@@ -427,7 +427,9 @@
         mostrarErrorOperacion(resultado.mensajeUsuario);
         return;
       }
-      window.location.href = `${RUTA_CATALOGO_CURSOS}?resultado=${cursoId ? "actualizado" : "creado"}`;
+      /* replace, no href: el formulario ya cumplió su función, así que su
+         entrada de historial no debe quedar viva para un Alt+← posterior. */
+      window.location.replace(`${RUTA_CATALOGO_CURSOS}?resultado=${cursoId ? "actualizado" : "creado"}`);
     }
   }
 })();

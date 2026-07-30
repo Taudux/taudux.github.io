@@ -666,6 +666,12 @@ html {
   .contact__panel {
     padding: 30px;
     flex-direction: column;
+    /* Sin esto, el flex-wrap:wrap de la regla base (pensado para la fila de
+       desktop) combina con flex-basis:100% de los hijos —que en dirección
+       columna es 100% de ALTO, no de ancho— y el segundo hijo termina
+       envuelto en una columna aparte a la derecha, empujando scroll
+       horizontal en vez de apilarse debajo. */
+    flex-wrap: nowrap;
     gap: 40px;
   }
 

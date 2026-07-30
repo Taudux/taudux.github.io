@@ -144,10 +144,20 @@
     max-inline-size: calc(100vw - 2rem);
   }
 
+  /* Sin fondo ni borde circular: es un ícono de navegación, no el badge de
+     cuenta. Ese estilo queda exclusivo de --account, más abajo. */
   .nav-menu__toggle--site {
+    background: none;
+    border: none;
     color: var(--color-text);
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     line-height: 1;
+  }
+
+  .nav-menu__toggle--account {
+    border: var(--border-subtle);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-field);
   }
 
   .nav-menu__toggle {
@@ -157,9 +167,6 @@
     justify-content: center;
     inline-size: 2.5rem;
     block-size: 2.5rem;
-    border: var(--border-subtle);
-    border-radius: var(--radius-pill);
-    background-color: var(--color-field);
     cursor: pointer;
     transition:
       transform 0.25s ease,
@@ -285,6 +292,12 @@
   @media (max-width: 760px) {
     .nav-menu--site {
       display: inline-block;
+    }
+
+    /* La hamburguesa y el isotipo ya identifican la marca; el logo central
+       solo le resta espacio a los dos controles reales en un ancho chico. */
+    .navbar__brand {
+      display: none;
     }
 
     /*

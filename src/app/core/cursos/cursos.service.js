@@ -17,9 +17,16 @@ function esUrlSegura(url) {
 }
 
 const CAMPOS_CURSO_BASE =
-  "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, creado_en";
+  "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, estado, creado_en";
 const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_rel:categorias!cursos_categoria_id_fkey(id, nombre, activo)`;
 let disponibilidadCategoriasEnCursos = null;
+
+// Borrador y archivado quedan fuera del catálogo público (RLS de 0014); esta
+// lista solo es defensa en capa, la autoridad real es el check constraint.
+const ESTADOS_CURSO_VALIDOS = new Set(["borrador", "publicado", "archivado"]);
+function estadoCursoValido(estado) {
+  return ESTADOS_CURSO_VALIDOS.has(estado);
+}
 
 function registrarErrorSupabaseCursos(contexto, error, datos = {}) {
   console.error("[cursos.service]", {
@@ -205,6 +212,7 @@ const CAMPOS_RECONCILIABLES = Object.freeze([
   "costo",
   "instructor",
   "proximamente",
+  "estado",
 ]);
 
 /*
@@ -323,6 +331,9 @@ async function crearCurso(campos, operacionId) {
   if (!campos.titulo) {
     return { ok: false, codigo: "title_required", mensaje: "El título es obligatorio." };
   }
+  if (Object.hasOwn(campos, "estado") && !estadoCursoValido(campos.estado)) {
+    return { ok: false, codigo: "invalid_estado", mensaje: "Estado de curso inválido." };
+  }
   const portadaInvalida = validarPortadaEnCampos(campos);
   if (portadaInvalida) return portadaInvalida;
   if (!esUuidOperacionValido(operacionId)) {
@@ -413,6 +424,7 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
   } else if (!usarCategoriaNormalizada && Object.hasOwn(campos, "categoria")) {
     normalizados.categoria = campos.categoria || null;
   }
+  if (Object.hasOwn(campos, "estado")) normalizados.estado = campos.estado;
   return normalizados;
 }
 
@@ -444,6 +456,9 @@ function esPortadaEsperadaCompleta(portadaEsperada) {
 
 // Actualiza un curso existente (solo admins).
 async function actualizarCurso(id, campos, portadaEsperada) {
+  if (Object.hasOwn(campos, "estado") && !estadoCursoValido(campos.estado)) {
+    return { ok: false, codigo: "invalid_estado", mensaje: "Estado de curso inválido." };
+  }
   const portadaInvalida = validarPortadaEnCampos(campos);
   if (portadaInvalida) return portadaInvalida;
   if (!esPortadaEsperadaCompleta(portadaEsperada)) {
@@ -544,4 +559,48 @@ async function eliminarCurso(id) {
     };
   }
   return { ok: true, id, yaNoExistia: true };
+}
+
+/*
+  Cambia solo el estado editorial de un curso (archivar/publicar desde
+  administrar-cursos): un UPDATE dirigido, sin pasar por el resto del formulario
+  ni por el bloqueo optimista de portada que usa actualizarCurso. select()
+  pide la fila para distinguir "RLS bloqueó el update" (0 admins) de un éxito
+  real, igual que eliminarCurso.
+*/
+async function actualizarEstadoCurso(id, estado) {
+  if (typeof id !== "string" || !id.trim()) {
+    return {
+      ok: false,
+      codigo: "invalid_course_id",
+      mensaje: "No se pudo identificar el curso. Recarga la página e inténtalo de nuevo.",
+    };
+  }
+  if (!estadoCursoValido(estado)) {
+    return { ok: false, codigo: "invalid_estado", mensaje: "Estado de curso inválido." };
+  }
+
+  const { data, error } = await supabaseClient
+    .from("cursos")
+    .update({ estado })
+    .eq("id", id)
+    .select("id, estado")
+    .maybeSingle();
+
+  if (error) {
+    registrarErrorSupabaseCursos("actualizar-estado", error);
+    return {
+      ok: false,
+      codigo: error.code || "update_estado_failed",
+      mensaje: "No se pudo actualizar el estado del curso.",
+    };
+  }
+  if (!data) {
+    return {
+      ok: false,
+      codigo: "forbidden",
+      mensaje: "No tienes permisos para modificar este curso, o ya no existe.",
+    };
+  }
+  return { ok: true, data };
 }

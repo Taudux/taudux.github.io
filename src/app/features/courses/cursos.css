@@ -298,6 +298,21 @@
   font-size: 0.7rem;
 }
 
+/* Sello de borrador/archivado: solo lo ve un admin (RLS de 0014 oculta la fila
+   al resto), así que aparece en el catálogo público y en administración. */
+.courses__card-state-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: var(--z-content);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-warning) 22%, var(--color-background) 70%);
+  color: var(--color-warning);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
 .courses__card-body {
   display: flex;
   flex: 1;
@@ -419,6 +434,14 @@
   border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
   background: color-mix(in srgb, var(--color-accent) 9%, transparent);
   color: var(--color-accent);
+}
+
+/* Solo un admin llega a ver esta chip: RLS de 0014 oculta borrador/archivado
+   a cualquier otro visitante del catálogo. */
+.courses__card-chip--estado {
+  border-color: color-mix(in srgb, var(--color-warning) 38%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 9%, transparent);
+  color: var(--color-warning);
 }
 
 .courses__card-description {

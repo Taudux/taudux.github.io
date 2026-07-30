@@ -21,10 +21,32 @@ function crearEstadoVacioAdmin(mensaje) {
   return vacio;
 }
 
+// Único botón cuya acción y etiqueta dependen del estado actual: publicado
+// se archiva, borrador o archivado se publica. No hay tercer botón para pasar
+// a borrador desde acá; eso vive en el formulario (Guardar borrador).
+function accionEstadoCurso(curso) {
+  return curso.estado === "publicado"
+    ? { estadoDestino: "archivado", etiqueta: "Archivar" }
+    : { estadoDestino: "publicado", etiqueta: "Publicar" };
+}
+
+/*
+  El toggle llega directo a actualizarEstadoCurso, sin pasar por el formulario
+  ni su validación: sin este chequeo, un borrador guardado con formnovalidate
+  (que puede no tener días de la semana) se publicaría incompleto con un solo
+  click. Espeja la regla de gestionar-curso.js#enviarFormulario.
+*/
+function cursoListoParaPublicar(curso, estadoDestino) {
+  if (estadoDestino !== "publicado") return true;
+  if (curso.proximamente) return true;
+  return Array.isArray(curso.dias_semana) && curso.dias_semana.length > 0;
+}
+
 function crearAdministradorCursos({
   lista,
   listar,
   eliminar,
+  cambiarEstado,
   confirmar,
   notificar,
   reportarFallo,
@@ -44,6 +66,8 @@ function crearAdministradorCursos({
     cursosVisibles.forEach((curso) => {
       const botonEliminar = document.getElementById(`curso-eliminar-${curso.id}`);
       if (botonEliminar) botonEliminar.disabled = ocupado;
+      const botonEstado = document.getElementById(`curso-estado-${curso.id}`);
+      if (botonEstado) botonEstado.disabled = ocupado;
       const enlaceEditar = document.getElementById(`curso-editar-${curso.id}`);
       if (enlaceEditar) enlaceEditar.setAttribute("aria-disabled", String(ocupado));
     });
@@ -123,6 +147,53 @@ function crearAdministradorCursos({
     }
   }
 
+  /*
+    Archivar/publicar es reversible y no borra nada, así que —a diferencia de
+    eliminar— no pasa por el diálogo de confirmación por tipeo: solo el candado
+    de mutación en vuelo y el toast de resultado. La tarjeta no desaparece,
+    así que el foco vuelve al mismo botón tras refrescar.
+  */
+  async function confirmarCambioEstado(curso, boton) {
+    if (mutacionEnCurso || cargaEnCurso) return;
+
+    const { estadoDestino } = accionEstadoCurso(curso);
+    if (!cursoListoParaPublicar(curso, estadoDestino)) {
+      notificar(
+        "Este curso no tiene días de la semana asignados. Edítalo para completar los datos antes de publicarlo.",
+        "error"
+      );
+      return;
+    }
+    if (!iniciarMutacion()) return;
+
+    const inicio = iniciarTiempo();
+    try {
+      const resultado = await cambiarEstado(curso.id, estadoDestino);
+      if (!resultado.ok) {
+        reportarFallo("course_state_change", null, inicio, resultado.codigo || "course_state_change_failed");
+        notificar(resultado.mensaje, "error");
+        return;
+      }
+
+      notificar(
+        estadoDestino === "publicado" ? "Curso publicado." : "Curso archivado.",
+        "success"
+      );
+
+      try {
+        await cargarCursos();
+      } catch (error) {
+        reportarFallo("course_state_change", error, inicio, "course_state_change_reload_failed");
+        notificar("El estado se actualizó, pero no se pudo refrescar la lista. Recarga la página.", "error");
+      }
+    } catch (error) {
+      reportarFallo("course_state_change", error, inicio, "course_state_change_exception");
+      notificar("No se pudo actualizar el estado del curso. Revisa tu conexión e inténtalo de nuevo.", "error");
+    } finally {
+      finalizarMutacion(boton.id);
+    }
+  }
+
   function crearTarjetaCursoAdmin(curso, indice) {
     const tarjeta = document.createElement("article");
     tarjeta.className = "courses__card panel";
@@ -139,6 +210,16 @@ function crearAdministradorCursos({
     ];
     badge.textContent = `Actualizado: ${fechaPlaceholder}`;
 
+    media.appendChild(badge);
+    // Publicado es el estado esperado y no necesita sello; borrador/archivado
+    // sí, porque son los que un usuario normal nunca llega a ver (RLS de 0014).
+    if (curso.estado && curso.estado !== "publicado") {
+      const estadoBadge = document.createElement("span");
+      estadoBadge.className = "courses__card-state-badge";
+      estadoBadge.textContent = curso.estado === "borrador" ? "Borrador" : "Archivado";
+      media.appendChild(estadoBadge);
+    }
+
     const mediaLabel = document.createElement("span");
     mediaLabel.className = "courses__card-media-label";
     mediaLabel.textContent = "TAUDUX / ACADEMY";
@@ -147,7 +228,7 @@ function crearAdministradorCursos({
     mediaTopic.className = "courses__card-media-topic";
     mediaTopic.textContent = (curso.categoria || "Formación tecnológica").toUpperCase();
 
-    media.append(badge, mediaLabel, mediaTopic);
+    media.append(mediaLabel, mediaTopic);
     tarjeta.appendChild(media);
 
     const cuerpo = document.createElement("div");
@@ -168,6 +249,15 @@ function crearAdministradorCursos({
     editar.textContent = "Editar";
     editar.setAttribute("aria-label", `Editar curso ${curso.titulo}`);
 
+    const { etiqueta: etiquetaEstado } = accionEstadoCurso(curso);
+    const cambiarEstadoBoton = document.createElement("button");
+    cambiarEstadoBoton.className = "button courses__action";
+    cambiarEstadoBoton.id = `curso-estado-${curso.id}`;
+    cambiarEstadoBoton.type = "button";
+    cambiarEstadoBoton.textContent = etiquetaEstado;
+    cambiarEstadoBoton.setAttribute("aria-label", `${etiquetaEstado} curso ${curso.titulo}`);
+    cambiarEstadoBoton.addEventListener("click", () => confirmarCambioEstado(curso, cambiarEstadoBoton));
+
     const eliminar = document.createElement("button");
     eliminar.className = "button courses__action courses__action--danger";
     eliminar.id = `curso-eliminar-${curso.id}`;
@@ -176,7 +266,7 @@ function crearAdministradorCursos({
     eliminar.setAttribute("aria-label", `Eliminar curso ${curso.titulo}`);
     eliminar.addEventListener("click", () => confirmarEliminacion(curso, eliminar));
 
-    acciones.append(editar, eliminar);
+    acciones.append(editar, cambiarEstadoBoton, eliminar);
     cuerpo.appendChild(acciones);
     tarjeta.appendChild(cuerpo);
 
@@ -229,6 +319,7 @@ async function iniciarAdministracionCursos() {
     lista,
     listar: listarCursos,
     eliminar: eliminarCurso,
+    cambiarEstado: actualizarEstadoCurso,
     confirmar: confirmarConTexto,
     notificar: mostrarToast,
     reportarFallo: arranque.reportarFallo,

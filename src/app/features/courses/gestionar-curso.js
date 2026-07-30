@@ -433,23 +433,29 @@
       return cursoId ? "course_update" : "course_create";
     }
 
-    function textoBotonPorEtapa(etapa) {
+    function textoBotonPorEtapa(etapa, estadoDestino) {
       if (etapa === "upload") return "Subiendo portada...";
+      if (estadoDestino === "borrador") return "Guardando borrador...";
       return cursoId ? "Guardando..." : "Publicando...";
     }
 
     async function enviarFormulario(evento) {
       evento.preventDefault();
       if (portada.estaRetirando()) return;
+      // Guardar borrador usa formnovalidate (un curso a medio llenar es
+      // justamente el caso de uso), así que la única validación de "campos
+      // completos" que debe aplicar es la de publicar de verdad.
+      const botonClicado = evento.submitter || botonEnviar;
+      const estadoDestino = botonClicado.dataset.estado === "borrador" ? "borrador" : "publicado";
       const datos = obtenerDatosFormulario();
       const fuentePortada = portada.archivoSeleccionado();
-      if (!inputProximamente.checked && datos.dias_semana.length === 0) {
+      if (estadoDestino === "publicado" && !inputProximamente.checked && datos.dias_semana.length === 0) {
         mostrarToast("Selecciona al menos un día de la semana.", "error");
         return;
       }
 
       ocultarErrorOperacion();
-      const textoBoton = botonEnviar.textContent;
+      const textoBoton = botonClicado.textContent;
       const inicio = iniciarTiempo();
 
       const generada = await portada.generarArchivo();
@@ -457,16 +463,16 @@
 
       const resultado = await flujoMutacionCurso.ejecutar({
         cursoId,
-        datos,
+        datos: { ...datos, estado: estadoDestino },
         archivoPortada: generada.archivo,
         portadaEsperada: cursoId ? portada.portadaEsperada() : null,
         firma: firmaSolicitud(datos, fuentePortada),
         controles: form.elements,
         alCambiarEtapa: (etapa) => {
-          botonEnviar.textContent = textoBotonPorEtapa(etapa);
+          botonClicado.textContent = textoBotonPorEtapa(etapa, estadoDestino);
         },
       });
-      botonEnviar.textContent = textoBoton;
+      botonClicado.textContent = textoBoton;
 
       if (!resultado.ok) {
         reportarFallo(
@@ -480,9 +486,11 @@
         return;
       }
       borradorCurso.abandonar();
+      const sufijoResultado = estadoDestino === "borrador" ? "borrador" : "";
+      const resultadoQuery = [cursoId ? "actualizado" : "creado", sufijoResultado].filter(Boolean).join("_");
       /* replace, no href: el formulario ya cumplió su función, así que su
          entrada de historial no debe quedar viva para un Alt+← posterior. */
-      window.location.replace(`${RUTA_CATALOGO_CURSOS}?resultado=${cursoId ? "actualizado" : "creado"}`);
+      window.location.replace(`${RUTA_CATALOGO_CURSOS}?resultado=${resultadoQuery}`);
     }
   }
 })();

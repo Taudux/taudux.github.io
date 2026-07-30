@@ -4,8 +4,20 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 
 const SOURCE = fs.readFileSync("src/app/features/courses/administrar-cursos.js", "utf8");
-const PRIMERO = { id: "curso-1", titulo: "Node práctico", categoria: "Backend" };
-const SEGUNDO = { id: "curso-2", titulo: "React desde cero", categoria: "Frontend" };
+const PRIMERO = { id: "curso-1", titulo: "Node práctico", categoria: "Backend", estado: "publicado" };
+const SEGUNDO = { id: "curso-2", titulo: "React desde cero", categoria: "Frontend", estado: "publicado" };
+const BORRADOR = {
+  id: "curso-3", titulo: "Rust desde cero", categoria: "Backend", estado: "borrador",
+  dias_semana: ["lun"], proximamente: false,
+};
+const BORRADOR_INCOMPLETO = {
+  id: "curso-4", titulo: "Go desde cero", categoria: "Backend", estado: "borrador",
+  dias_semana: [], proximamente: false,
+};
+const BORRADOR_PROXIMAMENTE = {
+  id: "curso-5", titulo: "Kotlin desde cero", categoria: "Backend", estado: "borrador",
+  dias_semana: [], proximamente: true,
+};
 
 class Element {
   constructor(tagName) {
@@ -63,13 +75,14 @@ function createHarness({
   cursos = [PRIMERO, SEGUNDO],
   listar,
   eliminar = async () => ({ ok: true }),
+  cambiarEstado = async () => ({ ok: true }),
   confirmar = async () => true,
 } = {}) {
   const lista = new Element("section");
   const cursoNuevo = new Element("a");
   cursoNuevo.id = "cursoNuevo";
   const registro = new Map([["cursoNuevo", cursoNuevo]]);
-  const calls = { toasts: [], fallos: [], eliminados: [], confirmaciones: [], listados: 0 };
+  const calls = { toasts: [], fallos: [], eliminados: [], cambiosEstado: [], confirmaciones: [], listados: 0 };
 
   const context = {
     console,
@@ -91,6 +104,7 @@ function createHarness({
     lista,
     listar: listar || (async () => { calls.listados += 1; return { ok: true, data: cursos }; }),
     eliminar: async (id) => { calls.eliminados.push(id); return eliminar(id); },
+    cambiarEstado: async (id, estado) => { calls.cambiosEstado.push([id, estado]); return cambiarEstado(id, estado); },
     confirmar: async (opciones) => { calls.confirmaciones.push(opciones); return confirmar(opciones); },
     notificar: (...args) => calls.toasts.push(args),
     reportarFallo: (...args) => calls.fallos.push(args),
@@ -103,6 +117,10 @@ function createHarness({
 
 function botonEliminar(lista, id) {
   return buscarTodos(lista, (nodo) => nodo.id === `curso-eliminar-${id}`)[0];
+}
+
+function botonEstado(lista, id) {
+  return buscarTodos(lista, (nodo) => nodo.id === `curso-estado-${id}`)[0];
 }
 
 test("the admin grid renders one labelled delete button per course", async () => {
@@ -250,4 +268,127 @@ test("focus moves to a neighbour after a delete and to the create link when the 
   assert.equal(harness.calls.ultimoFoco, "cursoNuevo");
   assert.equal(harness.cursoNuevo.focused, true);
   assert.equal(harness.lista.children[0].textContent, "Aún no hay cursos publicados.");
+});
+
+test("a published course offers to archive it; a draft offers to publish it", async () => {
+  const { administrador, lista } = createHarness({ cursos: [PRIMERO, BORRADOR] });
+  await administrador.cargarCursos();
+
+  const botonPublicado = botonEstado(lista, PRIMERO.id);
+  assert.equal(botonPublicado.textContent, "Archivar");
+  assert.equal(botonPublicado.attributes["aria-label"], `Archivar curso ${PRIMERO.titulo}`);
+
+  const botonBorrador = botonEstado(lista, BORRADOR.id);
+  assert.equal(botonBorrador.textContent, "Publicar");
+  assert.equal(botonBorrador.attributes["aria-label"], `Publicar curso ${BORRADOR.titulo}`);
+});
+
+test("archiving a published course sends the archived target state and confirms without a dialog", async () => {
+  const { administrador, lista, calls } = createHarness({ cursos: [PRIMERO] });
+  await administrador.cargarCursos();
+  await botonEstado(lista, PRIMERO.id).click();
+
+  assert.deepEqual(calls.cambiosEstado, [[PRIMERO.id, "archivado"]]);
+  assert.equal(calls.confirmaciones.length, 0, "archivar no debe abrir el diálogo de confirmación por tipeo");
+  assert.deepEqual(calls.toasts[0], ["Curso archivado.", "success"]);
+});
+
+test("publishing a draft sends the published target state and refetches the list", async () => {
+  let restantes = [BORRADOR];
+  const { administrador, lista, calls } = createHarness({
+    cursos: [BORRADOR],
+    listar: async () => { calls.listados += 1; return { ok: true, data: restantes }; },
+    cambiarEstado: async (id) => {
+      restantes = restantes.map((curso) => (curso.id === id ? { ...curso, estado: "publicado" } : curso));
+      return { ok: true, data: { id, estado: "publicado" } };
+    },
+  });
+  await administrador.cargarCursos();
+  const listadosIniciales = calls.listados;
+  await botonEstado(lista, BORRADOR.id).click();
+
+  assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]]);
+  assert.deepEqual(calls.toasts[0], ["Curso publicado.", "success"]);
+  assert.equal(calls.listados, listadosIniciales + 1);
+  assert.equal(botonEstado(lista, BORRADOR.id).textContent, "Archivar");
+});
+
+test("a failed state change surfaces the service message and keeps the card as-is", async () => {
+  const { administrador, lista, calls } = createHarness({
+    cursos: [PRIMERO],
+    cambiarEstado: async () => ({ ok: false, codigo: "forbidden", mensaje: "No tienes permisos para modificar este curso, o ya no existe." }),
+  });
+  await administrador.cargarCursos();
+  await botonEstado(lista, PRIMERO.id).click();
+
+  assert.deepEqual(calls.toasts[0], ["No tienes permisos para modificar este curso, o ya no existe.", "error"]);
+  assert.equal(calls.fallos[0][0], "course_state_change");
+  assert.equal(calls.fallos[0][3], "forbidden");
+  assert.equal(botonEstado(lista, PRIMERO.id).textContent, "Archivar");
+});
+
+test("a second click is ignored while a state change is in flight", async () => {
+  let resolver;
+  const { administrador, lista, calls } = createHarness({
+    cursos: [PRIMERO],
+    cambiarEstado: () => new Promise((resolve) => { resolver = resolve; }),
+  });
+  await administrador.cargarCursos();
+
+  const boton = botonEstado(lista, PRIMERO.id);
+  const primera = boton.click();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(boton.disabled, true);
+  await boton.click();
+  assert.equal(calls.cambiosEstado.length, 1, "el segundo click no debe disparar otro cambio de estado");
+
+  resolver({ ok: true });
+  await primera;
+});
+
+test("deleting and changing state share the same in-flight lock", async () => {
+  let resolver;
+  const { administrador, lista, calls } = createHarness({
+    cursos: [PRIMERO],
+    eliminar: () => new Promise((resolve) => { resolver = resolve; }),
+  });
+  await administrador.cargarCursos();
+
+  botonEliminar(lista, PRIMERO.id).click();
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(botonEstado(lista, PRIMERO.id).disabled, true);
+  await botonEstado(lista, PRIMERO.id).click();
+  assert.equal(calls.cambiosEstado.length, 0, "el cambio de estado no debe correr mientras el borrado está en vuelo");
+
+  resolver({ ok: true });
+});
+
+test("publishing a draft with no weekday assigned is blocked before touching the service", async () => {
+  const { administrador, lista, calls } = createHarness({ cursos: [BORRADOR_INCOMPLETO] });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR_INCOMPLETO.id).click();
+
+  assert.equal(calls.cambiosEstado.length, 0, "no debe llamar a cambiarEstado con un curso incompleto");
+  assert.match(calls.toasts[0][0], /días de la semana/);
+  assert.equal(calls.toasts[0][1], "error");
+  assert.equal(calls.fallos.length, 0, "es un rechazo de validación, no una falla de operación");
+});
+
+test("a draft marked próximamente can be published without weekdays", async () => {
+  const { administrador, lista, calls } = createHarness({ cursos: [BORRADOR_PROXIMAMENTE] });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR_PROXIMAMENTE.id).click();
+
+  assert.deepEqual(calls.cambiosEstado, [[BORRADOR_PROXIMAMENTE.id, "publicado"]]);
+});
+
+test("archiving an incomplete course is never blocked by the weekday guard", async () => {
+  const cursoPublicadoIncompleto = { ...PRIMERO, dias_semana: [] };
+  const { administrador, lista, calls } = createHarness({ cursos: [cursoPublicadoIncompleto] });
+  await administrador.cargarCursos();
+  await botonEstado(lista, cursoPublicadoIncompleto.id).click();
+
+  assert.deepEqual(calls.cambiosEstado, [[cursoPublicadoIncompleto.id, "archivado"]]);
 });

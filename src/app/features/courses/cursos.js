@@ -75,6 +75,9 @@ async function iniciarCatalogoCursos() {
     const resultado = url.searchParams.get("resultado");
     if (resultado === "creado") mostrarToast("Curso publicado.", "success");
     if (resultado === "actualizado") mostrarToast("Curso actualizado.", "success");
+    if (resultado === "creado_borrador" || resultado === "actualizado_borrador") {
+      mostrarToast("Curso guardado como borrador.", "success");
+    }
     if (!resultado) return;
     url.searchParams.delete("resultado");
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
@@ -162,6 +165,11 @@ function crearTarjetaCurso(curso) {
   agregarChipCurso(chips, formatearCosto(curso.costo));
   if (curso.proximamente) {
     agregarChipCurso(chips, "Próximamente", "proximamente");
+  }
+  // Un usuario normal nunca recibe estas filas (RLS de 0014); si aparece es
+  // porque quien mira el catálogo es admin, y conviene que lo sepa de un vistazo.
+  if (curso.estado && curso.estado !== "publicado") {
+    agregarChipCurso(chips, curso.estado === "borrador" ? "Borrador" : "Archivado", "estado");
   }
 
   if (chips.childElementCount) {

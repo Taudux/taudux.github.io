@@ -171,7 +171,12 @@
           </div>
           <div class="courses__form-actions">
             <button class="button button--outline" type="button" id="cursoCancelar">Cancelar</button>
-            <button class="button button--glow" type="submit" id="cursoEnviar">Publicar curso</button>
+            <!-- cursoEnviar va antes que cursoGuardarBorrador en el DOM a propósito: con
+                 dos botones type="submit", el submit implícito de Enter usa el primero en
+                 orden de documento. Publicar debe seguir siendo ese, igual que cuando era
+                 el único botón — invertir el orden despublicaría cursos por accidente. -->
+            <button class="button button--glow" type="submit" id="cursoEnviar" data-estado="publicado">Publicar curso</button>
+            <button class="button button--outline" type="submit" id="cursoGuardarBorrador" data-estado="borrador" formnovalidate>Guardar borrador</button>
           </div>
           </form>
         </section>

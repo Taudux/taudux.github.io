@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /src/app/features/explore/
 
 Sitemap: https://taudux.com/sitemap.xml

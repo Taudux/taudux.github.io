@@ -4,11 +4,11 @@
 */
 
 const RUTAS_AUTH = Object.freeze({
-  login: "/src/app/features/auth/login/",
-  signup: "/src/app/features/auth/signup/",
-  confirm: "/src/app/features/auth/confirm/",
-  forgotPassword: "/src/app/features/auth/forgot-password/",
-  resetPassword: "/src/app/features/auth/reset-password/",
+  login: "/app/features/auth/login/",
+  signup: "/app/features/auth/signup/",
+  confirm: "/app/features/auth/confirm/",
+  forgotPassword: "/app/features/auth/forgot-password/",
+  resetPassword: "/app/features/auth/reset-password/",
 });
 
 const CLAVE_DESTINO_AUTH = "taudux_auth_next";
@@ -57,7 +57,7 @@ function validarDestinoInterno(valor) {
 
   try {
     const url = new URL(valor, window.location.origin);
-    const baseAuth = "/src/app/features/auth/";
+    const baseAuth = "/app/features/auth/";
     if (url.origin !== window.location.origin || url.pathname.startsWith(baseAuth)) {
       return null;
     }

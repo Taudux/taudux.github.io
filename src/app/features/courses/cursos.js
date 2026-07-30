@@ -233,7 +233,7 @@ function crearFallbackCurso(media, curso) {
 }
 
 function verMasInformacion() {
-  window.location.href = "/index.html#contacto";
+  window.location.href = "/#contacto";
 }
 
 window.tauduxCursosCatalog = {

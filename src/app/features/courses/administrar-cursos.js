@@ -164,7 +164,7 @@ function crearAdministradorCursos({
     const editar = document.createElement("a");
     editar.className = "button courses__action";
     editar.id = `curso-editar-${curso.id}`;
-    editar.href = `/src/app/features/courses/editar-curso.html?id=${encodeURIComponent(curso.id)}`;
+    editar.href = `/app/features/courses/editar-curso.html?id=${encodeURIComponent(curso.id)}`;
     editar.textContent = "Editar";
     editar.setAttribute("aria-label", `Editar curso ${curso.titulo}`);
 

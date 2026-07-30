@@ -10,7 +10,7 @@ const esRecuperacionLegacy =
   consultaLegacy.has("code") ||
   consultaLegacy.has("error_code");
 const destinoLegacy = esRecuperacionLegacy
-  ? "/src/app/features/auth/reset-password/"
-  : "/src/app/features/auth/login/";
+  ? "/app/features/auth/reset-password/"
+  : "/app/features/auth/login/";
 
 window.location.replace(`${destinoLegacy}${window.location.search}${window.location.hash}`);

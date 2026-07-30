@@ -99,7 +99,7 @@ function cargarParticulasAbout() {
     },
     background: {
       color: { value: "#0d0f11" },
-      image: "url('/src/assets/images/01.png')",
+      image: "url('/assets/images/01.png')",
       position: "50% 50%",
       repeat: "no-repeat",
       size: "cover",

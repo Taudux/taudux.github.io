@@ -5,21 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/png" href="/src/assets/images/1.png">
+  <link rel="icon" type="image/png" href="/assets/images/1.png">
   <title>Crear cuenta | Taudux</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/src/styles.css">
-  <link rel="stylesheet" href="/src/app/shared/navbar/navbar.css">
-  <link rel="stylesheet" href="/src/app/shared/button/button.css">
-  <link rel="stylesheet" href="/src/app/shared/panel/panel.css">
-  <link rel="stylesheet" href="/src/app/shared/field/field.css">
-  <link rel="stylesheet" href="/src/app/features/auth/auth.css">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/app/shared/button/button.css">
+  <link rel="stylesheet" href="/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/app/shared/field/field.css">
+  <link rel="stylesheet" href="/app/features/auth/auth.css">
 </head>
 
 <body>
   <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
-    <a href="/index.html" class="navbar__brand">
-      <img src="/src/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
+    <a href="/" class="navbar__brand">
+      <img src="/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
     </a>
   </nav>
 
@@ -105,20 +105,20 @@
       </form>
 
       <div class="auth__actions">
-        <p>¿Ya tienes una cuenta? <a class="auth__link" data-preserve-next href="/src/app/features/auth/login/">Inicia sesión</a></p>
+        <p>¿Ya tienes una cuenta? <a class="auth__link" data-preserve-next href="/app/features/auth/login/">Inicia sesión</a></p>
       </div>
     </section>
 
     <div class="auth__legal">
-      <p>Al continuar, confirmas que aceptas el <a href="/src/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__link">Aviso de Privacidad</a>.</p>
+      <p>Al continuar, confirmas que aceptas el <a href="/app/features/legal/privacidad.html" target="_blank" rel="noopener noreferrer" class="auth__link">Aviso de Privacidad</a>.</p>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/src/app/core/supabase/supabase-client.js"></script>
-  <script src="/src/app/core/auth/auth.service.js"></script>
-  <script src="/src/app/features/auth/auth-ui.js"></script>
-  <script src="/src/app/features/auth/signup/signup.js"></script>
+  <script src="/app/core/supabase/supabase-client.js"></script>
+  <script src="/app/core/auth/auth.service.js"></script>
+  <script src="/app/features/auth/auth-ui.js"></script>
+  <script src="/app/features/auth/signup/signup.js"></script>
 </body>
 
 </html>

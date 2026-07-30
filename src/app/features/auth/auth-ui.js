@@ -197,7 +197,7 @@ function mensajeErrorEnlace(parametros) {
 }
 
 function destinoDespuesDeAuth() {
-  return obtenerDestinoAuth() || "/index.html";
+  return obtenerDestinoAuth() || "/";
 }
 
 async function redirigirSiSesionActiva() {

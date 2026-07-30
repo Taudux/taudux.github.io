@@ -117,7 +117,7 @@ test("public course details behave identically without an authentication gate", 
 
     assert.equal(calls.sessions, sessionsBeforeActivation);
     assert.equal(calls.loginUrls, 0);
-    assert.equal(window.location.href, "/index.html#contacto");
+    assert.equal(window.location.href, "/#contacto");
     assert.deepEqual(calls.toasts, []);
   }
 });

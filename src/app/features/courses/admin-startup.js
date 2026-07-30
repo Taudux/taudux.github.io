@@ -7,7 +7,7 @@
   Depende de auth.service.js y telemetry/operaciones.js.
 */
 
-const RUTA_CATALOGO_CURSOS = "/src/app/features/courses/cursos.html";
+const RUTA_CATALOGO_CURSOS = "/app/features/courses/cursos.html";
 
 function crearArranqueAdmin({ pagina, tituloError }) {
   const { iniciarTiempo, reportarFallo } = crearReporteroOperaciones(pagina);

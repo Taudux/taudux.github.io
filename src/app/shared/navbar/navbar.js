@@ -4,7 +4,7 @@
 */
 
 const ENLACES_NAVEGACION_BASE = [
-  { texto: "Cursos", href: "/src/app/features/courses/cursos.html", habilitado: true },
+  { texto: "Cursos", href: "/app/features/courses/cursos.html", habilitado: true },
   { texto: "Portal", habilitado: false },
   { texto: "Publicaciones", habilitado: false },
   { texto: "Proyectos", habilitado: false },
@@ -18,7 +18,7 @@ async function salirYVolver(evento) {
     if (typeof mostrarToast === "function") mostrarToast(resultado.mensaje, "error");
     return;
   }
-  window.location.href = "/index.html";
+  window.location.href = "/";
 }
 
 window.addEventListener("taudux:operation-error", () => {
@@ -123,7 +123,7 @@ async function montarMenuNavegacion() {
       if (enlace.texto === "Herramientas" && esAdministrador) {
         return {
           ...enlace,
-          href: "/src/app/features/detector/detector.html",
+          href: "/app/features/detector/detector.html",
           habilitado: true,
         };
       }

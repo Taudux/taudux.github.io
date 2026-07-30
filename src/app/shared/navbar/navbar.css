@@ -187,28 +187,55 @@
     pointer-events: none;
   }
 
+  /* Un solo drop-shadow, ciclo lento: mismo lenguaje que el resto de los
+     brillos del sitio (logo del hero en home.css, token --glow-accent en
+     styles.css). Apilar dos drop-shadow en un ciclo rápido desentonaba con
+     esos brillos, mucho más suaves. El pico usa la misma magnitud que
+     --glow-accent (16px al 55%). */
   @keyframes nav-menu-pulse {
     0%,
     100% {
       filter: drop-shadow(
-        0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent)
+        0 0 4px color-mix(in srgb, var(--color-accent) 35%, transparent)
       );
     }
 
     50% {
       filter: drop-shadow(
-          0 0 12px color-mix(in srgb, var(--color-accent) 95%, transparent)
-        )
-        drop-shadow(
-          0 0 4px color-mix(in srgb, var(--color-accent) 80%, transparent)
-        );
+        0 0 16px color-mix(in srgb, var(--color-accent) 55%, transparent)
+      );
+    }
+  }
+
+  /* Rebote intermitente: dos saltos cortos y una pausa larga en vez de un
+     loop continuo, para que el ojo no lo termine filtrando como ruido de
+     fondo. Anima solo transform, así corre en paralelo con nav-menu-pulse
+     (que anima filter) sin pisarlo. */
+  @keyframes nav-menu-bounce {
+    0%,
+    76%,
+    100% {
+      transform: translateY(0);
+    }
+
+    80%,
+    88% {
+      transform: translateY(-4px);
+    }
+
+    84%,
+    92% {
+      transform: translateY(0);
     }
   }
 
   .nav-menu__toggle--account.nav-menu__toggle--pulsing::before {
-    /* El pulso se corta con `animation: none` al hacer hover/abrir (regla de
-       abajo) para que no compita con el filter fijo de esos estados. */
-    animation: nav-menu-pulse 1.8s ease-in-out infinite;
+    /* El pulso y el rebote se cortan juntos con `animation: none` al hacer
+       hover/abrir (regla de abajo), para que no compitan con el filter fijo
+       de esos estados. */
+    animation:
+      nav-menu-pulse 6s ease-in-out infinite,
+      nav-menu-bounce 6s ease-in-out infinite;
   }
 
   .nav-menu__toggle--account:hover::before,

@@ -150,6 +150,94 @@ test("operation failures get one visible generic report unless an alert is alrea
   assert.equal(messages.length, 1);
 });
 
+test("the navigation panel drops site links whose label already exists as an anchor", () => {
+  const context = {
+    window: { addEventListener() {}, scrollY: 0 },
+    document: {
+      addEventListener() {},
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      getElementById: () => null,
+      createElement: (tagName) => new Element(tagName),
+    },
+    queueMicrotask,
+  };
+  vm.runInNewContext(`${read("src/app/shared/navbar/navbar.js")}\nthis.montarPanelNavegacion = montarPanelNavegacion;`, context);
+
+  const lista = new Element("div");
+  context.montarPanelNavegacion(lista, {
+    anclas: [{ texto: "Herramientas", href: "#herramientas" }],
+    enlaces: [
+      { texto: "Cursos", href: "/app/features/courses/cursos.html", habilitado: true },
+      { texto: "Herramientas", href: "/app/features/detector/detector.html", habilitado: true },
+    ],
+  });
+
+  const etiquetas = lista.children.map((hijo) => hijo.textContent).filter(Boolean);
+  assert.deepEqual(etiquetas, ["Herramientas", "Cursos"]);
+  assert.equal(etiquetas.filter((texto) => texto === "Herramientas").length, 1);
+});
+
+test("dedupe by label intentionally hides the admin tools link behind a same-named anchor on the landing page", () => {
+  /*
+    Trade-off aceptado: en el landing, un admin que abre la hamburguesa ve
+    "Herramientas" apuntando al ancla de sección (#herramientas), no al link
+    real a detector.html — quedan con el mismo texto y el dedupe por texto
+    descarta el segundo. El acceso a detector.html sigue disponible desde el
+    menú de cuenta en desktop y desde la hamburguesa de cualquier otra página,
+    que no tiene ese ancla. Este test documenta que la pérdida es intencional,
+    no una regresión a corregir.
+  */
+  const context = {
+    window: { addEventListener() {}, scrollY: 0 },
+    document: {
+      addEventListener() {},
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      getElementById: () => null,
+      createElement: (tagName) => new Element(tagName),
+    },
+    queueMicrotask,
+  };
+  vm.runInNewContext(`${read("src/app/shared/navbar/navbar.js")}\nthis.montarPanelNavegacion = montarPanelNavegacion;`, context);
+
+  const lista = new Element("div");
+  context.montarPanelNavegacion(lista, {
+    anclas: [{ texto: "Herramientas", href: "#herramientas" }],
+    enlaces: [
+      { texto: "Herramientas", href: "/app/features/detector/detector.html", habilitado: true },
+    ],
+  });
+
+  const enlaceHerramientas = lista.children.find((hijo) => hijo.textContent === "Herramientas");
+  assert.equal(enlaceHerramientas.href, "#herramientas");
+});
+
+test("the navigation menu is revealed only on mobile", () => {
+  const css = read("src/app/shared/navbar/navbar.css");
+  /*
+    .nav-menu--site se oculta en la regla base y solo se revela dentro del
+    bloque de 760px: si esto se invierte, la hamburguesa aparece en desktop.
+  */
+  assert.match(css, /\.nav-menu--site\s*{[^}]*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*?\.nav-menu--site\s*{[^}]*display:\s*inline-block/);
+});
+
+test("mobile navigation lives only in the hamburger, and the legacy links panel is gone", () => {
+  const css = read("src/app/shared/navbar/navbar.css");
+  const js = read("src/app/shared/navbar/navbar.js");
+
+  /* En desktop el grupo sigue siendo la única navegación de cursos/detector/privacidad. */
+  assert.match(js, /nav-menu__group--nav/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)[\s\S]*?\.nav-menu__group--nav\s*{[^}]*display:\s*none/);
+  assert.doesNotMatch(css.split(/@media\s*\(max-width:\s*760px\)/)[0], /\.nav-menu__group--nav\s*{[^}]*display:\s*none/);
+
+  const fuente = `${css}\n${js}\n${read("src/index.html")}`;
+  assert.doesNotMatch(fuente, /navbar__links--mobile-open/);
+  assert.doesNotMatch(fuente, /navbar__toggle/);
+  assert.doesNotMatch(css, /--z-mobile-menu|--z-mobile-toggle/);
+});
+
 test("live source contains no references to removed pages", () => {
   const source = fs.readdirSync(path.join(ROOT, "src"), { recursive: true })
     .filter((file) => /\.(?:html|js|css)$/.test(file))

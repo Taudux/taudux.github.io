@@ -70,20 +70,75 @@ function actualizarEnlaceActivo() {
   });
 }
 
-function configurarMenuMovil() {
-  const boton = document.getElementById("menuToggle");
-  const enlaces = document.querySelector(".navbar__links");
-  if (!boton || !enlaces) return;
+/*
+  Cada desplegable registra acá su función de cierre. Al abrir uno se cierran
+  los demás: en ≤760px los dos toggles conviven en una barra de 6.5rem y dos
+  paneles abiertos a la vez se pisarían.
+*/
+const cerradoresDeDesplegables = [];
 
-  boton.addEventListener("click", () => {
-    enlaces.classList.toggle("navbar__links--mobile-open");
+function crearDesplegable({ clase, idLista, etiqueta }) {
+  const menu = document.createElement("div");
+  menu.className = `nav-menu nav-menu--${clase}`;
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = `nav-menu__toggle nav-menu__toggle--${clase}`;
+  toggle.setAttribute("aria-haspopup", "menu");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-controls", idLista);
+  toggle.setAttribute("aria-label", etiqueta);
+
+  const lista = document.createElement("div");
+  lista.className = "nav-menu__list floating-menu";
+  lista.id = idLista;
+
+  menu.appendChild(toggle);
+  menu.appendChild(lista);
+
+  return { menu, toggle, lista };
+}
+
+function conectarDesplegable({ menu, toggle, lista }) {
+  function establecerMenuAbierto(abierto) {
+    menu.classList.toggle("nav-menu--open", abierto);
+    toggle.setAttribute("aria-expanded", String(abierto));
+  }
+
+  const cerrar = () => establecerMenuAbierto(false);
+  cerradoresDeDesplegables.push(cerrar);
+
+  toggle.addEventListener("click", (evento) => {
+    evento.stopPropagation();
+    const abriendo = !menu.classList.contains("nav-menu--open");
+    if (abriendo) {
+      cerradoresDeDesplegables.forEach((otroCerrar) => {
+        if (otroCerrar !== cerrar) otroCerrar();
+      });
+    }
+    establecerMenuAbierto(abriendo);
   });
 
-  document.querySelectorAll(".navbar__link").forEach((enlace) => {
-    enlace.addEventListener("click", () => {
-      enlaces.classList.remove("navbar__links--mobile-open");
-    });
+  document.addEventListener("click", (evento) => {
+    if (!menu.contains(evento.target)) cerrar();
   });
+
+  menu.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && menu.classList.contains("nav-menu--open")) {
+      cerrar();
+      toggle.focus();
+    }
+  });
+
+  /*
+    Las anclas del landing no recargan la página, así que sin este cierre
+    explícito el panel quedaría abierto tapando la sección recién saltada.
+  */
+  lista.addEventListener("click", (evento) => {
+    if (evento.target.closest("a")) cerrar();
+  });
+
+  return cerrar;
 }
 
 function crearItemMenu({ texto, href, alHacerClick, destacado, habilitado = true }) {
@@ -117,7 +172,78 @@ async function nombreParaMenu(session) {
   return nombre || "Mi cuenta";
 }
 
-async function montarMenuNavegacion() {
+function resolverEnlacesNavegacion(esAdministrador) {
+  return ENLACES_NAVEGACION_BASE.map((enlace) => {
+    if (enlace.texto === "Herramientas" && esAdministrador) {
+      return {
+        ...enlace,
+        href: "/app/features/detector/detector.html",
+        habilitado: true,
+      };
+    }
+    return enlace;
+  });
+}
+
+/*
+  Las anclas salen del DOM, no de una constante: el markup de index.html sigue
+  siendo la única fuente de esas secciones y no hay riesgo de que las dos copias
+  se desincronicen. En páginas sin anclas devuelve [] y el panel arranca directo
+  con los enlaces del sitio.
+*/
+function anclasDeLaPagina() {
+  const anclas = document.querySelectorAll('.navbar__links .navbar__link[href^="#"]');
+  return Array.from(anclas)
+    .filter((ancla) => ancla.id !== "accessBtn")
+    .map((ancla) => ({
+      texto: ancla.textContent.trim(),
+      href: ancla.getAttribute("href"),
+    }));
+}
+
+function montarPanelNavegacion(lista, { anclas, enlaces }) {
+  const textosDeAnclas = new Set(anclas.map((ancla) => ancla.texto.toLowerCase()));
+  /*
+    "Herramientas" existe como ancla del landing y como enlace admin al
+    detector. Si el ancla ya ocupa ese texto, el enlace del sitio se omite:
+    dos entradas con el mismo nombre y distinto destino son indistinguibles.
+  */
+  const enlacesSinRepetir = enlaces.filter(
+    (enlace) => !textosDeAnclas.has(enlace.texto.toLowerCase())
+  );
+
+  anclas.forEach((ancla) => lista.appendChild(crearItemMenu(ancla)));
+
+  if (anclas.length && enlacesSinRepetir.length) {
+    const divisor = document.createElement("hr");
+    divisor.className = "nav-menu__divider";
+    lista.appendChild(divisor);
+  }
+
+  enlacesSinRepetir.forEach((enlace) => lista.appendChild(crearItemMenu(enlace)));
+}
+
+/*
+  Shell síncrono: el botón se monta en DOMContentLoaded con su tamaño final para
+  que el brand no salte cuando resuelve la sesión. El contenido de la lista lo
+  completa montarMenus() después, con los datos de sesión ya resueltos.
+*/
+function montarNavegacionMovil() {
+  const navbar = document.querySelector(".navbar");
+  if (!navbar || !navbar.querySelector(".navbar__links")) return;
+
+  const { menu, toggle, lista } = crearDesplegable({
+    clase: "site",
+    idLista: "menuNavegacionLista",
+    etiqueta: "Menú de navegación",
+  });
+  toggle.textContent = "☰";
+
+  navbar.prepend(menu);
+  conectarDesplegable({ menu, toggle, lista });
+}
+
+async function montarMenus() {
   const boton = document.getElementById("accessBtn");
   if (!boton) return;
 
@@ -129,32 +255,24 @@ async function montarMenuNavegacion() {
     const session = await obtenerSesion();
     const esAdministrador = Boolean(session && await esAdmin(session));
 
-    const enlacesNavegacion = ENLACES_NAVEGACION_BASE.map((enlace) => {
-      if (enlace.texto === "Herramientas" && esAdministrador) {
-        return {
-          ...enlace,
-          href: "/app/features/detector/detector.html",
-          habilitado: true,
-        };
-      }
-      return enlace;
-    });
+    const enlacesNavegacion = resolverEnlacesNavegacion(esAdministrador);
+
+    const listaNavegacion = document.getElementById("menuNavegacionLista");
+    if (listaNavegacion) {
+      montarPanelNavegacion(listaNavegacion, {
+        anclas: anclasDeLaPagina(),
+        enlaces: enlacesNavegacion,
+      });
+    }
 
     const nombreCuenta = await nombreParaMenu(session);
 
-    const menu = document.createElement("div");
-    menu.className = "nav-menu";
-
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "nav-menu__toggle";
+    const { menu, toggle, lista } = crearDesplegable({
+      clase: "account",
+      idLista: "menuCuentaLista",
+      etiqueta: nombreCuenta ? `Cuenta: ${nombreCuenta}` : "Cuenta",
+    });
     toggle.classList.toggle("nav-menu__toggle--pulsing", !session);
-    toggle.setAttribute("aria-label", nombreCuenta || "Menú");
-    toggle.setAttribute("aria-haspopup", "menu");
-    toggle.setAttribute("aria-expanded", "false");
-
-    const lista = document.createElement("div");
-    lista.className = "nav-menu__list floating-menu";
 
     if (nombreCuenta) {
       const encabezado = document.createElement("div");
@@ -163,52 +281,36 @@ async function montarMenuNavegacion() {
       lista.appendChild(encabezado);
     }
 
+    /*
+      En mobile la navegación vive en la hamburguesa, así que este grupo se
+      oculta por CSS. En desktop sigue siendo la única vía de navegación de las
+      páginas sin fila de enlaces (cursos, detector, privacidad).
+    */
+    const grupoNavegacion = document.createElement("div");
+    grupoNavegacion.className = "nav-menu__group nav-menu__group--nav";
     enlacesNavegacion.forEach((enlace) => {
-      lista.appendChild(crearItemMenu(enlace));
+      grupoNavegacion.appendChild(crearItemMenu(enlace));
     });
+    lista.appendChild(grupoNavegacion);
 
     const divisor = document.createElement("hr");
     divisor.className = "nav-menu__divider";
     lista.appendChild(divisor);
     lista.appendChild(crearItemMenu(enlaceDeSesion(session)));
 
-    menu.appendChild(toggle);
-    menu.appendChild(lista);
     boton.replaceWith(menu);
-
-    function establecerMenuAbierto(abierto) {
-      menu.classList.toggle("nav-menu--open", abierto);
-      toggle.setAttribute("aria-expanded", String(abierto));
-    }
-
-    toggle.addEventListener("click", (evento) => {
-      evento.stopPropagation();
-      establecerMenuAbierto(!menu.classList.contains("nav-menu--open"));
-    });
-
-    document.addEventListener("click", (evento) => {
-      if (!menu.contains(evento.target)) {
-        establecerMenuAbierto(false);
-      }
-    });
-
-    menu.addEventListener("keydown", (evento) => {
-      if (evento.key === "Escape" && menu.classList.contains("nav-menu--open")) {
-        establecerMenuAbierto(false);
-        toggle.focus();
-      }
-    });
+    conectarDesplegable({ menu, toggle, lista });
   } finally {
     if (boton.isConnected) boton.style.visibility = "visible";
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  configurarMenuMovil();
+  montarNavegacionMovil();
   cachearElementosDeScroll();
   actualizarEstadoVisualNavbar();
   actualizarEnlaceActivo();
-  montarMenuNavegacion();
+  montarMenus();
 });
 
 /* Throttle con requestAnimationFrame: como mucho una actualización por frame,

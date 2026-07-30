@@ -203,22 +203,30 @@ function crearAdministradorCursos({
     media.className = "courses__card-media courses__card-media--fallback";
     media.setAttribute("aria-hidden", "true");
 
+    // Un solo contenedor posicionado; los sellos se apilan por flujo normal
+    // (flex column) en vez de cada uno con su propio position:absolute, así
+    // no se solapan ni se aprietan entre sí en una tarjeta angosta.
+    const badges = document.createElement("div");
+    badges.className = "courses__card-badges";
+
     const badge = document.createElement("span");
     badge.className = "courses__card-updated-badge";
     const fechaPlaceholder = FECHAS_ACTUALIZACION_PLACEHOLDER[
       indice % FECHAS_ACTUALIZACION_PLACEHOLDER.length
     ];
     badge.textContent = `Actualizado: ${fechaPlaceholder}`;
+    badges.appendChild(badge);
 
-    media.appendChild(badge);
     // Publicado es el estado esperado y no necesita sello; borrador/archivado
     // sí, porque son los que un usuario normal nunca llega a ver (RLS de 0014).
     if (curso.estado && curso.estado !== "publicado") {
       const estadoBadge = document.createElement("span");
       estadoBadge.className = "courses__card-state-badge";
       estadoBadge.textContent = curso.estado === "borrador" ? "Borrador" : "Archivado";
-      media.appendChild(estadoBadge);
+      badges.appendChild(estadoBadge);
     }
+
+    media.appendChild(badges);
 
     const mediaLabel = document.createElement("span");
     mediaLabel.className = "courses__card-media-label";

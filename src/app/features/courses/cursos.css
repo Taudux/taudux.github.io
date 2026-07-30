@@ -285,12 +285,24 @@
   overflow-wrap: anywhere;
 }
 
-/* Sello de última actualización por tarjeta, panel de administración de cursos. */
-.courses__card-updated-badge {
+/* Contenedor único de sellos por tarjeta (panel de administración de cursos):
+   se apilan en columna por flujo normal, no cada uno con su propio
+   position:absolute, para que no se solapen ni se aprieten en una tarjeta
+   angosta. */
+.courses__card-badges {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
+  right: 0.75rem;
   z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+/* Sello de última actualización por tarjeta. */
+.courses__card-updated-badge {
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--color-background) 70%, transparent);
@@ -299,12 +311,8 @@
 }
 
 /* Sello de borrador/archivado: solo lo ve un admin (RLS de 0014 oculta la fila
-   al resto), así que aparece en el catálogo público y en administración. */
+   al resto). */
 .courses__card-state-badge {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  z-index: var(--z-content);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--color-warning) 22%, var(--color-background) 70%);
@@ -508,17 +516,23 @@
   position: relative;
   z-index: var(--z-highlight);
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: auto;
   padding-top: 0.75rem;
 }
 
+/* Sobrepisa el min-inline-size:0 / overflow-wrap:anywhere de .button: acá las
+   etiquetas son cortas y fijas, así que el botón entero pasa a la siguiente
+   línea (gracias al flex-wrap de arriba) en vez de partirse letra por letra. */
 .courses__action {
   padding: 0.4rem 1rem;
   border-radius: var(--radius-button);
   background: var(--color-field);
   color: var(--color-text);
   font-size: 0.8rem;
+  white-space: nowrap;
+  min-inline-size: fit-content;
 }
 
 .courses__action--danger {

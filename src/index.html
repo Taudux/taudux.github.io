@@ -20,7 +20,7 @@
 </head>
 
 <body>
-  <nav class="navbar" id="navbar">
+  <nav class="navbar" id="navbar" aria-label="Navegación principal">
     <a href="/" class="navbar__brand">
       <img src="/assets/images/logo-horizontal.png" alt="Taudux logo pequeño" class="navbar__logo">
     </a>
@@ -39,6 +39,7 @@
   </nav>
 
   <header class="hero">
+    <h1 class="u-visually-hidden">Taudux — Software development &amp; data analytics</h1>
     <div id="particles-hero" class="hero__particles" aria-hidden="true"></div>
     <div class="hero__logo-stage">
       <img src="/assets/images/01.png" alt="Taudux logo grande" class="hero__logo">
@@ -119,41 +120,41 @@
     <h2 class="technology__title">Tecnología que potencia tus proyectos</h2>
     <p class="technology__description">Dominamos una amplia gama de tecnologías que nos permiten diseñar, desarrollar y optimizar soluciones para cada cliente. Desde lenguajes de programación hasta plataformas de análisis, ponemos lo mejor de la tecnología a tu alcance.</p>
     <div class="technology__carousels">
-      <div class="carousel">
+      <div class="carousel" aria-hidden="true">
         <div class="carousel__track">
           <div class="carousel__group">
             <img src="/assets/icons/devicons/python-original-wordmark.svg"
-              alt="Python" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/javascript-plain.svg"
-              alt="JavaScript" class="carousel__item">
-            <img src="/assets/icons/devicons/r-original.svg" alt="R" class="carousel__item">
+              alt="" class="carousel__item">
+            <img src="/assets/icons/devicons/r-original.svg" alt="" class="carousel__item">
             <img src="/assets/icons/devicons/nodejs-original-wordmark.svg"
-              alt="NodeJs" class="carousel__item">
-            <img src="/assets/icons/devicons/cplusplus-plain.svg" alt="CPP" class="carousel__item">
+              alt="" class="carousel__item">
+            <img src="/assets/icons/devicons/cplusplus-plain.svg" alt="" class="carousel__item">
             <img src="/assets/icons/devicons/html5-original-wordmark.svg"
-              alt="HTML" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/java-original-wordmark.svg"
-              alt="Java" class="carousel__item">
+              alt="" class="carousel__item">
           </div>
         </div>
       </div>
-      <div class="carousel">
+      <div class="carousel" aria-hidden="true">
         <div class="carousel__track carousel__track--reverse">
           <div class="carousel__group">
-            <img src="/assets/icons/devicons/docker-original.svg" alt="Docker" class="carousel__item">
-            <img src="/assets/icons/devicons/git-plain.svg" alt="Git" class="carousel__item">
+            <img src="/assets/icons/devicons/docker-original.svg" alt="" class="carousel__item">
+            <img src="/assets/icons/devicons/git-plain.svg" alt="" class="carousel__item">
             <img src="/assets/icons/devicons/postgresql-plain-wordmark.svg"
-              alt="postgresql" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/mysql-original-wordmark.svg"
-              alt="mysql" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/mongodb-plain-wordmark.svg"
-              alt="mongodb" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/googlecloud-original.svg"
-              alt="gcp" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/amazonwebservices-plain-wordmark.svg"
-              alt="aws" class="carousel__item">
+              alt="" class="carousel__item">
             <img src="/assets/icons/devicons/postman-original.svg"
-              alt="Postman" class="carousel__item">
+              alt="" class="carousel__item">
           </div>
         </div>
       </div>
@@ -173,13 +174,26 @@
       <form action="https://formsubmit.co/samaelflores@taudux.com" method="POST" class="contact__form"
         id="contactForm">
         <div class="contact__row">
-          <input type="text" id="nombre" name="nombre" placeholder="Nombre(s) *" class="contact__field field" required>
-          <input type="email" id="email" name="email" placeholder="Correo electrónico *" class="contact__field field" required>
+          <div class="contact__field-group">
+            <label class="u-visually-hidden" for="nombre">Nombre(s)</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre(s) *" class="contact__field field" required>
+          </div>
+          <div class="contact__field-group">
+            <label class="u-visually-hidden" for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" placeholder="Correo electrónico *" class="contact__field field" required>
+          </div>
         </div>
         <div class="contact__row">
-          <input type="text" id="empresa" name="empresa" placeholder="Empresa *" class="contact__field field" required>
-          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono (opcional)" class="contact__field field">
+          <div class="contact__field-group">
+            <label class="u-visually-hidden" for="empresa">Empresa</label>
+            <input type="text" id="empresa" name="empresa" placeholder="Empresa *" class="contact__field field" required>
+          </div>
+          <div class="contact__field-group">
+            <label class="u-visually-hidden" for="telefono">Teléfono (opcional)</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="Teléfono (opcional)" class="contact__field field">
+          </div>
         </div>
+        <label class="u-visually-hidden" for="mensaje">Mensaje</label>
         <textarea id="mensaje" name="message" rows="4" class="contact__field field field--textarea" placeholder="¿En qué servicio estás interesado? Cuéntanos más..."
           required></textarea>
         <input type="hidden" name="_captcha" value="false">
@@ -201,7 +215,7 @@
         <h2 class="footer__heading">Legal</h2>
         <ul class="footer__list">
           <li><a href="/app/features/legal/privacidad.html" class="footer__link">Aviso de privacidad</a></li>
-          <li><span class="footer__link footer__link--pending">Términos y condiciones</span></li>
+          <li><span class="footer__link footer__link--pending" aria-disabled="true">Términos y condiciones</span></li>
         </ul>
       </div>
 

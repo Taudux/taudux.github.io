@@ -19,7 +19,7 @@
 </head>
 
 <body class="courses">
-  <nav class="navbar navbar--scrolled" id="adminNavbar" hidden>
+  <nav class="navbar navbar--scrolled" id="adminNavbar" aria-label="Navegación principal" hidden>
     <a href="/" class="navbar__brand">
       <img src="/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
@@ -34,7 +34,7 @@
         <div class="courses__startup-loader" id="adminStartupLoader" aria-hidden="true"></div>
         <p class="courses__startup-announcement" id="adminStartupLoadingMessage">Cargando la administración de categorías.</p>
         <div class="courses__startup-error" id="adminStartupError" hidden>
-          <h1 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración de categorías</h1>
+          <h2 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración de categorías</h2>
           <p class="courses__startup-message" id="adminStartupMessage"></p>
           <div class="courses__startup-actions">
             <button class="button button--outline" type="button" id="adminStartupRetry" hidden>Reintentar</button>
@@ -73,7 +73,7 @@
             </div>
           </form>
         </div>
-        <div class="courses__categories-status" id="categoriasEstado" role="status" tabindex="-1" hidden>
+        <div class="courses__categories-status" id="categoriasEstado" role="status" aria-live="polite" tabindex="-1" hidden>
           <p class="courses__categories-status-message" id="categoriasEstadoMensaje"></p>
           <button class="button button--outline courses__category-action" type="button" id="categoriasReintentar">Reintentar</button>
         </div>

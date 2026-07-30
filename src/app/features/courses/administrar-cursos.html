@@ -20,7 +20,7 @@
 </head>
 
 <body class="courses">
-  <nav class="navbar navbar--scrolled" id="adminNavbar" hidden>
+  <nav class="navbar navbar--scrolled" id="adminNavbar" aria-label="Navegación principal" hidden>
     <a href="/" class="navbar__brand">
       <img src="/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
@@ -35,7 +35,7 @@
         <div class="courses__startup-loader" id="adminStartupLoader" aria-hidden="true"></div>
         <p class="courses__startup-announcement" id="adminStartupLoadingMessage">Cargando la administración de cursos.</p>
         <div class="courses__startup-error" id="adminStartupError" hidden>
-          <h1 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración de cursos</h1>
+          <h2 class="courses__subtitle" id="adminStartupTitle">No se pudo abrir la administración de cursos</h2>
           <p class="courses__startup-message" id="adminStartupMessage"></p>
           <div class="courses__startup-actions">
             <button class="button button--outline" type="button" id="adminStartupRetry" hidden>Reintentar</button>

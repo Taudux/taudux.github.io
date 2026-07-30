@@ -17,7 +17,7 @@
 </head>
 
 <body class="courses courses--catalog">
-  <nav class="navbar navbar--scrolled">
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
     <a href="/" class="navbar__brand">
       <img src="/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
     </a>
@@ -40,11 +40,11 @@
         </div>
       </header>
 
-      <section class="courses__data-status" id="cursosEstado" role="alert" tabindex="-1" hidden>
+      <section class="courses__data-status" id="cursosEstado" role="alert" aria-live="assertive" tabindex="-1" hidden>
         <p class="courses__data-status-message" id="cursosEstadoMensaje"></p>
         <button class="button button--outline" type="button" id="cursosReintentar">Reintentar carga</button>
       </section>
-      <section class="courses__list" id="cursosLista" aria-label="Cursos publicados" aria-busy="true" tabindex="-1"></section>
+      <section class="courses__list" id="cursosLista" aria-label="Cursos publicados" aria-live="polite" aria-busy="true" tabindex="-1"></section>
     </div>
   </main>
 

@@ -46,6 +46,13 @@
     --focus-ring: 3px solid var(--color-accent);
     --focus-ring-offset: 3px;
 
+    /*
+      Alto del navbar en su estado más alto (sin scroll). En rem, no px: el
+      navbar se construye con padding en rem, así que ambos escalan juntos si
+      el usuario agranda la tipografía del navegador.
+    */
+    --navbar-height: 6.5rem;
+
     --transition-fast: 0.2s ease;
     --transition-base: 0.3s ease;
 
@@ -60,6 +67,15 @@
     --z-mobile-toggle: 1100;
     --z-dropdown: 1200;
     --z-toast: 1300;
+  }
+
+  /*
+    El navbar es fixed y taparía el inicio de cualquier ancla. Reservar el
+    espacio acá, en el scrollport, cubre todos los anclajes del documento en
+    una sola regla en vez de repetir scroll-margin-top por sección.
+  */
+  html {
+    scroll-padding-top: var(--navbar-height);
   }
 
   body {

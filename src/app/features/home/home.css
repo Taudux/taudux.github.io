@@ -264,20 +264,33 @@ html {
   }
 }
 
+/*
+  Base común de las secciones del landing. align-content centra el contenido
+  cuando sobra alto y lo deja crecer cuando lo excede, así que sirve tanto
+  para una sección corta como para .services, que supera el viewport.
+  El espacio del navbar lo reserva scroll-padding-top en html (styles.css).
+*/
 .home__section {
   min-height: 100vh;
   min-height: 100svh;
-  scroll-margin-top: 80px;
+  display: grid;
+  /*
+    minmax(0, 1fr) y no 1fr: sin el mínimo en 0 la pista se estira al
+    max-content del hijo más ancho, y .carousel__track mide varios miles de
+    píxeles por diseño. Eso arrastraría al resto del contenido fuera del
+    viewport.
+  */
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  padding-block: clamp(2.5rem, 6vw, 5rem);
   background-color: var(--color-background);
 }
 
 .about {
   position: relative;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8rem 2rem;
+  justify-items: center;
+  padding-inline: 2rem;
   text-align: center;
   opacity: 0;
   transform: translateY(10px);
@@ -325,7 +338,7 @@ html {
 }
 
 .services {
-  padding: clamp(3rem, 10vw, 140px) 1.25rem;
+  padding-inline: 1.25rem;
 }
 
 .services__container {
@@ -419,7 +432,7 @@ html {
 }
 
 .technology {
-  padding: clamp(4rem, 14vw, 15rem) 1.25rem;
+  padding-inline: 1.25rem;
   text-align: center;
   overflow: hidden;
 }
@@ -493,7 +506,7 @@ html {
 }
 
 .contact {
-  padding: clamp(3.5rem, 14vw, 200px) 1.5rem;
+  padding-inline: 1.5rem;
 }
 
 .contact__panel {

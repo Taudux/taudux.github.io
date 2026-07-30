@@ -499,8 +499,8 @@
 }
 
 .courses__action--danger {
-  background: color-mix(in srgb, #e5484d 20%, transparent);
-  color: #ffb4b4;
+  background: color-mix(in srgb, var(--color-error) 20%, transparent);
+  color: var(--color-error-text);
 }
 
 .courses__action:disabled {

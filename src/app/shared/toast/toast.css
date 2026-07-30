@@ -46,13 +46,19 @@
   color: var(--color-accent);
 }
 
-.toast--error {
-  background: rgba(255, 80, 80, 0.12);
-  border: 1px solid rgba(255, 80, 80, 0.4);
-  color: #ff8a8a;
+.toast--warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 40%, transparent);
+  color: var(--color-warning);
 }
 
-@media (max-width: 768px) {
+.toast--error {
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, transparent);
+  color: var(--color-error-text);
+}
+
+@media (max-width: 760px) {
   .toast-stack {
     bottom: 1rem;
     left: 1rem;

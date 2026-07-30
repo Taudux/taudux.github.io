@@ -18,11 +18,12 @@ async function iniciarCatalogoCursos() {
     (cargados ? lista : estado).focus();
   });
 
+  const inicioAdminCheck = iniciarTiempo();
   try {
     const session = await obtenerSesion();
     usuarioAdmin = Boolean(session && await esAdmin(session));
   } catch (error) {
-    reportarFallo("catalog_admin_check", error, Date.now(), "admin_check_failed");
+    reportarFallo("catalog_admin_check", error, inicioAdminCheck, "admin_check_failed");
   }
   controlesAdmin.hidden = !usuarioAdmin;
   await pintarCursos();

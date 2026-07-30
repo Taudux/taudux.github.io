@@ -110,4 +110,18 @@
     box-shadow: 0 0 12px
       color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button--glow,
+    .button--glow::before,
+    .button.button--access,
+    .button--whatsapp,
+    .button--outline {
+      transition: none;
+    }
+
+    .button.button--access:hover {
+      transform: none;
+    }
+  }
 }

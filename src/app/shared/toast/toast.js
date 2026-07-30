@@ -37,7 +37,7 @@ function mostrarToast(mensaje, tipo) {
   const texto = String(mensaje || "").trim();
   if (!texto) return;
 
-  const clase = tipo === "error" ? "error" : "success";
+  const clase = tipo === "error" || tipo === "warning" ? tipo : "success";
   const contenedor = obtenerContenedorToast();
   const existente = Array.from(contenedor.children).find(
     (toast) => toast.dataset.mensaje === texto && toast.dataset.tipo === clase

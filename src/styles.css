@@ -27,10 +27,14 @@
     --color-accent: #00e1ff;
     --color-accent-dark: #1249a4;
     --color-success: #25d366;
+    --color-warning: #e5a848;
+    --color-error: #e5484d;
+    --color-error-text: #ffb4b4;
     --color-field: #1e1e1e;
     --color-border: #333;
 
     --gradient-heading: linear-gradient(90deg, var(--color-text-subtle), var(--color-text));
+    --glow-accent: 0 0 16px color-mix(in srgb, var(--color-accent) 55%, transparent);
 
     --radius-field: 8px;
     --radius-button: 10px;
@@ -41,6 +45,9 @@
     --shadow-panel: 0 0 20px rgba(255, 255, 255, 0.05);
     --focus-ring: 3px solid var(--color-accent);
     --focus-ring-offset: 3px;
+
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
 
     --z-behind: -1;
     --z-base: 0;
@@ -91,5 +98,43 @@
     font-family: var(--font-body);
     font-size: 1rem;
     color: var(--color-text-muted);
+  }
+}
+
+@layer components {
+  /*
+    Utilidades compartidas para patrones que se repetían idénticos en varias
+    hojas de features (heading con gradiente, foco accesible, estado
+    deshabilitado). Un feature puede seguir sobreescribiendo si necesita un
+    caso distinto; esto solo cubre el caso común.
+  */
+  .heading--gradient {
+    background: var(--gradient-heading);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .u-focus-ring:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .u-disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  /* Visible para lectores de pantalla, invisible en pantalla. */
+  .u-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }

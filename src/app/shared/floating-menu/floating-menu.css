@@ -35,4 +35,10 @@
       transparent
     );
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-menu__link {
+      transition: none;
+    }
+  }
 }

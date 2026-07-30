@@ -67,6 +67,11 @@
           <p class="courses__intro" id="cursoPaginaContexto">Crea un curso para el catálogo público.</p>
         </header>
           <form class="courses__form" id="cursoForm" aria-labelledby="cursoPaginaTitulo" aria-describedby="cursoPaginaContexto categoriasEstadoMensaje cursoOperacionMensaje">
+          <div class="courses__categories-status" id="cursoBorradorAviso" role="status" aria-live="polite" tabindex="-1" hidden>
+            <p class="courses__categories-status-message" id="cursoBorradorMensaje">Hay un borrador sin guardar de este formulario. La portada no se conserva: si eliges restaurar, vuelve a seleccionar la imagen.</p>
+            <button class="button button--outline courses__category-action" type="button" id="cursoBorradorRestaurar">Restaurar</button>
+            <button class="button button--outline courses__category-action" type="button" id="cursoBorradorDescartar">Descartar</button>
+          </div>
           <div class="courses__form-row">
             <div class="courses__field-group">
               <label class="courses__field-label" for="cursoTitulo">Título</label>
@@ -188,6 +193,7 @@
   <script src="/app/features/courses/course-cover-cropper.js"></script>
   <script src="/app/features/courses/gestionar-curso.portada.js"></script>
   <script src="/app/features/courses/gestionar-curso.categorias.js"></script>
+  <script src="/app/features/courses/gestionar-curso.borrador.js"></script>
   <script src="/app/features/courses/gestionar-curso.js"></script>
 </body>
 

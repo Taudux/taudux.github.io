@@ -90,6 +90,9 @@
     const botonReintentarCategorias = document.getElementById("categoriasReintentar");
     const estadoOperacion = document.getElementById("cursoOperacionEstado");
     const mensajeOperacion = document.getElementById("cursoOperacionMensaje");
+    const avisoBorrador = document.getElementById("cursoBorradorAviso");
+    const botonRestaurarBorrador = document.getElementById("cursoBorradorRestaurar");
+    const botonDescartarBorrador = document.getElementById("cursoBorradorDescartar");
 
     const panelEstadoCategorias = crearPanelEstadoCategorias(estadoCategorias, mensajeEstadoCategorias);
     const selectCategorias = crearControlCategoriasCurso(inputCategoria);
@@ -99,6 +102,16 @@
     let modoCategorias = "cargando";
     let cargaCategoriasEnCurso = false;
     let secuenciaCargaCategorias = 0;
+    let huellaBase = null;
+    let datosBorradorPendiente = null;
+
+    const borradorCurso = crearBorradorCurso({
+      obtenerCursoId: () => cursoId,
+      obtenerDatos: obtenerDatosFormulario,
+      estaSucio: () => huellaBase !== null && firmaSolicitud() !== huellaBase,
+      estaEnviando: () => flujoMutacionCurso.estaEnCurso(),
+      ventana: window,
+    });
 
     const portada = crearControlPortada({
       formulario: form,
@@ -123,12 +136,17 @@
     form.addEventListener("submit", enviarFormulario);
     form.addEventListener("input", invalidarOperacionSiCambio);
     form.addEventListener("change", invalidarOperacionSiCambio);
+    form.addEventListener("input", () => borradorCurso.registrarCambio());
+    form.addEventListener("change", () => borradorCurso.registrarCambio());
     botonCancelar.addEventListener("click", () => {
+      borradorCurso.abandonar();
       window.location.href = RUTA_CATALOGO_CURSOS;
     });
     botonReintentarCategorias.addEventListener("click", reintentarCategorias);
     botonReintentarRuta.addEventListener("click", () => window.location.reload());
     inputProximamente.addEventListener("change", actualizarEstadoProgramacion);
+    botonRestaurarBorrador.addEventListener("click", restaurarBorrador);
+    botonDescartarBorrador.addEventListener("click", descartarBorrador);
 
     const inicioStartup = iniciarTiempo();
     if (!(await arranque.asegurarAdmin(inicioStartup))) return;
@@ -151,6 +169,7 @@
       await cargarCategorias();
       if (cursoEditando) poblarFormulario(cursoEditando);
       actualizarEstadoProgramacion();
+      prepararBorrador();
       panel.hidden = false;
       arranque.revelar();
     } catch (error) {
@@ -316,6 +335,39 @@
       portada.mostrarPortadaCargada();
     }
 
+    // Se corre tras el poblado inicial (servidor o formulario en blanco): esa
+    // es la línea base contra la que se mide si el usuario ensució algo, y
+    // recién ahí tiene sentido comparar un borrador guardado contra ella.
+    function prepararBorrador() {
+      const datosBase = obtenerDatosFormulario();
+      huellaBase = firmaSolicitud(datosBase);
+      const datosGuardados = borradorCurso.recuperar();
+      borradorCurso.marcarListo();
+      if (!datosGuardados || JSON.stringify(datosGuardados) === JSON.stringify(datosBase)) return;
+      datosBorradorPendiente = datosGuardados;
+      avisoBorrador.hidden = false;
+    }
+
+    function ocultarAvisoBorrador() {
+      avisoBorrador.hidden = true;
+      datosBorradorPendiente = null;
+    }
+
+    function restaurarBorrador() {
+      if (!datosBorradorPendiente) return;
+      poblarFormulario(datosBorradorPendiente);
+      actualizarEstadoProgramacion();
+      ocultarAvisoBorrador();
+      // poblarFormulario asigna .value directamente y eso no dispara input/change,
+      // así que hay que avisarle al borrador a mano que el formulario cambió.
+      borradorCurso.registrarCambio();
+    }
+
+    function descartarBorrador() {
+      borradorCurso.descartar();
+      ocultarAvisoBorrador();
+    }
+
     function obtenerDatosFormulario() {
       const diasSeleccionados = checksDias
         .filter((check) => check.checked)
@@ -427,6 +479,7 @@
         mostrarErrorOperacion(resultado.mensajeUsuario);
         return;
       }
+      borradorCurso.abandonar();
       /* replace, no href: el formulario ya cumplió su función, así que su
          entrada de historial no debe quedar viva para un Alt+← posterior. */
       window.location.replace(`${RUTA_CATALOGO_CURSOS}?resultado=${cursoId ? "actualizado" : "creado"}`);

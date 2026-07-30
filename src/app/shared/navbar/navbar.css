@@ -144,39 +144,34 @@
     max-inline-size: calc(100vw - 2rem);
   }
 
-  /* Sin fondo ni borde circular: es un ícono de navegación, no el badge de
-     cuenta. Ese estilo queda exclusivo de --account, más abajo. */
   .nav-menu__toggle--site {
-    background: none;
-    border: none;
     color: var(--color-text);
     font-size: 1.6rem;
     line-height: 1;
   }
 
-  .nav-menu__toggle--account {
-    border: var(--border-subtle);
-    border-radius: var(--radius-pill);
-    background-color: var(--color-field);
-  }
-
+  /* Ninguna de las dos variantes usa placa ni borde: el toggle de sitio es un
+     glifo suelto y el de cuenta ya trae su propio brillo vía ::before, así
+     que el reset de <button> vive acá una sola vez. */
   .nav-menu__toggle {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    inline-size: 2.5rem;
-    block-size: 2.5rem;
+    inline-size: 3.1rem;
+    block-size: 3.1rem;
+    background: none;
+    border: none;
     cursor: pointer;
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease;
   }
 
-  /* El isotipo vive en un pseudo-elemento propio (sin fondo opaco detrás) para
-     que el drop-shadow siga el contorno del ícono, no el del círculo. Va sobre
-     el modificador --account para que el toggle de navegación, que comparte la
-     base circular, no herede la imagen. */
+  /* Sin placa ni círculo detrás: el isotipo vive en un pseudo-elemento propio
+     para que el brillo (drop-shadow) siga el contorno real del ícono, no el
+     de una caja. El pulso también anima ese filter, nunca un box-shadow, así
+     el halo nunca queda cuadrado. */
   .nav-menu__toggle--account::before {
     content: "";
     position: absolute;
@@ -184,40 +179,43 @@
     background-image: url("../../../assets/images/isotipo.png");
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 78%;
+    background-size: 92%;
     filter: drop-shadow(
       0 0 3px color-mix(in srgb, var(--color-accent) 85%, transparent)
     );
+    transition: filter 0.25s ease;
     pointer-events: none;
   }
 
   @keyframes nav-menu-pulse {
     0%,
     100% {
-      transform: scale(1);
-      box-shadow: 0 0 10px
-        color-mix(in srgb, var(--color-accent) 45%, transparent);
+      filter: drop-shadow(
+        0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent)
+      );
     }
 
     50% {
-      transform: scale(1.08);
-      box-shadow: 0 0 28px 4px
-        color-mix(in srgb, var(--color-accent) 95%, transparent);
+      filter: drop-shadow(
+          0 0 12px color-mix(in srgb, var(--color-accent) 95%, transparent)
+        )
+        drop-shadow(
+          0 0 4px color-mix(in srgb, var(--color-accent) 80%, transparent)
+        );
     }
   }
 
-  .nav-menu__toggle--pulsing {
+  .nav-menu__toggle--account.nav-menu__toggle--pulsing::before {
     /* El pulso se corta con `animation: none` al hacer hover/abrir (regla de
-       abajo) para que este `scale` nunca corra a la vez que el `scale(1.18)`
-       del hover. Si se quita ese corte, hay que resolver el choque de transforms. */
+       abajo) para que no compita con el filter fijo de esos estados. */
     animation: nav-menu-pulse 1.8s ease-in-out infinite;
   }
 
-  .nav-menu__toggle--account:hover,
-  .nav-menu--open .nav-menu__toggle--account {
-    transform: scale(1.18);
-    box-shadow: 0 0 20px 2px
-      color-mix(in srgb, var(--color-accent) 75%, transparent);
+  .nav-menu__toggle--account:hover::before,
+  .nav-menu--open .nav-menu__toggle--account::before {
+    filter: drop-shadow(
+      0 0 12px color-mix(in srgb, var(--color-accent) 90%, transparent)
+    );
     animation: none;
   }
 
@@ -226,13 +224,12 @@
       transition: none;
     }
 
-    .nav-menu__toggle--pulsing {
-      animation: none;
+    .nav-menu__toggle--account::before {
+      transition: none;
     }
 
-    .nav-menu__toggle--account:hover,
-    .nav-menu--open .nav-menu__toggle--account {
-      transform: none;
+    .nav-menu__toggle--account.nav-menu__toggle--pulsing::before {
+      animation: none;
     }
   }
 

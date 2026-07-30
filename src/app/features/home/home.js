@@ -25,7 +25,9 @@ function cargarParticulasHero() {
   if (!window.tsParticles) return;
 
   window.tsParticles.load("particles-hero", {
-    fpsLimit: 60,
+    /* 30 fps basta para partículas que derivan lento y reduce a la mitad el
+       costo de redibujar el canvas de pantalla completa en cada frame. */
+    fpsLimit: 30,
     fullScreen: {
       enable: false,
       zIndex: 0,
@@ -58,6 +60,12 @@ function cargarParticulasHero() {
       },
       shape: {
         type: "circle",
+      },
+      shadow: {
+        enable: true,
+        blur: 3,
+        color: { value: "#00d2ff" },
+        offset: { x: 0, y: 0 },
       },
       opacity: {
         value: { min: 0.12, max: 0.72 },

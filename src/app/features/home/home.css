@@ -51,9 +51,10 @@ html {
   pointer-events: none;
 }
 
+/* El glow lo dibuja tsParticles por partícula (shadow en home.js); un filter
+   sobre el canvas se re-aplicaría al lienzo completo en cada frame. */
 .hero__particles canvas {
   opacity: 0.88;
-  filter: drop-shadow(0 0 3px rgba(0, 210, 255, 0.48));
 }
 
 .hero__logo-stage {
@@ -168,15 +169,15 @@ html {
   }
 }
 
+/* Animaciones infinitas solo con opacity/transform: animar filter o
+   background-position fuerza un repaint del elemento en cada frame. */
 @keyframes hero-logo-float {
   0%,
   100% {
-    filter: brightness(1) saturate(1);
     transform: translateY(0) scale(1);
   }
 
   50% {
-    filter: brightness(1.09) saturate(1.12);
     transform: translateY(-14px) scale(1.018);
   }
 }
@@ -201,19 +202,16 @@ html {
 @keyframes hero-logo-glow-pulse {
   0% {
     opacity: 0.22;
-    background-position: -22% 46%, 122% 54%;
     transform: scale(0.98);
   }
 
   50% {
     opacity: 0.44;
-    background-position: 44% 36%, 58% 64%;
     transform: scale(1.05);
   }
 
   100% {
     opacity: 0.26;
-    background-position: 122% 48%, -22% 52%;
     transform: scale(1);
   }
 }

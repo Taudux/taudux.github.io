@@ -41,9 +41,19 @@ function actualizarEstadoVisualNavbar() {
   navbar.classList.toggle("navbar--scrolled", desplazado);
 }
 
+/* Cache para no repetir querySelectorAll en cada evento de scroll. */
+let seccionesConId = [];
+let enlacesDeAncla = [];
+
+function cachearElementosDeScroll() {
+  seccionesConId = document.querySelectorAll("section[id]");
+  enlacesDeAncla = document.querySelectorAll('.navbar__link[href^="#"]');
+}
+
 function actualizarEnlaceActivo() {
-  const secciones = document.querySelectorAll("section[id]");
-  const enlaces = document.querySelectorAll('.navbar__link[href^="#"]');
+  if (!seccionesConId.length && !enlacesDeAncla.length) cachearElementosDeScroll();
+  const secciones = seccionesConId;
+  const enlaces = enlacesDeAncla;
   let seccionActual = "";
 
   secciones.forEach((seccion) => {
@@ -195,12 +205,26 @@ async function montarMenuNavegacion() {
 
 document.addEventListener("DOMContentLoaded", () => {
   configurarMenuMovil();
+  cachearElementosDeScroll();
   actualizarEstadoVisualNavbar();
   actualizarEnlaceActivo();
   montarMenuNavegacion();
 });
 
-window.addEventListener("scroll", () => {
-  actualizarEstadoVisualNavbar();
-  actualizarEnlaceActivo();
-});
+/* Throttle con requestAnimationFrame: como mucho una actualización por frame,
+   aunque lleguen varios eventos de scroll. */
+let actualizacionPendiente = false;
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (actualizacionPendiente) return;
+    actualizacionPendiente = true;
+    requestAnimationFrame(() => {
+      actualizarEstadoVisualNavbar();
+      actualizarEnlaceActivo();
+      actualizacionPendiente = false;
+    });
+  },
+  { passive: true }
+);

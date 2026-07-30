@@ -10,33 +10,50 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: transparent;
     border-bottom: 1px solid transparent;
-    -webkit-backdrop-filter: blur(0) contrast(1) saturate(1);
-    backdrop-filter: blur(0) contrast(1) saturate(1);
     z-index: var(--z-navbar);
     transition:
-      background-color 0.5s ease-out,
       border-color 0.5s ease-out,
-      -webkit-backdrop-filter 0.5s ease-out,
-      backdrop-filter 0.5s ease-out,
       padding 0.3s ease;
   }
 
-  .navbar--scrolled {
+  /* El fondo con blur vive en un pseudo-elemento y se transiciona su opacity
+     (composición pura). Transicionar backdrop-filter directamente obliga a
+     re-rasterizar todo lo que pasa detrás de la navbar en cada frame. */
+  .navbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background-color: color-mix(
       in srgb,
       var(--color-background) 40%,
       transparent
     );
+    -webkit-backdrop-filter: blur(12px) contrast(1.25) saturate(1.5);
+    backdrop-filter: blur(12px) contrast(1.25) saturate(1.5);
+    opacity: 0;
+    /* visibility corta el muestreo del backdrop en reposo (opacity: 0 no lo
+       evita); el delay la mantiene visible hasta que termina el fade-out. */
+    visibility: hidden;
+    transition:
+      opacity 0.5s ease-out,
+      visibility 0s linear 0.5s;
+  }
+
+  .navbar--scrolled {
     border-bottom-color: color-mix(
       in srgb,
       var(--color-text) 5%,
       transparent
     );
-    -webkit-backdrop-filter: blur(12px) contrast(1.25) saturate(1.5);
-    backdrop-filter: blur(12px) contrast(1.25) saturate(1.5);
     padding: 0.5rem 2rem;
+  }
+
+  .navbar--scrolled::before {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease-out, visibility 0s;
   }
 
   .navbar__brand {

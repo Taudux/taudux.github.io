@@ -5,7 +5,7 @@
 
 const ENLACES_NAVEGACION_BASE = [
   { texto: "Cursos", href: "/app/features/courses/cursos.html", habilitado: true },
-  { texto: "Portal", habilitado: false },
+  { texto: "Portal", href: "/app/features/portal/", habilitado: true },
   { texto: "Publicaciones", habilitado: false },
   { texto: "Proyectos", habilitado: false },
   { texto: "Herramientas", habilitado: false },

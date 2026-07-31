@@ -227,7 +227,7 @@ async function obtenerPerfil(session) {
 
   const { data, error } = await supabaseClient
     .from("perfiles")
-    .select("nombre, apellidos, telefono, rol")
+    .select("nombre, apellidos, telefono, rol, avisos_curso_nuevo")
     .eq("id", session.user.id)
     .single();
   if (error) return null;

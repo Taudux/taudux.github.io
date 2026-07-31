@@ -164,6 +164,19 @@
   font-size: 0.85rem;
 }
 
+.portal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.portal__checkbox input[type="checkbox"] {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  accent-color: var(--color-accent);
+}
+
 .portal__account-actions {
   display: flex;
   justify-content: flex-start;

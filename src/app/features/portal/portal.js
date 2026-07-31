@@ -251,6 +251,65 @@
     configurarCierreSesion();
   }
 
+  // El perfil llega de la BD en snake_case (avisos_curso_nuevo); el núcleo
+  // puro trabaja en camelCase, igual que el name del checkbox del form.
+  function poblarFormularioCorreo(form, perfil) {
+    const datos = normalizarPreferenciasCorreo({
+      avisosCursoNuevo: perfil && perfil.avisos_curso_nuevo,
+    });
+    form.elements.avisosCursoNuevo.checked = datos.avisosCursoNuevo;
+    return datos;
+  }
+
+  function leerFormularioCorreo(form) {
+    return { avisosCursoNuevo: form.elements.avisosCursoNuevo.checked };
+  }
+
+  function mostrarErrorCorreo(estado, mensaje) {
+    estado.textContent = mensaje;
+    estado.hidden = false;
+    estado.focus();
+  }
+
+  function ocultarErrorCorreo(estado) {
+    if (estado.hidden) return;
+    estado.hidden = true;
+    estado.textContent = "";
+  }
+
+  function configurarFormularioCorreo(session, perfilInicial) {
+    const form = document.getElementById("formCorreo");
+    const estado = document.getElementById("correoStatus");
+    if (!form || !estado) return;
+
+    let original = poblarFormularioCorreo(form, perfilInicial);
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      const actual = leerFormularioCorreo(form);
+      const cambios = cambiosPreferenciasCorreo(original, actual);
+      if (Object.keys(cambios).length === 0) {
+        ocultarErrorCorreo(estado);
+        return;
+      }
+
+      establecerFormularioOcupado(form, true);
+      try {
+        const resultado = await actualizarPerfil(session.user.id, cambios);
+        if (!resultado.ok) {
+          mostrarErrorCorreo(estado, resultado.mensaje);
+          return;
+        }
+        original = poblarFormularioCorreo(form, resultado.data);
+        ocultarErrorCorreo(estado);
+        mostrarToast("Preferencia guardada.", "success");
+      } finally {
+        establecerFormularioOcupado(form, false);
+      }
+    });
+  }
+
   async function inicializarPortal() {
     // Sin sesión, requerirSesion ya navegó al login con ?next=: no hay nada más
     // que hacer en esta página, ni siquiera revelar el contenido.
@@ -260,8 +319,10 @@
     aplicarHash();
     window.addEventListener("hashchange", aplicarHash);
 
-    configurarFormularioPerfil(session, await obtenerPerfil(session));
+    const perfil = await obtenerPerfil(session);
+    configurarFormularioPerfil(session, perfil);
     configurarSeccionCuenta(session);
+    configurarFormularioCorreo(session, perfil);
 
     if (contenido) contenido.hidden = false;
     if (startup) {

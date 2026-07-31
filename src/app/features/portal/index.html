@@ -51,10 +51,7 @@
             <nav class="portal__nav" id="portalNav">
               <a class="portal__nav-link" href="#perfil" data-seccion="perfil">Editar Perfil</a>
               <a class="portal__nav-link" href="#cuenta" data-seccion="cuenta">Mi cuenta</a>
-              <a class="portal__nav-link" href="#correo" data-seccion="correo">
-                Preferencias de correo
-                <span class="portal__nav-badge">Pronto</span>
-              </a>
+              <a class="portal__nav-link" href="#correo" data-seccion="correo">Preferencias de correo</a>
               <a class="portal__nav-link" href="#plan" data-seccion="plan">
                 Mi plan
                 <span class="portal__nav-badge">Pronto</span>
@@ -160,12 +157,23 @@
 
             <section class="portal__section panel panel--spacious" id="seccion-correo" data-seccion="correo" aria-labelledby="tituloCorreo" hidden>
               <h2 class="portal__section-title" id="tituloCorreo">Preferencias de correo</h2>
-              <div class="coming-soon__card">
-                <p class="coming-soon__description">
-                  Todavía no enviamos correos de novedades. Cuando lo hagamos, vas a
-                  poder elegir acá qué recibir.
-                </p>
-              </div>
+              <p class="portal__section-intro">Elige qué avisos quieres recibir por correo.</p>
+
+              <form id="formCorreo" novalidate>
+                <p class="portal__status" id="correoStatus" role="alert" tabindex="-1" hidden></p>
+
+                <div class="portal__field-group">
+                  <label class="portal__checkbox" for="correoCursoNuevo">
+                    <input type="checkbox" id="correoCursoNuevo" name="avisosCursoNuevo">
+                    <span>Avísame por correo cuando se publique un curso nuevo.</span>
+                  </label>
+                  <p class="portal__field-note">Puedes desactivarlo cuando quieras desde aquí o con el enlace al pie de cada correo.</p>
+                </div>
+
+                <div class="portal__form-actions">
+                  <button type="submit" class="button button--glow" data-loading-text="Guardando…">Guardar cambios</button>
+                </div>
+              </form>
             </section>
 
             <section class="portal__section panel panel--spacious" id="seccion-plan" data-seccion="plan" aria-labelledby="tituloPlan" hidden>
@@ -203,6 +211,7 @@
   <script src="/app/shared/toast/toast.js"></script>
   <script src="/app/features/portal/portal.secciones.js"></script>
   <script src="/app/features/portal/portal.perfil.js"></script>
+  <script src="/app/features/portal/portal.correo.js"></script>
   <script src="/app/features/portal/portal.js"></script>
 </body>
 

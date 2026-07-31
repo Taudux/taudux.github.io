@@ -340,10 +340,11 @@ test("the account email field is read-only and there is no role input", () => {
 test("unavailable portal sections ship no interactive controls at all", () => {
   /*
     Un input o un botón en una sección que todavía no hace nada promete una
-    capacidad inexistente. Estas tres secciones solo explican qué falta.
+    capacidad inexistente. Estas dos secciones solo explican qué falta.
+    "correo" salió de esta lista: ya tiene backend real (ver bloque E).
   */
   const html = read("src/app/features/portal/index.html");
-  ["correo", "plan", "pagos"].forEach((id) => {
+  ["plan", "pagos"].forEach((id) => {
     const markup = markupSeccion(html, id);
     assert.doesNotMatch(markup, /<input/i, `${id} no debe tener inputs`);
     assert.doesNotMatch(markup, /<select/i, `${id} no debe tener selects`);
@@ -351,4 +352,61 @@ test("unavailable portal sections ship no interactive controls at all", () => {
     assert.doesNotMatch(markup, /<button/i, `${id} no debe tener botones`);
     assert.match(markup, /coming-soon__description/, `${id} debe explicar qué falta`);
   });
+});
+
+/* Bloque E — sección "Preferencias de correo". */
+
+test("the email preference section is now declared available", () => {
+  const correo = SECCIONES_PORTAL.find((seccion) => seccion.id === "correo");
+  assert.equal(correo.disponible, true);
+});
+
+test("the email preference section ships exactly one checkbox, an alert region, and a submit button", () => {
+  const html = read("src/app/features/portal/index.html");
+  const markup = markupSeccion(html, "correo");
+
+  const inputs = markup.match(/<input/gi) || [];
+  assert.equal(inputs.length, 1, "la sección de correo debe tener un solo input");
+  assert.match(markup, /<input[^>]*type="checkbox"[^>]*id="correoCursoNuevo"/);
+  assert.match(markup, /id="correoStatus"[^>]*role="alert"/);
+  assert.match(markup, /<button[^>]*type="submit"/);
+  assert.doesNotMatch(markup, /coming-soon__description/, "ya no es un placeholder");
+});
+
+test("the correo nav link no longer carries the coming-soon badge", () => {
+  const html = read("src/app/features/portal/index.html");
+  const inicio = html.indexOf('href="#correo"');
+  assert.notEqual(inicio, -1);
+  const fin = html.indexOf("</a>", inicio);
+  const enlace = html.slice(inicio, fin);
+  assert.doesNotMatch(enlace, /portal__nav-badge/);
+});
+
+test("portal.correo.js loads after portal.perfil.js and before portal.js", () => {
+  const html = read("src/app/features/portal/index.html");
+  const perfilNucleo = html.indexOf("/app/features/portal/portal.perfil.js");
+  const correoNucleo = html.indexOf("/app/features/portal/portal.correo.js");
+  const portal = html.indexOf("/app/features/portal/portal.js");
+
+  [perfilNucleo, correoNucleo, portal].forEach((indice) => assert.notEqual(indice, -1));
+  assert.ok(perfilNucleo < correoNucleo, "portal.correo.js debe cargarse después de portal.perfil.js");
+  assert.ok(correoNucleo < portal, "portal.correo.js debe cargarse antes que portal.js");
+});
+
+test("auth.service.js and perfil.service.js select avisos_curso_nuevo, or the checkbox would always render unchecked", () => {
+  const authJs = read("src/app/core/auth/auth.service.js");
+  const perfilServicio = read("src/app/core/perfil/perfil.service.js");
+  assert.match(authJs, /\.select\(\s*"[^"]*avisos_curso_nuevo[^"]*"\s*\)/);
+  assert.match(perfilServicio, /\.select\(\s*"[^"]*avisos_curso_nuevo[^"]*"\s*\)/);
+});
+
+test("portal.js converts the DB's snake_case avisos_curso_nuevo into the checkbox's camelCase field", () => {
+  /*
+    Bug real encontrado probando en el navegador: la BD devuelve
+    avisos_curso_nuevo, pero normalizarPreferenciasCorreo espera
+    avisosCursoNuevo. Sin esta conversión el checkbox nace siempre
+    desmarcado sin importar el valor real guardado.
+  */
+  const js = read("src/app/features/portal/portal.js");
+  assert.match(js, /avisosCursoNuevo:\s*perfil\s*&&\s*perfil\.avisos_curso_nuevo/);
 });

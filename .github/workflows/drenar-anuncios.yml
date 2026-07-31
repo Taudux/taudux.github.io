@@ -1,0 +1,37 @@
+# Drena la cola de anuncios de curso nuevo llamando a la edge function
+# notify-course-published. El envío real vive en Supabase; este workflow solo
+# la despierta cada 15 minutos, más un disparo manual desde la pestaña
+# Actions cuando haga falta probar o forzar un envío.
+#
+# GitHub deshabilita los workflows programados de un repo sin actividad
+# durante 60 días. Si este cron deja de correr, reactivalo con un clic desde
+# la pestaña Actions.
+name: Drenar anuncios de curso nuevo
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  drenar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar a notify-course-published
+        env:
+          SUPABASE_FUNCTIONS_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ANUNCIOS_CRON_SECRET: ${{ secrets.ANUNCIOS_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o /tmp/respuesta.json -w "%{http_code}" \
+            -X POST "${SUPABASE_FUNCTIONS_URL}/notify-course-published" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "x-taudux-anuncios-secret: ${ANUNCIOS_CRON_SECRET}" \
+            -H "Content-Type: application/json")
+          echo "HTTP $status"
+          cat /tmp/respuesta.json
+          echo
+          if [ "$status" -ge 400 ]; then
+            exit 1
+          fi

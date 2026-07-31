@@ -311,6 +311,18 @@ test("the password change form wires live requirement feedback", () => {
   assert.match(js, /configurarRequisitosContrasena\(/);
 });
 
+test("password errors (mismatch, weak, wrong current password) also raise a red toast", () => {
+  const js = read("src/app/features/portal/portal.js");
+  const match = js.match(/function mostrarErrorContrasena\([^)]*\)\s*{([^}]*)}/);
+  assert.ok(match, "mostrarErrorContrasena not found");
+  assert.match(match[1], /mostrarToast\(\s*mensaje\s*,\s*"error"\s*\)/);
+});
+
+test("invalid fields get a visible red border via the shared .field rule", () => {
+  const css = read("src/app/shared/field/field.css");
+  assert.match(css, /\.field\[aria-invalid="true"\]\s*{[^}]*border-color:\s*var\(--color-error\)/);
+});
+
 test("the portal layout collapses to one column only on mobile", () => {
   const css = read("src/app/features/portal/portal.css");
   assert.match(css, /\.portal__layout\s*{[^}]*grid-template-columns:\s*minmax\(220px,\s*260px\)/);

@@ -23,4 +23,12 @@
     min-height: 120px;
     resize: vertical;
   }
+
+  /*
+    Va después de :focus/:focus-visible a propósito: un campo inválido debe
+    seguir marcado en rojo incluso mientras tiene foco.
+  */
+  .field[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
 }

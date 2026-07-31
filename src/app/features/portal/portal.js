@@ -156,6 +156,7 @@
     estado.hidden = false;
     if (campo) marcarCampoInvalidoContrasena(form, campo);
     estado.focus();
+    mostrarToast(mensaje, "error");
   }
 
   function ocultarErrorContrasena(form, estado) {

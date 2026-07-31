@@ -1,0 +1,196 @@
+/* Portal de cuenta: barra lateral de secciones más el panel de contenido. */
+
+@layer features {
+.portal {
+  min-block-size: 100vh;
+  padding-block-start: var(--navbar-height);
+  padding-block-end: 4rem;
+  background-color: var(--color-background);
+}
+
+.portal__container {
+  max-inline-size: 1100px;
+  margin-inline: auto;
+  padding-inline: 2rem;
+}
+
+.portal__header {
+  padding-block: 2.5rem 2rem;
+}
+
+.portal__title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  margin-block-end: 0.5rem;
+  background: var(--gradient-heading);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.portal__intro {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.portal__startup {
+  padding: 2rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.portal__noscript {
+  padding: 2rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.portal__layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.portal__sidebar {
+  position: sticky;
+  top: calc(var(--navbar-height) + 1rem);
+  padding: 1rem;
+}
+
+.portal__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.portal__nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-field);
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.portal__nav-link:hover {
+  color: var(--color-text);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.portal__nav-link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.portal__nav-link[aria-current="page"] {
+  color: var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.portal__nav-badge {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.5rem;
+  border: var(--border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-subtle);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.portal__content {
+  min-inline-size: 0;
+}
+
+.portal__section {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/*
+  `display: grid` en la regla base gana sobre la hoja del navegador para
+  [hidden], así que la conmutación por hash necesita esta regla explícita o
+  todas las secciones quedarían visibles a la vez.
+*/
+.portal__section[hidden] {
+  display: none;
+}
+
+.portal__section-title {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+}
+
+.portal__section-intro {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.portal__status {
+  display: none;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-field);
+  background-color: color-mix(in srgb, var(--color-error) 12%, transparent);
+  color: var(--color-error-text);
+}
+
+.portal__status:not([hidden]) {
+  display: block;
+}
+
+.portal__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.portal__field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.portal__field-group small {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.portal__field-note {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.portal__account-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 760px) {
+  .portal__container {
+    padding-inline: 1.25rem;
+  }
+
+  .portal__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portal__sidebar {
+    position: static;
+  }
+
+  .portal__nav {
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  .portal__nav-link {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+}
+}

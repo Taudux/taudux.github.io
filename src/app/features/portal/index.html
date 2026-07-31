@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/assets/images/1.png">
+  <title>Portal | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/app/shared/floating-menu/floating-menu.css">
+  <link rel="stylesheet" href="/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/app/shared/button/button.css">
+  <link rel="stylesheet" href="/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/app/shared/field/field.css">
+  <link rel="stylesheet" href="/app/shared/toast/toast.css">
+  <link rel="stylesheet" href="/app/shared/coming-soon/coming-soon.css">
+  <link rel="stylesheet" href="/app/features/auth/auth.css">
+  <link rel="stylesheet" href="/app/features/portal/portal.css">
+</head>
+
+<body>
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/" class="navbar__brand">
+      <img src="/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
+    </a>
+    <div class="navbar__links navbar__links--visible navbar__links--simple">
+      <a href="#" id="accessBtn" class="navbar__link button button--access">Salir</a>
+    </div>
+  </nav>
+
+  <main class="portal">
+    <div class="portal__container">
+      <header class="portal__header">
+        <h1 class="portal__title">Portal</h1>
+        <p class="portal__intro">Administra tu perfil y los datos de tu cuenta.</p>
+      </header>
+
+      <div class="portal__startup panel" id="portalStartup" role="status" aria-live="polite" aria-busy="true" tabindex="-1">
+        <p>Cargando tu portal.</p>
+      </div>
+
+      <noscript>
+        <p class="portal__noscript panel">Necesitas habilitar JavaScript para usar el portal de tu cuenta. Puedes <a href="/">volver al inicio</a>.</p>
+      </noscript>
+
+      <div id="portalContent" hidden>
+        <div class="portal__layout">
+          <aside class="portal__sidebar panel" aria-label="Secciones del portal">
+            <nav class="portal__nav" id="portalNav">
+              <a class="portal__nav-link" href="#perfil" data-seccion="perfil">Editar Perfil</a>
+              <a class="portal__nav-link" href="#cuenta" data-seccion="cuenta">Mi cuenta</a>
+              <a class="portal__nav-link" href="#correo" data-seccion="correo">
+                Preferencias de correo
+                <span class="portal__nav-badge">Pronto</span>
+              </a>
+              <a class="portal__nav-link" href="#plan" data-seccion="plan">
+                Mi plan
+                <span class="portal__nav-badge">Pronto</span>
+              </a>
+              <a class="portal__nav-link" href="#pagos" data-seccion="pagos">
+                Pagos
+                <span class="portal__nav-badge">Pronto</span>
+              </a>
+            </nav>
+          </aside>
+
+          <div class="portal__content">
+            <section class="portal__section panel panel--spacious" id="seccion-perfil" data-seccion="perfil" aria-labelledby="tituloPerfil" hidden>
+              <h2 class="portal__section-title" id="tituloPerfil">Editar Perfil</h2>
+              <p class="portal__section-intro">Actualiza tu nombre, apellidos y teléfono.</p>
+
+              <form id="formPerfil" novalidate>
+                <p class="portal__status" id="perfilStatus" role="alert" tabindex="-1" hidden></p>
+
+                <div class="portal__field-group">
+                  <label for="perfilNombre">Nombre</label>
+                  <input class="field" type="text" id="perfilNombre" name="nombre" autocomplete="given-name" required>
+                </div>
+
+                <div class="portal__field-group">
+                  <label for="perfilApellidos">Apellidos</label>
+                  <input class="field" type="text" id="perfilApellidos" name="apellidos" autocomplete="family-name" required>
+                </div>
+
+                <div class="portal__field-group">
+                  <label for="perfilTelefono">Teléfono</label>
+                  <input class="field" type="tel" id="perfilTelefono" name="telefono" autocomplete="tel">
+                  <small>Incluye el código de país, por ejemplo +52 55 1234 5678.</small>
+                </div>
+
+                <div class="portal__form-actions">
+                  <button type="submit" class="button button--glow" data-loading-text="Guardando…">Guardar cambios</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="portal__section panel panel--spacious" id="seccion-cuenta" data-seccion="cuenta" aria-labelledby="tituloCuenta" hidden>
+              <h2 class="portal__section-title" id="tituloCuenta">Mi cuenta</h2>
+              <p class="portal__section-intro">Aquí vas a ver el correo con el que entras y las opciones de acceso.</p>
+
+              <div class="portal__field-group">
+                <label for="cuentaEmail">Correo</label>
+                <input class="field" type="email" id="cuentaEmail" name="email" readonly aria-readonly="true">
+                <p class="portal__field-note">El correo no se puede cambiar desde aquí. ¿Necesitas ayuda? <a href="/#contacto">Contáctanos</a>.</p>
+              </div>
+
+              <form id="formContrasena" novalidate>
+                <p class="portal__status" id="contrasenaStatus" role="alert" tabindex="-1" hidden></p>
+
+                <div class="portal__field-group">
+                  <label for="contrasenaActual">Contraseña actual</label>
+                  <div class="password-field">
+                    <input type="password" id="contrasenaActual" name="actual" class="password-field__input field" autocomplete="current-password" required>
+                    <button type="button" class="password-field__toggle" data-target="contrasenaActual" aria-label="Mostrar contraseña" aria-pressed="false">
+                      <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="portal__field-group">
+                  <label for="contrasenaNueva">Contraseña nueva</label>
+                  <div class="password-field">
+                    <input type="password" id="contrasenaNueva" name="nueva" class="password-field__input field" autocomplete="new-password" minlength="8" aria-describedby="contrasenaNuevaReqs" required>
+                    <button type="button" class="password-field__toggle" data-target="contrasenaNueva" aria-label="Mostrar contraseña" aria-pressed="false">
+                      <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+                    </button>
+                  </div>
+                </div>
+                <ul class="password-requirements" id="contrasenaNuevaReqs">
+                  <li class="password-requirements__item" data-req="longitud">Al menos 8 caracteres</li>
+                  <li class="password-requirements__item" data-req="mayuscula">Una letra mayúscula</li>
+                  <li class="password-requirements__item" data-req="minuscula">Una letra minúscula</li>
+                  <li class="password-requirements__item" data-req="digito">Un número</li>
+                </ul>
+
+                <div class="portal__field-group">
+                  <label for="contrasenaConfirmar">Confirmar contraseña nueva</label>
+                  <div class="password-field">
+                    <input type="password" id="contrasenaConfirmar" name="confirmar" class="password-field__input field" autocomplete="new-password" minlength="8" required>
+                    <button type="button" class="password-field__toggle" data-target="contrasenaConfirmar" aria-label="Mostrar contraseña" aria-pressed="false">
+                      <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="portal__form-actions">
+                  <button type="submit" class="button button--glow" data-loading-text="Actualizando…">Actualizar contraseña</button>
+                </div>
+              </form>
+
+              <div class="portal__account-actions">
+                <button type="button" class="button button--outline" id="botonCerrarSesion">Cerrar sesión</button>
+              </div>
+            </section>
+
+            <section class="portal__section panel panel--spacious" id="seccion-correo" data-seccion="correo" aria-labelledby="tituloCorreo" hidden>
+              <h2 class="portal__section-title" id="tituloCorreo">Preferencias de correo</h2>
+              <div class="coming-soon__card">
+                <p class="coming-soon__description">
+                  Todavía no enviamos correos de novedades. Cuando lo hagamos, vas a
+                  poder elegir acá qué recibir.
+                </p>
+              </div>
+            </section>
+
+            <section class="portal__section panel panel--spacious" id="seccion-plan" data-seccion="plan" aria-labelledby="tituloPlan" hidden>
+              <h2 class="portal__section-title" id="tituloPlan">Mi plan</h2>
+              <div class="coming-soon__card">
+                <p class="coming-soon__description">
+                  Todavía no hay planes de suscripción: los cursos se contratan uno
+                  por uno. Si alguna vez lanzamos planes, acá vas a ver el tuyo.
+                </p>
+              </div>
+            </section>
+
+            <section class="portal__section panel panel--spacious" id="seccion-pagos" data-seccion="pagos" aria-labelledby="tituloPagos" hidden>
+              <h2 class="portal__section-title" id="tituloPagos">Pagos</h2>
+              <div class="coming-soon__card">
+                <p class="coming-soon__description">
+                  Todavía no cobramos desde el sitio, así que no hay historial que
+                  mostrar. Cuando los pagos pasen por acá, vas a encontrar tus
+                  comprobantes en esta sección.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app/core/supabase/supabase-client.js"></script>
+  <script src="/app/core/auth/auth.service.js"></script>
+  <script src="/app/core/perfil/perfil.service.js"></script>
+  <script src="/app/features/auth/auth-ui.js"></script>
+  <script src="/app/shared/navbar/navbar.js"></script>
+  <script src="/app/shared/toast/toast.js"></script>
+  <script src="/app/features/portal/portal.secciones.js"></script>
+  <script src="/app/features/portal/portal.perfil.js"></script>
+  <script src="/app/features/portal/portal.js"></script>
+</body>
+
+</html>

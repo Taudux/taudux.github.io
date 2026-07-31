@@ -176,6 +176,11 @@
     const estado = document.getElementById("contrasenaStatus");
     if (!form || !estado) return;
 
+    configurarRequisitosContrasena(
+      document.getElementById("contrasenaNueva"),
+      document.getElementById("contrasenaNuevaReqs"),
+    );
+
     form.addEventListener("submit", async (evento) => {
       evento.preventDefault();
 

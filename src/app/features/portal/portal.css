@@ -142,6 +142,20 @@
   display: block;
 }
 
+/*
+  El gap tiene que ser 1rem, igual que .auth__form (auth.css): el portal
+  reusa el markup de .password-requirements de auth.css, cuyo
+  `margin: -0.4rem 0 0` está calibrado para neutralizar parte de ESE gap.
+  Un gap distinto acá vuelve a solapar la lista de requisitos con los
+  campos vecinos.
+*/
+.portal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-inline-size: 0;
+}
+
 .portal__form-actions {
   display: flex;
   justify-content: flex-end;

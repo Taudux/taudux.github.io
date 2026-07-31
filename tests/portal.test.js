@@ -281,6 +281,36 @@ test("the portal stylesheet treats --border-subtle as the full shorthand it is",
   assert.doesNotMatch(css, /1px solid var\(--border-subtle\)/);
 });
 
+test("portal forms declare a flex layout with the gap .password-requirements depends on", () => {
+  const css = read("src/app/features/portal/portal.css");
+  const match = css.match(/\.portal__form\s*{([^}]*)}/);
+  assert.ok(match, ".portal__form must be defined in portal.css");
+  assert.match(match[1], /display:\s*flex/);
+  assert.match(match[1], /gap:\s*1rem/);
+});
+
+test("the three portal forms carry the portal__form layout class", () => {
+  const html = read("src/app/features/portal/index.html");
+  for (const id of ["formPerfil", "formContrasena", "formCorreo"]) {
+    const formTag = html.match(new RegExp(`<form id="${id}"[^>]*>`));
+    assert.ok(formTag, `<form id="${id}"> not found`);
+    assert.match(formTag[0], /class="portal__form"/, `#${id} is missing class="portal__form"`);
+  }
+});
+
+test("portal__form's gap matches auth__form's gap (password-requirements' negative margin assumes it)", () => {
+  const portalCss = read("src/app/features/portal/portal.css");
+  const authCss = read("src/app/features/auth/auth.css");
+  const portalGap = portalCss.match(/\.portal__form\s*{[^}]*gap:\s*([^;]+);/)[1].trim();
+  const authGap = authCss.match(/\.auth__form\s*{[^}]*gap:\s*([^;]+);/)[1].trim();
+  assert.equal(portalGap, authGap);
+});
+
+test("the password change form wires live requirement feedback", () => {
+  const js = read("src/app/features/portal/portal.js");
+  assert.match(js, /configurarRequisitosContrasena\(/);
+});
+
 test("the portal layout collapses to one column only on mobile", () => {
   const css = read("src/app/features/portal/portal.css");
   assert.match(css, /\.portal__layout\s*{[^}]*grid-template-columns:\s*minmax\(220px,\s*260px\)/);

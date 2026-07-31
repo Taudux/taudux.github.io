@@ -249,12 +249,98 @@
     });
   }
 
+  function mostrarErrorEliminarCuenta(form, estado, mensaje) {
+    estado.textContent = mensaje;
+    estado.hidden = false;
+    form.elements.contrasena.setAttribute("aria-describedby", "eliminarCuentaStatus");
+    form.elements.contrasena.setAttribute("aria-invalid", "true");
+    estado.focus();
+    mostrarToast(mensaje, "error");
+  }
+
+  function ocultarErrorEliminarCuenta(form, estado) {
+    if (estado.hidden) return;
+    estado.hidden = true;
+    estado.textContent = "";
+    form.elements.contrasena.removeAttribute("aria-describedby");
+    form.elements.contrasena.removeAttribute("aria-invalid");
+  }
+
+  /*
+    Doble barrera antes de un borrado irreversible: primero la contraseña actual
+    (que alguien con la sesión abierta no necesariamente conoce) y después el
+    correo tipeado en el diálogo. El toast del diálogo se emite recién cuando la
+    promesa resuelve, porque el top layer del <dialog> taparía cualquier toast
+    lanzado antes.
+  */
+  function configurarEliminarCuenta(session) {
+    const boton = document.getElementById("botonMostrarEliminarCuenta");
+    const form = document.getElementById("formEliminarCuenta");
+    const estado = document.getElementById("eliminarCuentaStatus");
+    if (!boton || !form || !estado) return;
+
+    boton.addEventListener("click", () => {
+      form.hidden = false;
+      boton.hidden = true;
+      form.elements.contrasena.focus();
+    });
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      ocultarErrorEliminarCuenta(form, estado);
+
+      const contrasena = form.elements.contrasena.value;
+      if (!contrasena) {
+        mostrarErrorEliminarCuenta(form, estado, "Escribe tu contraseña actual para continuar.");
+        return;
+      }
+
+      establecerFormularioOcupado(form, true);
+      try {
+        const reauth = await supabaseClient.auth.signInWithPassword({
+          email: session.user.email,
+          password: contrasena,
+        });
+        if (reauth.error) {
+          mostrarErrorEliminarCuenta(form, estado, "Contraseña actual incorrecta.");
+          return;
+        }
+
+        const confirmado = await confirmarConTexto({
+          titulo: "Eliminar cuenta",
+          mensaje: `Se eliminarán tu cuenta (${session.user.email}) y tu perfil de forma permanente. Esta acción no se puede deshacer.`,
+          textoEsperado: session.user.email,
+          etiquetaEntrada: "Escribe tu correo para confirmar:",
+          etiquetaConfirmar: "Eliminar cuenta",
+        });
+        if (!confirmado) {
+          form.elements.contrasena.value = "";
+          return;
+        }
+
+        const resultado = await eliminarCuenta();
+        if (!resultado.ok) {
+          mostrarErrorEliminarCuenta(form, estado, resultado.mensaje);
+          return;
+        }
+
+        // La cuenta ya no existe: el signOut solo limpia la sesión local, y si
+        // fallara igual hay que sacar al usuario de un portal sin dueño.
+        await cerrarSesion({ scope: "local" });
+        window.location.href = "/";
+      } finally {
+        establecerFormularioOcupado(form, false);
+      }
+    });
+  }
+
   function configurarSeccionCuenta(session) {
     const email = document.getElementById("cuentaEmail");
     if (email) email.value = session.user.email || "";
 
     configurarFormularioContrasena(session);
     configurarCierreSesion();
+    configurarEliminarCuenta(session);
   }
 
   // El perfil llega de la BD en snake_case (avisos_curso_nuevo); el núcleo

@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/app/shared/field/field.css">
   <link rel="stylesheet" href="/app/shared/toast/toast.css">
   <link rel="stylesheet" href="/app/shared/coming-soon/coming-soon.css">
+  <link rel="stylesheet" href="/app/shared/confirm-dialog/confirm-dialog.css">
   <link rel="stylesheet" href="/app/features/auth/auth.css">
   <link rel="stylesheet" href="/app/features/portal/portal.css">
 </head>
@@ -153,6 +154,31 @@
               <div class="portal__account-actions">
                 <button type="button" class="button button--outline" id="botonCerrarSesion">Cerrar sesión</button>
               </div>
+
+              <div class="portal__danger-zone">
+                <h3 class="portal__danger-title">Eliminar cuenta</h3>
+                <p class="portal__section-intro">Se borran tu cuenta y tu perfil de forma permanente. Esta acción no se puede deshacer.</p>
+                <button type="button" class="button button--outline portal__danger-button" id="botonMostrarEliminarCuenta">Eliminar cuenta</button>
+
+                <form id="formEliminarCuenta" class="portal__form" novalidate hidden>
+                  <p class="portal__status" id="eliminarCuentaStatus" role="alert" tabindex="-1" hidden></p>
+
+                  <div class="portal__field-group">
+                    <label for="eliminarCuentaContrasena">Confirma tu contraseña actual</label>
+                    <div class="password-field">
+                      <input type="password" id="eliminarCuentaContrasena" name="contrasena" class="password-field__input field" autocomplete="current-password" required>
+                      <button type="button" class="password-field__toggle" data-target="eliminarCuentaContrasena" aria-label="Mostrar contraseña" aria-pressed="false">
+                        <svg class="password-field__icon password-field__icon--show" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <svg class="password-field__icon password-field__icon--hide" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"></path><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94"></path></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="portal__form-actions">
+                    <button type="submit" class="button button--glow" data-loading-text="Verificando…">Continuar</button>
+                  </div>
+                </form>
+              </div>
             </section>
 
             <section class="portal__section panel panel--spacious" id="seccion-correo" data-seccion="correo" aria-labelledby="tituloCorreo" hidden>
@@ -209,6 +235,7 @@
   <script src="/app/features/auth/auth-ui.js"></script>
   <script src="/app/shared/navbar/navbar.js"></script>
   <script src="/app/shared/toast/toast.js"></script>
+  <script src="/app/shared/confirm-dialog/confirm-dialog.js"></script>
   <script src="/app/features/portal/portal.secciones.js"></script>
   <script src="/app/features/portal/portal.perfil.js"></script>
   <script src="/app/features/portal/portal.correo.js"></script>

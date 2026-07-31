@@ -176,6 +176,23 @@ async function cerrarSesion({ scope = "global" } = {}) {
   return { ok: true };
 }
 
+/*
+  Borra la cuenta del usuario de la sesión actual. El id a borrar nunca viaja en
+  el cuerpo: la edge function lo toma del JWT, así que esta llamada no puede
+  apuntar a otra cuenta. Un solo mensaje de error porque no hay casos de negocio
+  que el usuario pueda distinguir ni resolver de manera distinta.
+*/
+async function eliminarCuenta() {
+  const { data, error } = await supabaseClient.functions.invoke("delete-account", { body: {} });
+  if (error || data?.ok !== true) {
+    return {
+      ok: false,
+      mensaje: "No pudimos eliminar tu cuenta. Intenta de nuevo en unos momentos.",
+    };
+  }
+  return { ok: true };
+}
+
 async function recuperarContrasena(email) {
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: urlAbsolutaAuth(RUTAS_AUTH.resetPassword),

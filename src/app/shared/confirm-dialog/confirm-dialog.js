@@ -29,7 +29,7 @@ function coincideTextoConfirmacion(valor, esperado) {
 }
 
 function crearDialogoConfirmacion({ documento }) {
-  function construir({ titulo, mensaje, textoEsperado, etiquetaConfirmar, etiquetaCancelar }) {
+  function construir({ titulo, mensaje, textoEsperado, etiquetaConfirmar, etiquetaCancelar, etiquetaEntrada }) {
     const dialogo = documento.createElement("dialog");
     dialogo.className = "confirm-dialog panel";
     dialogo.setAttribute("aria-labelledby", "confirmDialogTitulo");
@@ -48,7 +48,10 @@ function crearDialogoConfirmacion({ documento }) {
     const etiqueta = documento.createElement("label");
     etiqueta.className = "confirm-dialog__etiqueta";
     etiqueta.setAttribute("for", "confirmDialogEntrada");
-    etiqueta.textContent = "Escribe el nombre exacto para confirmar:";
+    // El default habla de "nombre" porque el primer consumidor confirma con el
+    // título de un curso; quien confirme con otra cosa (un correo, por ejemplo)
+    // pasa su propia etiqueta.
+    etiqueta.textContent = etiquetaEntrada || "Escribe el nombre exacto para confirmar:";
 
     const esperado = documento.createElement("strong");
     esperado.className = "confirm-dialog__esperado";

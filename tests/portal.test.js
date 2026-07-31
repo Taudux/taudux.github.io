@@ -311,6 +311,72 @@ test("the password change form wires live requirement feedback", () => {
   assert.match(js, /configurarRequisitosContrasena\(/);
 });
 
+test("the delete-account form ships hidden behind a reveal button", () => {
+  const html = read("src/app/features/portal/index.html");
+  const formTag = html.match(/<form id="formEliminarCuenta"[^>]*>/);
+  assert.ok(formTag, "formEliminarCuenta not found");
+  assert.match(formTag[0], /\bhidden\b/, "the form must start hidden");
+  assert.match(html, /id="botonMostrarEliminarCuenta"/);
+  assert.match(html, /id="eliminarCuentaContrasena"[^>]*type="password"|type="password"[^>]*id="eliminarCuentaContrasena"/);
+});
+
+test("a hidden portal form stays hidden: [hidden] must beat .portal__form's display:flex", () => {
+  /*
+    .portal__form es display:flex, que gana sobre la hoja del navegador para
+    [hidden]. Sin esta regla el formulario de borrado se vería siempre, igual
+    que pasaría con .portal__section.
+  */
+  const css = read("src/app/features/portal/portal.css");
+  assert.match(css, /\.portal__form\[hidden\]\s*{[^}]*display:\s*none/);
+});
+
+test("the portal page loads the confirm-dialog assets it now depends on", () => {
+  const html = read("src/app/features/portal/index.html");
+  assert.match(html, /confirm-dialog\/confirm-dialog\.css/);
+  assert.match(html, /confirm-dialog\/confirm-dialog\.js/);
+
+  const dialogo = html.indexOf("confirm-dialog/confirm-dialog.js");
+  const portal = html.indexOf("portal/portal.js");
+  assert.ok(dialogo < portal, "confirm-dialog.js must load before portal.js");
+});
+
+test("account deletion re-authenticates before opening the typed confirmation", () => {
+  const js = read("src/app/features/portal/portal.js");
+  const cuerpo = js.match(/function configurarEliminarCuenta\(session\)\s*{[\s\S]*?\n  }/)[0];
+
+  const reauth = cuerpo.indexOf("signInWithPassword");
+  const dialogo = cuerpo.indexOf("confirmarConTexto");
+  const borrado = cuerpo.indexOf("eliminarCuenta()");
+  assert.ok(reauth >= 0 && dialogo >= 0 && borrado >= 0, "all three steps must exist");
+  assert.ok(reauth < dialogo, "the password check must come before the dialog");
+  assert.ok(dialogo < borrado, "the dialog must be confirmed before deleting");
+});
+
+test("the deletion dialog asks for the email, not a course name, and expects that exact email", () => {
+  const js = read("src/app/features/portal/portal.js");
+  const cuerpo = js.match(/function configurarEliminarCuenta\(session\)\s*{[\s\S]*?\n  }/)[0];
+  assert.match(cuerpo, /etiquetaEntrada:\s*"Escribe tu correo para confirmar:"/);
+  assert.match(cuerpo, /textoEsperado:\s*session\.user\.email/);
+});
+
+test("a deleted account is signed out locally and sent home", () => {
+  const js = read("src/app/features/portal/portal.js");
+  const cuerpo = js.match(/function configurarEliminarCuenta\(session\)\s*{[\s\S]*?\n  }/)[0];
+  /*
+    scope local, no global: la cuenta ya no existe, así que revocar sesiones
+    contra el servidor fallaría; solo queda limpiar la sesión de este navegador.
+  */
+  assert.match(cuerpo, /cerrarSesion\(\{\s*scope:\s*"local"\s*\}\)/);
+  assert.match(cuerpo, /window\.location\.href\s*=\s*"\/"/);
+});
+
+test("eliminarCuenta never sends a user id: the edge function reads it from the JWT", () => {
+  const js = read("src/app/core/auth/auth.service.js");
+  const cuerpo = js.match(/async function eliminarCuenta\(\)\s*{([\s\S]*?)\n}/)[1];
+  assert.match(cuerpo, /functions\.invoke\("delete-account",\s*\{\s*body:\s*\{\}\s*\}\)/);
+  assert.doesNotMatch(cuerpo, /user\.id|userId|session/);
+});
+
 test("password errors (mismatch, weak, wrong current password) also raise a red toast", () => {
   const js = read("src/app/features/portal/portal.js");
   const match = js.match(/function mostrarErrorContrasena\([^)]*\)\s*{([^}]*)}/);

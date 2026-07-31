@@ -196,6 +196,41 @@
   justify-content: flex-start;
 }
 
+/*
+  Zona de acciones irreversibles. El borde superior la separa del resto de la
+  sección para que "Eliminar cuenta" no se lea como un ajuste más de la lista.
+*/
+.portal__danger-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-block-start: 1.5rem;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.portal__danger-title {
+  color: var(--color-error-text);
+}
+
+.portal__danger-button {
+  border-color: var(--color-error);
+  color: var(--color-error-text);
+}
+
+/*
+  El formulario de confirmación nace oculto y se revela al pulsar el botón; sin
+  esta regla, .portal__form (display:flex) le ganaría al [hidden] del navegador
+  y quedaría siempre visible, igual que pasa con .portal__section.
+*/
+.portal__danger-zone .portal__form {
+  align-self: stretch;
+}
+
+.portal__form[hidden] {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .portal__container {
     padding-inline: 1.25rem;

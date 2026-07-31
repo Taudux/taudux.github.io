@@ -97,6 +97,7 @@ function createHarness({ sinShowModal = false } = {}) {
       ayuda: buscar("confirm-dialog__ayuda"),
       cancelar: buscar("confirm-dialog__cancelar"),
       confirmar: buscar("confirm-dialog__confirmar"),
+      etiqueta: buscar("confirm-dialog__etiqueta"),
     };
   }
 
@@ -107,6 +108,24 @@ function tipear(entrada, texto) {
   entrada.value = texto;
   entrada.emitir("input");
 }
+
+test("the entry label defaults to the course wording when no override is given", async () => {
+  const { abrir } = createHarness();
+  const { promesa, etiqueta, cancelar } = abrir();
+  assert.equal(etiqueta.textContent, "Escribe el nombre exacto para confirmar:");
+  cancelar.emitir("click");
+  await promesa;
+});
+
+test("etiquetaEntrada overrides the entry label for non-course confirmations", async () => {
+  const { abrir } = createHarness();
+  const { promesa, etiqueta, cancelar } = abrir({
+    etiquetaEntrada: "Escribe tu correo para confirmar:",
+  });
+  assert.equal(etiqueta.textContent, "Escribe tu correo para confirmar:");
+  cancelar.emitir("click");
+  await promesa;
+});
 
 test("confirm button starts disabled and stays disabled while the text does not match", async () => {
   const { abrir } = createHarness();

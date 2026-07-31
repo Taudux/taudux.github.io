@@ -18,6 +18,11 @@ const {
   camposModificados,
 } = require(path.join(ROOT, "src/app/features/portal/portal.perfil.js"));
 
+const {
+  normalizarPreferenciasCorreo,
+  cambiosPreferenciasCorreo,
+} = require(path.join(ROOT, "src/app/features/portal/portal.correo.js"));
+
 /* Bloque A — núcleo puro. */
 
 test("the portal section catalog exposes unique, non-empty ids", () => {
@@ -175,6 +180,49 @@ test("validarCambios rejects clearing the name to an empty value", () => {
   const resultado = validarCambios(cambios);
   assert.equal(resultado.ok, false);
   assert.equal(resultado.campo, "nombre");
+});
+
+/* Bloque B-bis — núcleo puro de "Preferencias de correo". */
+
+test("normalizarPreferenciasCorreo turns null/undefined into false", () => {
+  assert.deepEqual(normalizarPreferenciasCorreo({ avisosCursoNuevo: null }), {
+    avisosCursoNuevo: false,
+  });
+  assert.deepEqual(normalizarPreferenciasCorreo({ avisosCursoNuevo: undefined }), {
+    avisosCursoNuevo: false,
+  });
+  assert.deepEqual(normalizarPreferenciasCorreo(), { avisosCursoNuevo: false });
+});
+
+test("normalizarPreferenciasCorreo coerces a truthy value to true", () => {
+  assert.deepEqual(normalizarPreferenciasCorreo({ avisosCursoNuevo: true }), {
+    avisosCursoNuevo: true,
+  });
+});
+
+test("cambiosPreferenciasCorreo returns {} when the checkbox matches what is saved", () => {
+  assert.deepEqual(
+    cambiosPreferenciasCorreo({ avisosCursoNuevo: true }, { avisosCursoNuevo: true }),
+    {}
+  );
+  assert.deepEqual(
+    cambiosPreferenciasCorreo({ avisosCursoNuevo: null }, { avisosCursoNuevo: false }),
+    {}
+  );
+});
+
+test("cambiosPreferenciasCorreo returns the DB column name when toggled off", () => {
+  assert.deepEqual(
+    cambiosPreferenciasCorreo({ avisosCursoNuevo: true }, { avisosCursoNuevo: false }),
+    { avisos_curso_nuevo: false }
+  );
+});
+
+test("cambiosPreferenciasCorreo returns the DB column name when toggled on", () => {
+  assert.deepEqual(
+    cambiosPreferenciasCorreo({ avisosCursoNuevo: false }, { avisosCursoNuevo: true }),
+    { avisos_curso_nuevo: true }
+  );
 });
 
 /* Bloque C — contratos estáticos sobre la fuente. */

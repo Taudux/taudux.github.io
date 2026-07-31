@@ -3,6 +3,11 @@
   exacto antes de habilitar el botón de confirmar. No tiene dependencias y expone
   confirmarConTexto(opciones) en el scope global.
 
+  `textoEsperado` es opcional: sin él, el diálogo se arma sin el input de tipeo,
+  sin su ayuda y con el botón confirmar habilitado desde que se abre (título,
+  mensaje, cancelar, confirmar). Es el modo que usa la confirmación simple de
+  publicar un curso; eliminar sigue exigiendo el tipeo exacto.
+
   Se apoya en el <dialog> nativo por showModal(): trae focus trap, cierre con Esc
   (evento cancel), inertización del fondo y ::backdrop sin código propio.
 
@@ -45,6 +50,31 @@ function crearDialogoConfirmacion({ documento }) {
     cuerpo.id = "confirmDialogMensaje";
     cuerpo.textContent = mensaje;
 
+    const acciones = documento.createElement("div");
+    acciones.className = "confirm-dialog__acciones";
+
+    const cancelar = documento.createElement("button");
+    cancelar.className = "button button--outline confirm-dialog__cancelar";
+    cancelar.type = "button";
+    cancelar.textContent = etiquetaCancelar || "Cancelar";
+
+    const confirmar = documento.createElement("button");
+    confirmar.className = "button confirm-dialog__confirmar";
+    confirmar.type = "button";
+    confirmar.textContent = etiquetaConfirmar || "Confirmar";
+
+    acciones.append(cancelar, confirmar);
+
+    // Sin textoEsperado no hay tipeo que exigir: el diálogo queda con título,
+    // mensaje y las dos acciones, y confirmar arranca habilitado.
+    const tieneTipeo = textoEsperado !== undefined && textoEsperado !== null;
+    if (!tieneTipeo) {
+      dialogo.append(encabezado, cuerpo, acciones);
+      return { dialogo, entrada: null, ayuda: null, cancelar, confirmar };
+    }
+
+    confirmar.disabled = true;
+
     const etiqueta = documento.createElement("label");
     etiqueta.className = "confirm-dialog__etiqueta";
     etiqueta.setAttribute("for", "confirmDialogEntrada");
@@ -72,21 +102,6 @@ function crearDialogoConfirmacion({ documento }) {
     ayuda.setAttribute("role", "status");
     ayuda.setAttribute("aria-live", "polite");
 
-    const acciones = documento.createElement("div");
-    acciones.className = "confirm-dialog__acciones";
-
-    const cancelar = documento.createElement("button");
-    cancelar.className = "button button--outline confirm-dialog__cancelar";
-    cancelar.type = "button";
-    cancelar.textContent = etiquetaCancelar || "Cancelar";
-
-    const confirmar = documento.createElement("button");
-    confirmar.className = "button confirm-dialog__confirmar";
-    confirmar.type = "button";
-    confirmar.textContent = etiquetaConfirmar || "Confirmar";
-    confirmar.disabled = true;
-
-    acciones.append(cancelar, confirmar);
     dialogo.append(encabezado, cuerpo, etiqueta, esperado, entrada, ayuda, acciones);
 
     return { dialogo, entrada, ayuda, cancelar, confirmar };
@@ -95,6 +110,7 @@ function crearDialogoConfirmacion({ documento }) {
   function abrir(opciones) {
     const { dialogo, entrada, ayuda, cancelar, confirmar } = construir(opciones);
     const textoEsperado = opciones.textoEsperado;
+    const tieneTipeo = textoEsperado !== undefined && textoEsperado !== null;
     const disparador = documento.activeElement;
 
     documento.body.appendChild(dialogo);
@@ -111,17 +127,19 @@ function crearDialogoConfirmacion({ documento }) {
         dialogo.close(valor);
       };
 
-      entrada.addEventListener("input", () => {
-        const coincide = coincideTextoConfirmacion(entrada.value, textoEsperado);
-        confirmar.disabled = !coincide;
-        ayuda.textContent = coincide ? "El texto coincide." : "";
-      });
+      if (tieneTipeo) {
+        entrada.addEventListener("input", () => {
+          const coincide = coincideTextoConfirmacion(entrada.value, textoEsperado);
+          confirmar.disabled = !coincide;
+          ayuda.textContent = coincide ? "El texto coincide." : "";
+        });
+      }
 
       cancelar.addEventListener("click", () => cerrar("cancelar"));
 
       // Revalida en vez de confiar solo en el disabled.
       confirmar.addEventListener("click", () => {
-        if (!coincideTextoConfirmacion(entrada.value, textoEsperado)) return;
+        if (tieneTipeo && !coincideTextoConfirmacion(entrada.value, textoEsperado)) return;
         cerrar("confirmar");
       });
 
@@ -140,7 +158,8 @@ function crearDialogoConfirmacion({ documento }) {
       dialogo.showModal();
       void dialogo.offsetWidth;
       dialogo.classList.add("confirm-dialog--visible");
-      entrada.focus();
+      if (tieneTipeo) entrada.focus();
+      else confirmar.focus();
     });
   }
 

@@ -261,6 +261,49 @@ test("a missing showModal resolves false instead of confirming blindly", async (
   assert.equal(errores.length, 1);
 });
 
+// --- Modo simple: sin textoEsperado no hay tipeo que exigir. ---
+
+test("without textoEsperado, no input or help text is built and confirm starts enabled", async () => {
+  const { abrir } = createHarness();
+  const { promesa, entrada, ayuda, confirmar, cancelar } = abrir({ textoEsperado: undefined });
+
+  assert.equal(entrada, null);
+  assert.equal(ayuda, null);
+  assert.equal(confirmar.disabled, false);
+
+  cancelar.emitir("click");
+  await promesa;
+});
+
+test("without textoEsperado, clicking confirm resolves true immediately", async () => {
+  const { abrir } = createHarness();
+  const { promesa, confirmar } = abrir({ textoEsperado: undefined });
+
+  confirmar.emitir("click");
+  assert.equal(await promesa, true);
+});
+
+test("without textoEsperado, cancel/backdrop/escape still resolve false", async () => {
+  const cancelado = createHarness().abrir({ textoEsperado: undefined });
+  cancelado.cancelar.emitir("click");
+  assert.equal(await cancelado.promesa, false);
+
+  const backdrop = createHarness().abrir({ textoEsperado: undefined });
+  backdrop.dialogo.emitir("click");
+  assert.equal(await backdrop.promesa, false);
+});
+
+test("the typed-confirmation path is unchanged: deleting a course still requires the exact title", async () => {
+  const { abrir } = createHarness();
+  const { promesa, entrada, confirmar, cancelar } = abrir();
+
+  assert.notEqual(entrada, null);
+  assert.equal(confirmar.disabled, true);
+
+  cancelar.emitir("click");
+  await promesa;
+});
+
 test("the dialog is labelled and described by its own heading and message", async () => {
   const { abrir } = createHarness();
   const { promesa, dialogo, cancelar } = abrir();

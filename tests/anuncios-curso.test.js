@@ -98,6 +98,19 @@ test("construirLoteResend arma un lote con baja y asunto correctos", async () =>
   }
 });
 
+test("construirLoteResend no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
+  const { construirLoteResend } = await anunciosModule;
+  const [mensaje] = construirLoteResend({
+    titulo: "Curso de Testing",
+    cursoId: CURSO_ID,
+    destinatarios: destinatariosDePagina(1),
+    siteUrl: "https://taudux.com",
+    remitente: "Taudux <avisos@taudux.com>",
+  });
+  assert.doesNotMatch(mensaje.text, /\b(querés|podés|dejá|tenés|sabés)\b/i);
+  assert.doesNotMatch(mensaje.html, /\b(querés|podés|dejá|tenés|sabés)\b/i);
+});
+
 test("debePausar respeta el presupuesto de tiempo", async () => {
   const { debePausar } = await anunciosModule;
   assert.equal(debePausar(1000, 40000), false);

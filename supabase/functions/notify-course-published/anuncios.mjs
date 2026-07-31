@@ -60,12 +60,12 @@ export function construirLoteResend({ titulo, cursoId, destinatarios, siteUrl, r
     to: [destinatario.email],
     subject: `Nuevo curso en Taudux: ${titulo}`,
     text: `Se publicó un nuevo curso en Taudux: ${titulo}.\n\n` +
-      `Podés verlo en el catálogo: ${catalogoUrl}\n\n` +
-      `Si no querés recibir estos avisos, podés darte de baja acá: ${unsubscribeUrl}`,
+      `Puedes verlo en el catálogo: ${catalogoUrl}\n\n` +
+      `Si no quieres recibir estos avisos, puedes darte de baja aquí: ${unsubscribeUrl}`,
     html: `<p>Se publicó un nuevo curso en Taudux: <strong>${titulo}</strong>.</p>` +
       `<p><a href="${catalogoUrl}">Ver el catálogo de cursos</a></p>` +
-      `<p style="font-size:12px;color:#666;">Si no querés recibir estos avisos, ` +
-      `<a href="${unsubscribeUrl}">dejá de recibirlos acá</a>.</p>`,
+      `<p style="font-size:12px;color:#666;">Si no quieres recibir estos avisos, ` +
+      `<a href="${unsubscribeUrl}">deja de recibirlos aquí</a>.</p>`,
     headers: { "List-Unsubscribe": `<${unsubscribeUrl}>` },
   }));
 }

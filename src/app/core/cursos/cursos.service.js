@@ -604,3 +604,31 @@ async function actualizarEstadoCurso(id, estado) {
   }
   return { ok: true, data };
 }
+
+/*
+  Consulta si un curso ya envió su aviso de publicación por correo (solo
+  admins, vía RPC security definer de la migración 0018). El cliente nunca
+  lee curso_anuncios directo: la tabla tiene revoke all desde 0015. Primera
+  llamada .rpc() de este servicio.
+*/
+async function cursoYaAnunciado(id) {
+  if (typeof id !== "string" || !id.trim()) {
+    return {
+      ok: false,
+      codigo: "invalid_course_id",
+      mensaje: "No se pudo identificar el curso. Recarga la página e inténtalo de nuevo.",
+    };
+  }
+
+  const { data, error } = await supabaseClient.rpc("curso_anunciado", { p_curso_id: id });
+
+  if (error) {
+    registrarErrorSupabaseCursos("curso-ya-anunciado", error);
+    return {
+      ok: false,
+      codigo: error.code || "curso_anunciado_failed",
+      mensaje: "No se pudo verificar si el curso ya fue anunciado.",
+    };
+  }
+  return { ok: true, data: Boolean(data) };
+}

@@ -21,7 +21,15 @@ const SUPABASE_URL = "https://yqkvgfqplmbbcebrivpt.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlxa3ZnZnFwbG1iYmNlYnJpdnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0ODgxOTEsImV4cCI6MjEwMDA2NDE5MX0.wU-ylZ6agwkochwmOGe-7BROByw1qsvYpmqT5xDvF1Y";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { storage: window.sessionStorage },
+  auth: {
+    storage: window.sessionStorage,
+    // PKCE para el handshake de OAuth (Google). El code_verifier vive en
+    // sessionStorage: sobrevive el redirect full-page al proveedor porque
+    // sessionStorage está atado a la pestaña, no al documento. Los enlaces
+    // de correo no dependen de él: usan token_hash + verifyOtp (ver
+    // confirm.js / reset-password.js), agnóstico al flowType.
+    flowType: "pkce",
+  },
 });
 
 // Antes de este cambio la sesión vivía en localStorage; remover el token heredado

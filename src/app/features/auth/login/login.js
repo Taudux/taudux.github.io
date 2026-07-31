@@ -4,12 +4,18 @@ const loginForm = document.getElementById("loginForm");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
 const reenviarButton = document.getElementById("reenviarButton");
+const googleButton = document.getElementById("googleButton");
 
 const parametrosLogin = new URLSearchParams(window.location.search);
+const errorEnlaceLogin = parametrosErrorAuth();
 if (parametrosLogin.get("confirmed") === "1") {
   mostrarEstadoAuth("Correo confirmado. Ya puedes iniciar sesión.", "success", false);
 } else if (parametrosLogin.get("password-reset") === "1") {
   mostrarEstadoAuth("Contraseña actualizada. Inicia sesión con tu nueva contraseña.", "success", false);
+} else if (errorEnlaceLogin) {
+  // El guard no distingue "enlace expirado" de "callback mal aterrizado";
+  // este mensaje cubre el caso donde igual se termina en login.
+  mostrarEstadoAuth(mensajeErrorEnlace(errorEnlaceLogin), "error", false);
 }
 
 redirigirSiSesionActiva();
@@ -39,6 +45,18 @@ loginForm.addEventListener("submit", async (evento) => {
     window.location.replace(destino);
   } finally {
     establecerFormularioOcupado(loginForm, false);
+  }
+});
+
+googleButton.addEventListener("click", async () => {
+  if (formularioEstaOcupado(loginForm)) return;
+  ocultarEstadoAuth();
+  establecerBotonOcupado(googleButton, true);
+  const resultado = await iniciarSesionConGoogle();
+  // En el camino feliz el navegador ya se fue a Google; solo se llega acá si falló.
+  if (!resultado.ok) {
+    establecerBotonOcupado(googleButton, false);
+    mostrarEstadoAuth(resultado.mensaje, "error");
   }
 });
 

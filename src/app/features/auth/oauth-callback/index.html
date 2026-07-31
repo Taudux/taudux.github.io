@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="/assets/images/1.png">
+  <title>Conectando tu cuenta | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/app/shared/button/button.css">
+  <link rel="stylesheet" href="/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/app/shared/field/field.css">
+  <link rel="stylesheet" href="/app/features/auth/auth.css">
+</head>
+
+<body>
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/" class="navbar__brand">
+      <img src="/assets/images/logo-horizontal.png" alt="Taudux" class="navbar__logo">
+    </a>
+  </nav>
+
+  <main class="auth">
+    <section class="auth__card panel panel--spacious">
+      <div class="auth__section" id="oauthLoading">
+        <div class="auth__spinner" aria-hidden="true"></div>
+        <h2 class="auth__title" id="authTitle">Conectando tu cuenta</h2>
+        <p class="auth__subtitle">Estamos completando tu inicio de sesión…</p>
+      </div>
+
+      <div class="auth__section" id="oauthActions" hidden>
+        <div class="auth__status" id="authStatus" tabindex="-1" hidden></div>
+        <div class="auth__actions">
+          <a class="auth__link button button--glow" href="/app/features/auth/login/">Volver a iniciar sesión</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app/core/supabase/supabase-client.js"></script>
+  <script src="/app/core/auth/auth.service.js"></script>
+  <script src="/app/features/auth/auth-ui.js"></script>
+  <script src="/app/features/auth/oauth-callback/oauth-callback.js"></script>
+</body>
+
+</html>

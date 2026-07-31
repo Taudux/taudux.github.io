@@ -36,6 +36,7 @@ const EXPECTED_MIGRATION_HASHES = Object.freeze({
   "0014_cursos_estado.sql": "990a1c009b0911a28a631197c6d1b0caf0a1b7db4f662dea9e343852a4ca3036",
   "0015_avisos_curso_nuevo.sql": "7db5575eef1aa96862932b228939aa7a92558a67d4a7f6aa7cdd161e73acdf5c",
   "0016_completar_anuncio_libera_claim.sql": "81d1cf37f2441338dcb63495115f2d921e5b69eec5c478881815dd4df600cf8f",
+  "0017_perfil_google_metadata.sql": "a64e430f11cb991d4c2fb92758a671ced142fba8bf738df58c40a2e244136f34",
 });
 const SERVICE_SOURCE = fs.readFileSync(SERVICE_PATH, "utf8");
 const FUNCTION_SOURCE = fs.readFileSync(FUNCTION_PATH, "utf8");
@@ -814,7 +815,7 @@ test("migration layout and 0011/0012 contracts remain fail-closed", () => {
 
   const versions = actualFiles.map((file) => file.slice(0, 4));
   assert.equal(new Set(versions).size, versions.length, "migration versions must be unique");
-  assert.deepEqual(versions, Array.from({ length: 16 }, (_, index) => String(index + 1).padStart(4, "0")));
+  assert.deepEqual(versions, Array.from({ length: 17 }, (_, index) => String(index + 1).padStart(4, "0")));
 
   if (fs.existsSync(OLD_MIGRATIONS_PATH)) {
     const oldSqlFiles = fs.readdirSync(OLD_MIGRATIONS_PATH).filter((file) => file.endsWith(".sql"));

@@ -56,6 +56,40 @@ test("preserva la query string junto con el hash", () => {
   );
 });
 
+test("un ?code= suelto es OAuth y va a la página de callback", () => {
+  assert.equal(
+    destinoCallbackAuth("/", "", "?code=abc-123"),
+    `${RUTAS_CALLBACK_AUTH.oauthCallback}?code=abc-123`,
+  );
+});
+
+test("token_hash de recuperación gana sobre el code y va a reset-password", () => {
+  const search = "?token_hash=pkce_xyz&type=recovery";
+  assert.equal(
+    destinoCallbackAuth("/", "", search),
+    `${RUTAS_CALLBACK_AUTH.resetPassword}${search}`,
+  );
+});
+
+test("token_hash de confirmación va a confirm", () => {
+  const search = "?token_hash=pkce_xyz&type=signup";
+  assert.equal(
+    destinoCallbackAuth("/", "", search),
+    `${RUTAS_CALLBACK_AUTH.confirm}${search}`,
+  );
+});
+
+test("ya en oauth-callback no redirige (evita loop)", () => {
+  assert.equal(destinoCallbackAuth(RUTAS_CALLBACK_AUTH.oauthCallback, "", "?code=abc"), null);
+});
+
+test("un ?next= no dispara ningún callback", () => {
+  assert.equal(
+    destinoCallbackAuth("/", "", "?next=%2Fapp%2Ffeatures%2Fportal%2F"),
+    null,
+  );
+});
+
 test("las rutas del guard coinciden con RUTAS_AUTH de auth.service.js", () => {
   const fs = require("node:fs");
   const vm = require("node:vm");

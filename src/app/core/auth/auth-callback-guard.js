@@ -23,26 +23,36 @@
 const RUTAS_CALLBACK_AUTH = Object.freeze({
   confirm: "/app/features/auth/confirm/",
   resetPassword: "/app/features/auth/reset-password/",
+  oauthCallback: "/app/features/auth/oauth-callback/",
 });
 
 /*
   Núcleo puro: a partir de pathname/hash/search actuales, decide a dónde
-  redirigir. Devuelve null cuando no hay nada que hacer (sin hash relevante,
-  o ya en la página que sabe procesarlo) para no generar un loop de replace.
+  redirigir. Devuelve null cuando no hay nada que hacer (sin marcas
+  relevantes, o ya en la página que sabe procesarlo) para no generar un loop
+  de replace.
+
+  Con PKCE, el `?code=` de OAuth y el de un enlace de correo mal aterrizado
+  son indistinguibles por sí solos: Supabase no agrega un discriminador y
+  depura los parámetros propios de redirectTo. Por eso los enlaces de correo
+  se emiten con `token_hash` + `type` (ver auth.service.js / confirm.js /
+  reset-password.js), y un `?code=` SIN token_hash queda reservado a OAuth.
 */
 function destinoCallbackAuth(pathname, hash, search) {
-  const params = new URLSearchParams((hash || "").replace(/^#/, ""));
-  const tipo = params.get("type");
-  const esConfirmacion = params.has("access_token") || tipo === "signup";
+  const fragmento = new URLSearchParams((hash || "").replace(/^#/, ""));
+  const consulta = new URLSearchParams(search || "");
+  const tipo = fragmento.get("type") || consulta.get("type");
+
   const esRecuperacion = tipo === "recovery";
+  const esConfirmacion = fragmento.has("access_token") || tipo === "signup" || tipo === "email";
+  const esOauth = consulta.has("code") && !consulta.has("token_hash");
 
-  if (!esConfirmacion && !esRecuperacion) return null;
+  let rutaDestino = null;
+  if (esRecuperacion) rutaDestino = RUTAS_CALLBACK_AUTH.resetPassword;
+  else if (esConfirmacion) rutaDestino = RUTAS_CALLBACK_AUTH.confirm;
+  else if (esOauth) rutaDestino = RUTAS_CALLBACK_AUTH.oauthCallback;
 
-  const rutaDestino = esRecuperacion
-    ? RUTAS_CALLBACK_AUTH.resetPassword
-    : RUTAS_CALLBACK_AUTH.confirm;
-
-  if (pathname === rutaDestino) return null;
+  if (!rutaDestino || pathname === rutaDestino) return null;
 
   return `${rutaDestino}${search || ""}${hash || ""}`;
 }

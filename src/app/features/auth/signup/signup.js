@@ -1,6 +1,7 @@
 /* Registro de cuenta con confirmación de correo obligatoria. */
 
 const signupForm = document.getElementById("signupForm");
+const googleButton = document.getElementById("googleButton");
 const signupPais = document.getElementById("signupPais");
 const signupPrefijo = document.getElementById("signupPrefijo");
 const signupTelefono = document.getElementById("signupTelefono");
@@ -18,6 +19,18 @@ signupPais.addEventListener("change", () => {
 
 signupTelefono.addEventListener("input", () => {
   limitarTelefonoNacional(signupTelefono, signupPais.value);
+});
+
+googleButton.addEventListener("click", async () => {
+  if (formularioEstaOcupado(signupForm)) return;
+  ocultarEstadoAuth();
+  establecerBotonOcupado(googleButton, true);
+  const resultado = await iniciarSesionConGoogle();
+  // En el camino feliz el navegador ya se fue a Google; solo se llega acá si falló.
+  if (!resultado.ok) {
+    establecerBotonOcupado(googleButton, false);
+    mostrarEstadoAuth(resultado.mensaje, "error");
+  }
 });
 
 signupForm.addEventListener("submit", async (evento) => {

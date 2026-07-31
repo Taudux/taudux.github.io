@@ -9,6 +9,7 @@ const RUTAS_AUTH = Object.freeze({
   confirm: "/app/features/auth/confirm/",
   forgotPassword: "/app/features/auth/forgot-password/",
   resetPassword: "/app/features/auth/reset-password/",
+  oauthCallback: "/app/features/auth/oauth-callback/",
 });
 
 const CLAVE_DESTINO_AUTH = "taudux_auth_next";
@@ -32,6 +33,9 @@ function traducirErrorAuth(error) {
       "Demasiados intentos. Espera unos minutos antes de volver a intentarlo.",
     signup_disabled: "El registro de nuevas cuentas no está disponible en este momento.",
     email_provider_disabled: "El acceso con correo no está disponible en este momento.",
+    provider_disabled: "El acceso con Google no está disponible en este momento.",
+    oauth_provider_not_supported: "El acceso con Google no está disponible en este momento.",
+    identity_already_exists: "Esa cuenta de Google ya está vinculada a otro usuario.",
     otp_expired: "El enlace expiró o ya fue utilizado. Solicita uno nuevo.",
     flow_state_expired: "El enlace expiró. Solicita uno nuevo.",
     flow_state_not_found: "El enlace ya no es válido. Solicita uno nuevo.",
@@ -168,6 +172,25 @@ async function iniciarSesion(email, password) {
   return { ok: true, data };
 }
 
+// Sin scopes explícitos: el default (openid email profile) ya es el mínimo
+// necesario. Sin access_type/prompt de consentimiento: no hay backend que
+// use el refresh token de Google, Supabase emite el suyo. Sin
+// skipBrowserRedirect: el default navega en la misma pestaña, que es lo que
+// preserva el code_verifier de PKCE guardado en sessionStorage.
+async function iniciarSesionConGoogle() {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: urlAbsolutaAuth(RUTAS_AUTH.oauthCallback),
+      queryParams: { prompt: "select_account" },
+    },
+  });
+  if (error) {
+    return { ok: false, codigo: error.code, mensaje: traducirErrorAuth(error) };
+  }
+  return { ok: true };
+}
+
 async function cerrarSesion({ scope = "global" } = {}) {
   const { error } = await supabaseClient.auth.signOut({ scope });
   if (error) {
@@ -273,6 +296,8 @@ async function esAdmin(session) {
 async function nombreUsuario(session) {
   const perfil = await obtenerPerfil(session);
   if (perfil?.nombre) return perfil.nombre;
+  // Cuentas de Google: el metadata trae given_name/full_name/name, no
+  // "nombre" (esa clave es propia del signup con contraseña).
   const meta = session?.user?.user_metadata || {};
-  return meta.nombre || null;
+  return meta.nombre || meta.given_name || meta.full_name || meta.name || null;
 }

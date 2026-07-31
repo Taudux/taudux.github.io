@@ -62,6 +62,48 @@
     color: #9ee8b9;
   }
 
+  .auth__oauth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-field);
+    background: var(--color-field);
+    color: var(--color-text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .auth__oauth-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 auto;
+  }
+
+  .auth__oauth[aria-busy="true"] {
+    cursor: wait;
+    opacity: 0.65;
+  }
+
+  .auth__separator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  .auth__separator::before,
+  .auth__separator::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--color-border);
+  }
+
   .auth__form {
     display: flex;
     flex-direction: column;

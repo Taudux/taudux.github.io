@@ -14,27 +14,12 @@
   <link rel="stylesheet" href="/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/app/shared/field/field.css">
   <link rel="stylesheet" href="/app/features/auth/auth.css">
-  <script>
-    // Enlaces legacy de emails viejos llegan con tokens en el hash o el query
-    // apuntando a esta URL en lugar de /reset-password/. Reenviarlos preservando
-    // los tokens; el resto de las cargas siguen al form normal.
-    (function () {
-      var hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-      var query = new URLSearchParams(window.location.search);
-      var esRecuperacion =
-        hash.get("type") === "recovery" ||
-        hash.has("access_token") ||
-        hash.has("error_code") ||
-        query.get("type") === "recovery" ||
-        query.has("code") ||
-        query.has("error_code");
-      if (esRecuperacion) {
-        window.location.replace(
-          "/app/features/auth/reset-password/" + window.location.search + window.location.hash
-        );
-      }
-    })();
-  </script>
+  <!--
+    Enlaces de auth (confirmación, recuperación, OAuth) que aterrizan acá por
+    una allowlist de Redirect URLs desactualizada en Supabase se rutean con
+    la misma lógica que la raíz del sitio: ver auth-callback-guard.js.
+  -->
+  <script src="/app/core/auth/auth-callback-guard.js"></script>
 </head>
 
 <body>
@@ -49,6 +34,20 @@
       <h1 class="auth__title" id="authTitle">Iniciar sesión</h1>
       <p class="auth__subtitle">Accede a tu cuenta para continuar.</p>
       <div class="auth__status" id="authStatus" tabindex="-1" hidden></div>
+
+      <button type="button" class="auth__oauth button" id="googleButton">
+        <svg class="auth__oauth-icon" aria-hidden="true" focusable="false" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z" />
+          <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z" />
+          <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z" />
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z" />
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+
+      <div class="auth__separator" role="separator" aria-orientation="horizontal">
+        <span class="auth__separator-texto">o</span>
+      </div>
 
       <form class="auth__form" id="loginForm" novalidate>
         <div class="auth__field-group">

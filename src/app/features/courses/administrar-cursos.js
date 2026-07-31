@@ -42,12 +42,39 @@ function cursoListoParaPublicar(curso, estadoDestino) {
   return Array.isArray(curso.dias_semana) && curso.dias_semana.length > 0;
 }
 
+// Migración 0018: publicar siempre reencola el aviso por correo, incluso si
+// el curso ya fue anunciado antes. Estos son los tres textos posibles del
+// diálogo de confirmación simple que antecede a ese envío masivo.
+const TEXTO_AVISO_NUEVO =
+  "Se enviará un aviso por correo a todos los usuarios suscritos. Tienes 10 minutos para archivarlo si te arrepientes.";
+const TEXTO_AVISO_REENVIO =
+  "Este curso ya fue anunciado antes. Al publicarlo se volverá a enviar el correo a todos los suscritos, incluidos los que ya lo recibieron.";
+const TEXTO_AVISO_DESCONOCIDO =
+  "No pudimos verificar si este curso ya fue anunciado. Al publicarlo se enviará un aviso por correo.";
+
+/*
+  No bloquea ni publica en silencio si la consulta falla: usa el texto
+  conservador y deja que decida el admin. `yaAnunciado` es cursoYaAnunciado
+  del servicio, inyectada para poder testear sin Supabase real.
+*/
+async function mensajeConfirmacionPublicar(cursoId, yaAnunciado) {
+  let resultado;
+  try {
+    resultado = await yaAnunciado(cursoId);
+  } catch {
+    resultado = { ok: false };
+  }
+  if (!resultado || !resultado.ok) return TEXTO_AVISO_DESCONOCIDO;
+  return resultado.data ? TEXTO_AVISO_REENVIO : TEXTO_AVISO_NUEVO;
+}
+
 function crearAdministradorCursos({
   lista,
   listar,
   eliminar,
   cambiarEstado,
   confirmar,
+  yaAnunciado,
   notificar,
   reportarFallo,
   iniciarTiempo,
@@ -148,10 +175,14 @@ function crearAdministradorCursos({
   }
 
   /*
-    Archivar/publicar es reversible y no borra nada, así que —a diferencia de
-    eliminar— no pasa por el diálogo de confirmación por tipeo: solo el candado
-    de mutación en vuelo y el toast de resultado. La tarjeta no desaparece,
-    así que el foco vuelve al mismo botón tras refrescar.
+    Archivar es reversible y no manda nada, así que —a diferencia de eliminar—
+    no pasa por ningún diálogo: solo el candado de mutación en vuelo y el
+    toast de resultado. Publicar sí abre el diálogo simple de confirm-dialog.js
+    (sin tipeo) porque, desde la 0018, publicar siempre reencola el aviso por
+    correo aunque el curso ya haya sido anunciado antes; el candado se toma
+    recién después de que el admin confirme, para que cancelar no deje la
+    lista trabada. La tarjeta no desaparece, así que el foco vuelve al mismo
+    botón tras refrescar.
   */
   async function confirmarCambioEstado(curso, boton) {
     if (mutacionEnCurso || cargaEnCurso) return;
@@ -164,6 +195,17 @@ function crearAdministradorCursos({
       );
       return;
     }
+
+    if (estadoDestino === "publicado") {
+      const mensaje = await mensajeConfirmacionPublicar(curso.id, yaAnunciado);
+      const confirmado = await confirmar({
+        titulo: "Publicar curso",
+        mensaje,
+        etiquetaConfirmar: "Publicar",
+      });
+      if (!confirmado) return;
+    }
+
     if (!iniciarMutacion()) return;
 
     const inicio = iniciarTiempo();
@@ -329,6 +371,7 @@ async function iniciarAdministracionCursos() {
     eliminar: eliminarCurso,
     cambiarEstado: actualizarEstadoCurso,
     confirmar: confirmarConTexto,
+    yaAnunciado: cursoYaAnunciado,
     notificar: mostrarToast,
     reportarFallo: arranque.reportarFallo,
     iniciarTiempo: arranque.iniciarTiempo,

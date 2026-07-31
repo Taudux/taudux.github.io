@@ -7,7 +7,9 @@
   orquesta el envío. La portada vive en gestionar-curso.portada.js y el <select>
   de categorías en gestionar-curso.categorias.js.
 
-  Depende de auth, categorías, cursos, portadas, telemetría, admin-startup y toast.
+  Depende de auth, categorías, cursos, portadas, telemetría, admin-startup,
+  toast y confirm-dialog (publicar exige confirmación simple desde la 0018:
+  ver mensajePublicacionCurso).
 */
 
 (() => {
@@ -45,8 +47,37 @@
     };
   }
 
+  // Migración 0018: publicar siempre reencola el aviso por correo, incluso si
+  // el curso ya fue anunciado antes. Estos son los tres textos posibles del
+  // diálogo de confirmación simple que antecede a ese envío masivo. Un curso
+  // nuevo (sin id) nunca fue anunciado, así que no hace falta consultar el RPC.
+  const TEXTO_AVISO_NUEVO =
+    "Se enviará un aviso por correo a todos los usuarios suscritos. Tienes 10 minutos para archivarlo si te arrepientes.";
+  const TEXTO_AVISO_REENVIO =
+    "Este curso ya fue anunciado antes. Al publicarlo se volverá a enviar el correo a todos los suscritos, incluidos los que ya lo recibieron.";
+  const TEXTO_AVISO_DESCONOCIDO =
+    "No pudimos verificar si este curso ya fue anunciado. Al publicarlo se enviará un aviso por correo.";
+
+  /*
+    No bloquea ni publica en silencio si la consulta falla: usa el texto
+    conservador y deja que decida el admin. `consultarAnuncio` es
+    cursoYaAnunciado del servicio, inyectada para poder testear sin Supabase real.
+  */
+  async function mensajePublicacionCurso(cursoId, consultarAnuncio) {
+    if (!cursoId) return TEXTO_AVISO_NUEVO;
+
+    let resultado;
+    try {
+      resultado = await consultarAnuncio(cursoId);
+    } catch {
+      resultado = { ok: false };
+    }
+    if (!resultado || !resultado.ok) return TEXTO_AVISO_DESCONOCIDO;
+    return resultado.data ? TEXTO_AVISO_REENVIO : TEXTO_AVISO_NUEVO;
+  }
+
   if (typeof module === "object" && module.exports) {
-    module.exports = Object.freeze({ crearDatosEnvioCurso });
+    module.exports = Object.freeze({ crearDatosEnvioCurso, mensajePublicacionCurso });
     return;
   }
 
@@ -452,6 +483,16 @@
       if (estadoDestino === "publicado" && !inputProximamente.checked && datos.dias_semana.length === 0) {
         mostrarToast("Selecciona al menos un día de la semana.", "error");
         return;
+      }
+
+      if (estadoDestino === "publicado") {
+        const mensaje = await mensajePublicacionCurso(cursoId, cursoYaAnunciado);
+        const confirmado = await confirmarConTexto({
+          titulo: "Publicar curso",
+          mensaje,
+          etiquetaConfirmar: "Publicar",
+        });
+        if (!confirmado) return;
       }
 
       ocultarErrorOperacion();

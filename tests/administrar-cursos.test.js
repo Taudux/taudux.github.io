@@ -77,12 +77,15 @@ function createHarness({
   eliminar = async () => ({ ok: true }),
   cambiarEstado = async () => ({ ok: true }),
   confirmar = async () => true,
+  yaAnunciado = async () => ({ ok: true, data: false }),
 } = {}) {
   const lista = new Element("section");
   const cursoNuevo = new Element("a");
   cursoNuevo.id = "cursoNuevo";
   const registro = new Map([["cursoNuevo", cursoNuevo]]);
-  const calls = { toasts: [], fallos: [], eliminados: [], cambiosEstado: [], confirmaciones: [], listados: 0 };
+  const calls = {
+    toasts: [], fallos: [], eliminados: [], cambiosEstado: [], confirmaciones: [], consultasAnuncio: [], listados: 0,
+  };
 
   const context = {
     console,
@@ -106,6 +109,7 @@ function createHarness({
     eliminar: async (id) => { calls.eliminados.push(id); return eliminar(id); },
     cambiarEstado: async (id, estado) => { calls.cambiosEstado.push([id, estado]); return cambiarEstado(id, estado); },
     confirmar: async (opciones) => { calls.confirmaciones.push(opciones); return confirmar(opciones); },
+    yaAnunciado: async (id) => { calls.consultasAnuncio.push(id); return yaAnunciado(id); },
     notificar: (...args) => calls.toasts.push(args),
     reportarFallo: (...args) => calls.fallos.push(args),
     iniciarTiempo: () => 0,
@@ -391,4 +395,74 @@ test("archiving an incomplete course is never blocked by the weekday guard", asy
   await botonEstado(lista, cursoPublicadoIncompleto.id).click();
 
   assert.deepEqual(calls.cambiosEstado, [[cursoPublicadoIncompleto.id, "archivado"]]);
+});
+
+// --- Migración 0018: publicar siempre reencola el aviso, así que ahora pasa
+// por el diálogo de confirmación simple (sin tipeo) antes de mutar nada. ---
+
+test("publishing from the panel opens the confirmation dialog with the first-time wording", async () => {
+  const { administrador, lista, calls } = createHarness({
+    cursos: [BORRADOR],
+    yaAnunciado: async () => ({ ok: true, data: false }),
+  });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR.id).click();
+
+  assert.equal(calls.confirmaciones.length, 1);
+  assert.equal(calls.confirmaciones[0].titulo, "Publicar curso");
+  assert.match(calls.confirmaciones[0].mensaje, /Se enviará un aviso por correo/);
+  assert.equal(calls.confirmaciones[0].textoEsperado, undefined, "publicar no exige tipeo");
+  assert.deepEqual(calls.consultasAnuncio, [BORRADOR.id]);
+  assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]]);
+});
+
+test("publishing an already-announced course uses the resend wording, not the first-time one", async () => {
+  const { administrador, lista, calls } = createHarness({
+    cursos: [BORRADOR],
+    yaAnunciado: async () => ({ ok: true, data: true }),
+  });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR.id).click();
+
+  assert.equal(calls.confirmaciones.length, 1);
+  assert.match(calls.confirmaciones[0].mensaje, /ya fue anunciado antes/);
+  assert.match(calls.confirmaciones[0].mensaje, /todos los suscritos/);
+  assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]]);
+});
+
+test("a failed announcement check falls back to the conservative wording without blocking publish", async () => {
+  const { administrador, lista, calls } = createHarness({
+    cursos: [BORRADOR],
+    yaAnunciado: async () => { throw new Error("network down"); },
+  });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR.id).click();
+
+  assert.equal(calls.confirmaciones.length, 1);
+  assert.match(calls.confirmaciones[0].mensaje, /No pudimos verificar/);
+  assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]], "el fallo del RPC no bloquea la publicación");
+});
+
+test("cancelling the publish confirmation calls neither cambiarEstado nor leaves the list locked", async () => {
+  const { administrador, lista, calls } = createHarness({
+    cursos: [BORRADOR],
+    confirmar: async () => false,
+  });
+  await administrador.cargarCursos();
+  await botonEstado(lista, BORRADOR.id).click();
+
+  assert.equal(calls.cambiosEstado.length, 0, "cancelar no debe cambiar el estado del curso");
+  assert.equal(calls.toasts.length, 0);
+  assert.equal(lista.attributes["aria-busy"], "false", "cancelar no debe dejar la lista trabada");
+  assert.equal(botonEstado(lista, BORRADOR.id).disabled, false);
+});
+
+test("archiving still opens no dialog and never queries the announcement state", async () => {
+  const { administrador, lista, calls } = createHarness({ cursos: [PRIMERO] });
+  await administrador.cargarCursos();
+  await botonEstado(lista, PRIMERO.id).click();
+
+  assert.equal(calls.confirmaciones.length, 0);
+  assert.equal(calls.consultasAnuncio.length, 0);
+  assert.deepEqual(calls.cambiosEstado, [[PRIMERO.id, "archivado"]]);
 });

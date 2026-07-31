@@ -215,6 +215,20 @@ async function reenviarConfirmacion(email) {
   return { ok: true };
 }
 
+// Los enlaces de correo llegan con token_hash: verifyOtp no depende del
+// code_verifier, así que el correo se puede abrir en cualquier navegador o
+// dispositivo distinto del que originó el pedido.
+async function verificarEnlaceCorreo(tokenHash, tipo) {
+  const { data, error } = await supabaseClient.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: tipo,
+  });
+  if (error) {
+    return { ok: false, codigo: error.code, mensaje: traducirErrorAuth(error) };
+  }
+  return { ok: true, data };
+}
+
 async function cambiarContrasena(nuevaPassword) {
   const { error } = await supabaseClient.auth.updateUser({ password: nuevaPassword });
   if (error) {

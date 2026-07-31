@@ -19,9 +19,17 @@ async function esperarSesionRecuperacion() {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   const query = new URLSearchParams(window.location.search);
   const esFragmentoRecuperacion = hash.get("type") === "recovery";
+  const tokenHash = query.get("token_hash");
   const esCodigoRecuperacion = query.has("code");
-  const pareceRecuperacion = esFragmentoRecuperacion || esCodigoRecuperacion;
+  const pareceRecuperacion = esFragmentoRecuperacion || esCodigoRecuperacion || Boolean(tokenHash);
   if (!pareceRecuperacion) return null;
+
+  // Enlace nuevo (token_hash): verifyOtp no depende del code_verifier, así
+  // que no hace falta esperar el evento PASSWORD_RECOVERY ni el timeout de 8 s.
+  if (tokenHash) {
+    const resultado = await verificarEnlaceCorreo(tokenHash, "recovery");
+    return resultado.ok ? resultado.data.session : null;
+  }
 
   let resolverSesion;
   const sesionRecuperada = new Promise((resolve) => {

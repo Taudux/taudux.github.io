@@ -42,8 +42,9 @@ async function procesarConfirmacion() {
   const query = new URLSearchParams(window.location.search);
   const errorEnlace = parametrosErrorAuth();
   const esFragmento = hash.has("access_token") || hash.get("type") === "signup";
+  const tokenHash = query.get("token_hash");
   const esCodigo = query.has("code");
-  const esCallback = esFragmento || esCodigo;
+  const esCallback = esFragmento || esCodigo || Boolean(tokenHash);
 
   if (errorEnlace) {
     mostrarContenidoConfirmacion();
@@ -57,7 +58,14 @@ async function procesarConfirmacion() {
     return;
   }
 
-  const session = await esperarSesionConfirmacion(esFragmento, esCodigo);
+  // Enlace nuevo (token_hash): verifyOtp no depende del code_verifier, así
+  // que no hace falta esperar onAuthStateChange ni el timeout de 8 s.
+  const session = tokenHash
+    ? await (async () => {
+        const resultado = await verificarEnlaceCorreo(tokenHash, query.get("type") || "signup");
+        return resultado.ok ? resultado.data.session : null;
+      })()
+    : await esperarSesionConfirmacion(esFragmento, esCodigo);
   if (!session) {
     mostrarContenidoConfirmacion();
     mostrarEstadoAuth("No pudimos validar el enlace. Solicita una confirmación nueva.", "error");

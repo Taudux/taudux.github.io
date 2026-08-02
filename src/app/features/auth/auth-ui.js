@@ -28,6 +28,50 @@ function configurarRequisitosContrasena(input, lista) {
   input.addEventListener("input", () => evaluarRequisitosContrasena(input, lista));
 }
 
+function estadoCoincidenciaContrasenas(original, copia) {
+  if (!copia) return "neutral";
+  if (original !== copia) return "mismatch";
+  if (!contrasenaValida(original)) return "debil";
+  return "ok";
+}
+
+function evaluarCoincidenciaContrasenas(input, confirmacion, aviso) {
+  const estado = estadoCoincidenciaContrasenas(input.value, confirmacion.value);
+  const marcaMatch = (campo, valor) => {
+    if (valor) campo.setAttribute("data-match", valor);
+    else campo.removeAttribute("data-match");
+  };
+
+  if (estado === "mismatch") {
+    marcaMatch(input, "mismatch");
+    marcaMatch(confirmacion, "mismatch");
+  } else if (estado === "ok") {
+    marcaMatch(input, "ok");
+    marcaMatch(confirmacion, "ok");
+  } else {
+    marcaMatch(input, null);
+    marcaMatch(confirmacion, null);
+  }
+
+  if (!aviso) return;
+  const mensajes = {
+    neutral: "",
+    debil: "Coinciden, pero falta cumplir los requisitos.",
+    mismatch: "Las contraseñas no coinciden.",
+    ok: "Las contraseñas coinciden.",
+  };
+  aviso.textContent = mensajes[estado];
+  aviso.classList.toggle("password-match--error", estado === "mismatch");
+  aviso.classList.toggle("password-match--ok", estado === "ok");
+}
+
+function configurarCoincidenciaContrasenas(input, confirmacion, aviso) {
+  if (!input || !confirmacion) return;
+  const evaluar = () => evaluarCoincidenciaContrasenas(input, confirmacion, aviso);
+  input.addEventListener("input", evaluar);
+  confirmacion.addEventListener("input", evaluar);
+}
+
 function configurarTogglesContrasena() {
   document.querySelectorAll(".password-field__toggle").forEach((boton) => {
     const input = document.getElementById(boton.dataset.target);
@@ -207,11 +251,19 @@ async function redirigirSiSesionActiva() {
   return true;
 }
 
-configurarTogglesContrasena();
-agregarDestinoAEnlaces();
+if (typeof document !== "undefined") {
+  configurarTogglesContrasena();
+  agregarDestinoAEnlaces();
 
-document.querySelectorAll(".auth__form input, .auth__form select").forEach((campo) => {
-  campo.addEventListener("input", () => {
-    if (campo.dataset.authErrorAssociated) limpiarErroresCamposAuth();
+  document.querySelectorAll(".auth__form input, .auth__form select").forEach((campo) => {
+    campo.addEventListener("input", () => {
+      if (campo.dataset.authErrorAssociated) limpiarErroresCamposAuth();
+    });
   });
-});
+}
+
+if (typeof module === "object" && module.exports) {
+  module.exports = {
+    estadoCoincidenciaContrasenas,
+  };
+}

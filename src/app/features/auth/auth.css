@@ -284,7 +284,7 @@
   }
 
   .password-requirements__item--valid {
-    color: #2ecc71;
+    color: var(--color-success);
   }
 
   .password-requirements__item--valid::before {
@@ -292,11 +292,26 @@
   }
 
   .password-requirements__item--invalid {
-    color: #ff5c5c;
+    color: var(--color-error);
   }
 
   .password-requirements__item--invalid::before {
     content: "✕ ";
+  }
+
+  .password-match {
+    font-size: .8rem;
+    color: #888;
+    transition: color .2s ease;
+    margin: -0.4rem 0 0;
+  }
+
+  .password-match--ok {
+    color: var(--color-success);
+  }
+
+  .password-match--error {
+    color: var(--color-error);
   }
 
   .auth__spinner {

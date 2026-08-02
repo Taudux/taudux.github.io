@@ -181,6 +181,11 @@
       document.getElementById("contrasenaNueva"),
       document.getElementById("contrasenaNuevaReqs"),
     );
+    configurarCoincidenciaContrasenas(
+      document.getElementById("contrasenaNueva"),
+      document.getElementById("contrasenaConfirmar"),
+      document.getElementById("contrasenaMatch"),
+    );
 
     form.addEventListener("submit", async (evento) => {
       evento.preventDefault();

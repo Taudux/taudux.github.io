@@ -25,6 +25,18 @@
   }
 
   /*
+    Feedback en vivo mientras se escribe (independiente del error de envío de
+    abajo, que debe seguir ganando si el formulario ya fue enviado con error).
+  */
+  .field[data-match="ok"] {
+    border-color: var(--color-success);
+  }
+
+  .field[data-match="mismatch"] {
+    border-color: var(--color-error);
+  }
+
+  /*
     Va después de :focus/:focus-visible a propósito: un campo inválido debe
     seguir marcado en rojo incluso mientras tiene foco.
   */

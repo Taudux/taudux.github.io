@@ -9,6 +9,7 @@ const passwordReqs = document.getElementById("passwordReqs");
 const requestNewLink = document.getElementById("requestNewLink");
 
 configurarRequisitosContrasena(resetPassword, passwordReqs);
+configurarCoincidenciaContrasenas(resetPassword, resetPasswordConfirm, document.getElementById("resetPasswordMatch"));
 
 function mostrarContenidoReset() {
   resetLoading.hidden = true;

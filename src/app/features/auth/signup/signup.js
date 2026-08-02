@@ -10,6 +10,7 @@ const signupPasswordConfirm = document.getElementById("signupPasswordConfirm");
 const passwordReqs = document.getElementById("passwordReqs");
 
 configurarRequisitosContrasena(signupPassword, passwordReqs);
+configurarCoincidenciaContrasenas(signupPassword, signupPasswordConfirm, document.getElementById("signupPasswordMatch"));
 redirigirSiSesionActiva();
 
 signupPais.addEventListener("change", () => {

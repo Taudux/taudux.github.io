@@ -314,7 +314,6 @@ html {
 .about__content {
   position: relative;
   z-index: var(--z-content);
-  max-width: 900px;
 }
 
 .about__title {
@@ -337,11 +336,6 @@ html {
 
 .services {
   padding-inline: 1.25rem;
-}
-
-.services__container {
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .services__title {
@@ -513,8 +507,6 @@ html {
   box-shadow: 0 0 40px rgba(0, 255, 255, 0.05);
   padding: 60px;
   backdrop-filter: blur(8px);
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   gap: 60px;
   justify-content: space-between;
@@ -581,8 +573,6 @@ html {
 }
 
 .footer__container {
-  max-width: 1000px;
-  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -645,8 +635,7 @@ html {
 }
 
 .footer__bottom {
-  max-width: 1000px;
-  margin: 2rem auto 0;
+  margin-block-start: 2rem;
   padding-top: 1.5rem;
   border-top: var(--border-subtle);
   text-align: center;

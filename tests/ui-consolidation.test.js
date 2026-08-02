@@ -371,3 +371,104 @@ test("catalog and crop controls retain focus and reduced-motion alternatives", (
   assert.match(adminCss, /courses__cropper-canvas:focus-visible/);
   assert.match(adminCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
+
+test("the site width is one knob (--ancho-sitio) with a shared container utility", () => {
+  const styles = read("src/styles.css");
+  assert.match(styles, /--ancho-sitio:\s*1200px/);
+  assert.match(styles, /\.u-contenedor\s*\{[^}]*max-inline-size:\s*var\(--ancho-sitio\)/);
+});
+
+test("--ancho-medio and --ancho-contenido derive from --ancho-sitio via calc(), not a resolved pixel value", () => {
+  /*
+    Si alguien "simplifica" el calc() a un número fijo, el sitio se ve
+    idéntico hoy y la perilla deja de existir en silencio. Este test protege
+    la derivación, no el valor resultante.
+  */
+  const styles = read("src/styles.css");
+  assert.match(styles, /--ancho-medio:\s*calc\(\s*var\(--ancho-sitio\)/);
+  assert.match(styles, /--ancho-contenido:\s*calc\(\s*var\(--ancho-sitio\)/);
+});
+
+test("--ancho-lectura stays independent of --ancho-sitio on purpose", () => {
+  /*
+    El límite de lectura (45-75 caracteres por línea) es función de la
+    tipografía, no del ancho del sitio. Colgarlo de la misma perilla
+    degradaría la prosa si el sitio creciera.
+  */
+  const styles = read("src/styles.css");
+  const declaracion = styles.match(/--ancho-lectura:\s*([^;]+);/);
+  assert.ok(declaracion, "--ancho-lectura debe estar declarada");
+  assert.doesNotMatch(declaracion[1], /var\(--ancho-sitio\)/);
+});
+
+test("no page container declares a raw pixel width anymore — the utility owns it", () => {
+  const cssSource = fs.readdirSync(path.join(ROOT, "src"), { recursive: true })
+    .filter((file) => /\.css$/.test(file))
+    .map((file) => read(path.join("src", file)))
+    .join("\n");
+
+  /*
+    Cualquier selector cuyo nombre termine en __container, __panel o
+    __content (los tres sufijos de contenedor de página del proyecto) no
+    debe volver a declarar max-width/max-inline-size en píxeles crudos: ese
+    ancho vive en .u-contenedor y sus modificadores.
+  */
+  assert.doesNotMatch(
+    cssSource,
+    /\.[\w-]*(?:__container|__panel|__content)[\w-]*\s*\{[^}]*(?:max-width|max-inline-size)\s*:\s*\d+px/,
+  );
+});
+
+test("every page container carries its u-contenedor* class in the markup", () => {
+  const esperados = [
+    { file: "src/index.html", needle: 'class="about__content panel panel--spacious u-contenedor u-contenedor--contenido"' },
+    { file: "src/index.html", needle: 'class="services__container u-contenedor"' },
+    { file: "src/index.html", needle: 'class="contact__panel panel u-contenedor"' },
+    { file: "src/index.html", needle: 'class="footer__container u-contenedor u-contenedor--medio"' },
+    { file: "src/index.html", needle: 'class="footer__bottom u-contenedor u-contenedor--medio"' },
+    { file: "src/app/features/portal/index.html", needle: 'class="portal__container u-contenedor u-contenedor--medio"' },
+    { file: "src/app/features/courses/cursos.html", needle: 'class="courses__container u-contenedor u-contenedor--medio"' },
+    { file: "src/app/features/courses/administrar-cursos.html", needle: 'class="courses__container u-contenedor u-contenedor--contenido"' },
+    { file: "src/app/features/courses/editar-curso.html", needle: 'class="courses__container u-contenedor u-contenedor--contenido"' },
+    { file: "src/app/features/courses/gestionar-categorias.html", needle: 'class="courses__container u-contenedor u-contenedor--contenido"' },
+    { file: "src/app/features/legal/privacidad.html", needle: 'class="legal__container panel panel--spacious u-contenedor u-contenedor--lectura"' },
+    { file: "src/app/features/courses/detalle-curso.html", needle: 'class="curso-detalle__container u-contenedor u-contenedor--lectura"' },
+    { file: "src/index.html", needle: 'class="technology__carousels u-contenedor"' },
+  ];
+
+  for (const { file, needle } of esperados) {
+    assert.ok(read(file).includes(needle), `${file} debe tener ${needle}`);
+  }
+
+  /*
+    Guarda contra la trampa que causó esto: un modificador --medio/--contenido/
+    --lectura SIN la clase base .u-contenedor al lado no centra nada, porque
+    solo la base declara margin-inline: auto. Es el mismo patrón que
+    .panel/.panel--spacious: el modificador nunca va solo.
+  */
+  const htmlSource = fs.readdirSync(path.join(ROOT, "src"), { recursive: true })
+    .filter((file) => /\.html$/.test(file))
+    .map((file) => read(path.join("src", file)))
+    .join("\n");
+  const clasesSinBase = htmlSource.match(/class="[^"]*\bu-contenedor--(?:medio|contenido|lectura)\b[^"]*"/g) || [];
+  for (const claseAttr of clasesSinBase) {
+    assert.match(claseAttr, /\bu-contenedor\b(?!-)/, `falta la clase base junto al modificador: ${claseAttr}`);
+  }
+});
+
+test("the navbar aligns with the content, but scrolling never reimposes a fixed side padding", () => {
+  const css = read("src/app/shared/navbar/navbar.css");
+
+  assert.match(css, /\.navbar\s*\{[^}]*padding-inline:\s*max\(2rem,\s*calc\(\(100%\s*-\s*var\(--ancho-sitio\)\)\s*\/\s*2\)\)/);
+
+  /*
+    El shorthand `padding:` en .navbar--scrolled reimpondría un
+    padding-inline fijo y rompería la alineación justo al hacer scroll, que
+    es cuando el navbar tiene fondo y más se nota. Solo padding-block acá.
+  */
+  const scrolledRule = css.match(/\.navbar--scrolled\s*\{([^}]*)\}/);
+  assert.ok(scrolledRule, ".navbar--scrolled debe existir");
+  const sinComentarios = scrolledRule[1].replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.doesNotMatch(sinComentarios, /\bpadding:\s*/);
+  assert.match(sinComentarios, /padding-block:\s*0\.5rem/);
+});

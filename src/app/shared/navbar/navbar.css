@@ -6,7 +6,15 @@
     top: 0;
     left: 0;
     width: 100%;
-    padding: 1rem 2rem;
+    padding-block: 1rem;
+    /*
+      El navbar sigue siendo de borde a borde (su fondo con blur en ::before
+      lo necesita, ver abajo), pero su contenido se alinea con .u-contenedor.
+      En pantallas angostas gana el 2rem; en anchas, la mitad del sobrante.
+      100% y no 100vw a propósito: 100vw incluye el ancho de la scrollbar,
+      así que introduciría el mismo desajuste que esto viene a corregir.
+    */
+    padding-inline: max(2rem, calc((100% - var(--ancho-sitio)) / 2));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -47,7 +55,13 @@
       var(--color-text) 5%,
       transparent
     );
-    padding: 0.5rem 2rem;
+    /*
+      padding-block solamente, NUNCA el shorthand `padding:`. El shorthand
+      reimpondría un padding-inline fijo y rompería la alineación con el
+      contenido justo al hacer scroll, que es cuando el navbar tiene fondo
+      y la desalineación más se nota.
+    */
+    padding-block: 0.5rem;
   }
 
   .navbar--scrolled::before {

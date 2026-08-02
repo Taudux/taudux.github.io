@@ -53,6 +53,23 @@
     */
     --navbar-height: 6.5rem;
 
+    /*
+      La perilla del sitio. Cambiar SOLO este valor reajusta todo el layout.
+      Los escalones son proporcionales porque son el mismo espacio visual
+      visto a distintas densidades de contenido.
+    */
+    --ancho-sitio: 1200px;                              /* grillas y secciones anchas */
+    --ancho-medio: calc(var(--ancho-sitio) * 0.9);      /* 1080: portal, catálogo, pie */
+    --ancho-contenido: calc(var(--ancho-sitio) * 0.75); /* 900: gestión, bloques en panel */
+
+    /*
+      NO se deriva de --ancho-sitio a propósito. El límite de lectura es función
+      de la tipografía (45-75 caracteres por línea), no del ancho de la página:
+      si el sitio creciera y la prosa escalara con él, se degradaría justo lo
+      que este límite existe para proteger.
+    */
+    --ancho-lectura: 760px;                             /* prosa: legal, detalle de curso */
+
     --transition-fast: 0.2s ease;
     --transition-base: 0.3s ease;
 
@@ -139,6 +156,28 @@
   .u-disabled {
     cursor: not-allowed;
     opacity: 0.55;
+  }
+
+  /*
+    Ancho de contenedor de página. Sin padding-inline: eso lo pone el padre
+    (cada feature ya lo declara según su caso). El default es --ancho-sitio;
+    los modificadores topan más angosto.
+  */
+  .u-contenedor {
+    max-inline-size: var(--ancho-sitio);
+    margin-inline: auto;
+  }
+
+  .u-contenedor--medio {
+    max-inline-size: var(--ancho-medio);
+  }
+
+  .u-contenedor--contenido {
+    max-inline-size: var(--ancho-contenido);
+  }
+
+  .u-contenedor--lectura {
+    max-inline-size: var(--ancho-lectura);
   }
 
   /* Visible para lectores de pantalla, invisible en pantalla. */

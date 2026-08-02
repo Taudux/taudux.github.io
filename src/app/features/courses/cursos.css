@@ -7,11 +7,6 @@
   background-color: var(--color-background);
 }
 
-.courses__container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
 .courses__header {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -47,10 +42,6 @@
   background:
     radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 34rem),
     var(--color-background);
-}
-
-.courses--catalog .courses__container {
-  max-width: 1040px;
 }
 
 .courses--catalog .courses__header {

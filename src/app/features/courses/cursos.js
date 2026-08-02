@@ -185,7 +185,7 @@ function crearTarjetaCurso(curso) {
     "aria-label",
     `Ver detalles del curso: ${curso.titulo || "curso sin título"}`
   );
-  activador.addEventListener("click", verMasInformacion);
+  activador.addEventListener("click", () => irADetalleDeCurso(curso.id));
   tarjeta.appendChild(activador);
 
   return tarjeta;
@@ -241,8 +241,8 @@ function crearFallbackCurso(media, curso) {
   media.append(mediaLabel, mediaTopic);
 }
 
-function verMasInformacion() {
-  window.location.href = "/#contacto";
+function irADetalleDeCurso(cursoId) {
+  window.location.href = `/app/features/courses/detalle-curso.html?id=${encodeURIComponent(cursoId)}`;
 }
 
 window.tauduxCursosCatalog = {

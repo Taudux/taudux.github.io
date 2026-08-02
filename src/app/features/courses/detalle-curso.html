@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Detalle de un curso de Taudux Academy: modalidad, fechas, cupo y contenido.">
+  <link rel="icon" type="image/png" href="/assets/images/1.png">
+  <title>Detalle del curso | Taudux</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/app/shared/floating-menu/floating-menu.css">
+  <link rel="stylesheet" href="/app/shared/navbar/navbar.css">
+  <link rel="stylesheet" href="/app/shared/button/button.css">
+  <link rel="stylesheet" href="/app/shared/panel/panel.css">
+  <link rel="stylesheet" href="/app/features/courses/curso-detalle.css">
+</head>
+
+<body class="curso-detalle">
+  <nav class="navbar navbar--scrolled" aria-label="Navegación principal">
+    <a href="/" class="navbar__brand">
+      <img src="/assets/images/logo-horizontal.png" alt="Taudux logo" class="navbar__logo">
+    </a>
+    <div class="navbar__links navbar__links--visible navbar__links--simple">
+      <a href="#" id="accessBtn" class="navbar__link button button--access">Acceder</a>
+    </div>
+  </nav>
+
+  <main class="curso-detalle__main">
+    <div class="curso-detalle__container">
+      <section class="curso-detalle__data-status" id="cursoEstado" role="alert" aria-live="assertive" tabindex="-1" hidden>
+        <p class="curso-detalle__data-status-message" id="cursoEstadoMensaje"></p>
+        <a class="button button--outline" href="/app/features/courses/cursos.html">Volver al catálogo</a>
+      </section>
+
+      <div id="cursoContenido" hidden>
+        <header class="curso-detalle__header">
+          <p class="curso-detalle__eyebrow">Taudux Academy / Curso</p>
+          <h1 class="curso-detalle__title" id="cursoTitulo"></h1>
+        </header>
+
+        <section class="curso-detalle__section panel panel--spacious" id="cursoObjetivosSeccion" aria-labelledby="objetivos" hidden>
+          <h2 class="curso-detalle__section-title" id="objetivos">Objetivos del curso</h2>
+          <div id="cursoObjetivosTexto"></div>
+        </section>
+
+        <section class="curso-detalle__section panel panel--spacious" aria-labelledby="info-general">
+          <h2 class="curso-detalle__section-title" id="info-general">Información general</h2>
+          <dl class="curso-detalle__info-table" id="cursoInfoTabla"></dl>
+        </section>
+
+        <section class="curso-detalle__section" id="cursoTemarioSeccion" aria-labelledby="contenido" hidden>
+          <h2 class="curso-detalle__section-title" id="contenido">Contenido del curso</h2>
+          <div id="cursoTemarioLista"></div>
+        </section>
+
+        <section class="curso-detalle__cta panel panel--spacious" aria-labelledby="inscripcion">
+          <h2 class="curso-detalle__section-title" id="inscripcion">¿Listo para inscribirte?</h2>
+          <p>Cupo limitado. Escríbenos para reservar tu lugar.</p>
+          <a class="button button--glow button--highlight" href="/#contacto">Contáctanos</a>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app/core/supabase/supabase-client.js"></script>
+  <script src="/app/core/auth/auth.service.js"></script>
+  <script src="/app/core/telemetry/operaciones.js"></script>
+  <script src="/app/core/cursos/portadas.constantes.js"></script>
+  <script src="/app/core/cursos/cursos.service.js"></script>
+  <script src="/app/shared/navbar/navbar.js"></script>
+  <script src="/app/features/courses/curso-presentacion.js"></script>
+  <script src="/app/features/courses/curso-detalle.js"></script>
+</body>
+
+</html>

@@ -48,14 +48,14 @@ function find(root, predicate) {
   return null;
 }
 
-function createCatalogHarness({ admin = false, authenticated = true } = {}) {
+function createCatalogHarness({ admin = false, authenticated = true, course: cursoOverride } = {}) {
   const elements = Object.fromEntries([
     "cursosLista", "adminControls", "cursosEstado", "cursosEstadoMensaje", "cursosReintentar",
   ].map((id) => [id, new Element("div")]));
   elements.adminControls.hidden = true;
   elements.cursosEstado.hidden = true;
   const calls = { sessions: 0, toasts: [], loginUrls: 0 };
-  const course = { id: "course/id", titulo: "Node práctico", modalidad: "remoto", costo: 0 };
+  const course = cursoOverride || { id: "course/id", titulo: "Node práctico", modalidad: "remoto", costo: 0 };
   const window = {
     location: { href: "https://taudux.test/cursos.html", pathname: "/cursos.html", search: "", hash: "" },
     history: { replaceState() {} },
@@ -108,7 +108,7 @@ test("public course details behave identically without an authentication gate", 
     createCatalogHarness({ authenticated: true }),
   ];
 
-  for (const { calls, elements, window } of contexts) {
+  for (const { calls, course, elements, window } of contexts) {
     await window.tauduxCursosCatalog.ready;
     const sessionsBeforeActivation = calls.sessions;
     const hitArea = find(elements.cursosLista, (element) => element.className === "courses__card-hit-area");
@@ -117,9 +117,27 @@ test("public course details behave identically without an authentication gate", 
 
     assert.equal(calls.sessions, sessionsBeforeActivation);
     assert.equal(calls.loginUrls, 0);
-    assert.equal(window.location.href, "/#contacto");
+    assert.equal(window.location.href, `/app/features/courses/detalle-curso.html?id=${encodeURIComponent(course.id)}`);
     assert.deepEqual(calls.toasts, []);
   }
+});
+
+test("every course card links to its own detail page, with an honest aria-label", async () => {
+  const curso = {
+    id: "da175f1c-cae5-45f9-889c-f09a17aa10ed",
+    titulo: "Análisis de Datos con Python",
+    modalidad: "en_linea",
+    costo: 300,
+  };
+  const { elements, window } = createCatalogHarness({ course: curso });
+  await window.tauduxCursosCatalog.ready;
+
+  const hitArea = find(elements.cursosLista, (element) => element.className === "courses__card-hit-area");
+  assert.equal(hitArea.attributes["aria-label"], "Ver detalles del curso: Análisis de Datos con Python");
+
+  await hitArea.click();
+
+  assert.equal(window.location.href, `/app/features/courses/detalle-curso.html?id=${curso.id}`);
 });
 
 test("operation failures get one visible generic report unless an alert is already visible", async () => {

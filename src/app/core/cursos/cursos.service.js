@@ -17,7 +17,7 @@ function esUrlSegura(url) {
 }
 
 const CAMPOS_CURSO_BASE =
-  "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, estado, creado_en";
+  "id, titulo, descripcion, imagen_url, imagen_storage_path, categoria, modalidad, fecha_inicio, fecha_fin, dias_semana, hora_inicio, duracion_horas, cupo_maximo, costo, instructor, proximamente, estado, creado_en, temario, dirigido_a, requisitos, herramientas, numero_sesiones";
 const CAMPOS_CURSO_NORMALIZADO = `${CAMPOS_CURSO_BASE}, categoria_id, categoria_rel:categorias!cursos_categoria_id_fkey(id, nombre, activo)`;
 let disponibilidadCategoriasEnCursos = null;
 
@@ -193,6 +193,9 @@ function valorCursoComparable(campo, valor) {
     return valor === null || valor === undefined ? null : Number(valor);
   }
   if (campo === "dias_semana") return JSON.stringify(valor || null);
+  // El temario es un arreglo anidado: comparado por identidad nunca coincidiría
+  // consigo mismo tras el viaje a Postgres, igual que dias_semana.
+  if (campo === "temario") return JSON.stringify(valor || null);
   if (campo === "hora_inicio") return canonicalizarHoraComparable(valor);
   return valor === undefined ? null : valor;
 }
@@ -213,6 +216,11 @@ const CAMPOS_RECONCILIABLES = Object.freeze([
   "instructor",
   "proximamente",
   "estado",
+  "temario",
+  "dirigido_a",
+  "requisitos",
+  "herramientas",
+  "numero_sesiones",
 ]);
 
 /*
@@ -395,6 +403,11 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     costo,
     instructor,
     proximamente,
+    temario,
+    dirigido_a,
+    requisitos,
+    herramientas,
+    numero_sesiones,
   } = campos;
   const esProximamente = Boolean(proximamente);
 
@@ -415,6 +428,13 @@ function normalizarCamposCurso(campos, usarCategoriaNormalizada = usarCategorias
     costo: esValorCapturado(costo) ? parseFloat(costo) : null,
     instructor: instructor || null,
     proximamente: esProximamente,
+    // Un temario vacío se guarda como null, no como [], igual que dias_semana:
+    // así "sin temario" tiene una sola representación en la base.
+    temario: Array.isArray(temario) && temario.length ? temario : null,
+    dirigido_a: dirigido_a || null,
+    requisitos: requisitos || null,
+    herramientas: herramientas || null,
+    numero_sesiones: numero_sesiones ? parseInt(numero_sesiones, 10) : null,
   };
 
   if (imagen_upload_token) normalizados.imagen_upload_token = imagen_upload_token;

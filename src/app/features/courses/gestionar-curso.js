@@ -27,6 +27,13 @@
     cupoMaximo,
     costo,
     instructor,
+    // El contenido de la 0020 es opcional de punta a punta: un llamador que no
+    // lo conoce (o un curso viejo) produce el mismo payload que antes.
+    dirigidoA = "",
+    requisitos = "",
+    herramientas = "",
+    numeroSesiones = "",
+    datosTemario = { temario: [] },
   }, cursoActual) {
     return {
       titulo: titulo.trim(),
@@ -42,6 +49,11 @@
       cupo_maximo: cupoMaximo,
       costo,
       instructor: instructor.trim(),
+      dirigido_a: dirigidoA.trim(),
+      requisitos: requisitos.trim(),
+      herramientas: herramientas.trim(),
+      numero_sesiones: numeroSesiones,
+      ...datosTemario,
       imagen_url: cursoActual?.imagen_url || "",
       imagen_storage_path: cursoActual?.imagen_storage_path || null,
     };
@@ -114,6 +126,12 @@
     const inputCupo = document.getElementById("cursoCupo");
     const inputCosto = document.getElementById("cursoCosto");
     const inputInstructor = document.getElementById("cursoInstructor");
+    const inputDirigidoA = document.getElementById("cursoDirigidoA");
+    const inputRequisitos = document.getElementById("cursoRequisitos");
+    const inputHerramientas = document.getElementById("cursoHerramientas");
+    const inputNumeroSesiones = document.getElementById("cursoNumeroSesiones");
+    const contenedorTemario = document.getElementById("cursoTemarioModulos");
+    const botonAgregarModulo = document.getElementById("cursoTemarioAgregar");
     const botonEnviar = document.getElementById("cursoEnviar");
     const botonCancelar = document.getElementById("cursoCancelar");
     const estadoCategorias = document.getElementById("categoriasEstado");
@@ -127,6 +145,21 @@
 
     const panelEstadoCategorias = crearPanelEstadoCategorias(estadoCategorias, mensajeEstadoCategorias);
     const selectCategorias = crearControlCategoriasCurso(inputCategoria);
+
+    /*
+      Agregar o eliminar módulos y temas son clicks, no eventos `input`, así que
+      la delegación de más abajo no los ve. El control avisa por acá para que el
+      borrador y la clave de idempotencia se enteren igual que con cualquier
+      otro cambio del formulario.
+    */
+    const controlTemario = crearControlTemarioCurso({
+      contenedor: contenedorTemario,
+      botonAgregar: botonAgregarModulo,
+      alCambiar: () => {
+        invalidarOperacionSiCambio();
+        borradorCurso.registrarCambio();
+      },
+    });
 
     let cursoId = null;
     let cursoEditando = null;
@@ -363,6 +396,11 @@
       inputCupo.value = curso.cupo_maximo || "";
       inputCosto.value = curso.costo ?? "";
       inputInstructor.value = curso.instructor || "";
+      inputDirigidoA.value = curso.dirigido_a || "";
+      inputRequisitos.value = curso.requisitos || "";
+      inputHerramientas.value = curso.herramientas || "";
+      inputNumeroSesiones.value = curso.numero_sesiones || "";
+      controlTemario.poblar(curso);
       portada.mostrarPortadaCargada();
     }
 
@@ -417,6 +455,11 @@
         cupoMaximo: inputCupo.value,
         costo: inputCosto.value,
         instructor: inputInstructor.value,
+        dirigidoA: inputDirigidoA.value,
+        requisitos: inputRequisitos.value,
+        herramientas: inputHerramientas.value,
+        numeroSesiones: inputNumeroSesiones.value,
+        datosTemario: controlTemario.datosParaEnvio(),
       }, cursoEditando);
     }
 

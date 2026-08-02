@@ -144,6 +144,32 @@
             <label class="courses__field-label" for="cursoInstructor">Instructor</label>
             <input class="field" id="cursoInstructor" type="text" placeholder="Impartido por" required>
           </div>
+          <div class="courses__form-row">
+            <div class="courses__field-group">
+              <label class="courses__field-label" for="cursoDirigidoA">Dirigido a (opcional)</label>
+              <input class="field" id="cursoDirigidoA" type="text" placeholder="A quién está dirigido el curso">
+            </div>
+            <div class="courses__field-group">
+              <label class="courses__field-label" for="cursoRequisitos">Requisitos previos (opcional)</label>
+              <input class="field" id="cursoRequisitos" type="text" placeholder="Qué necesita saber de antes">
+            </div>
+          </div>
+          <div class="courses__form-row">
+            <div class="courses__field-group">
+              <label class="courses__field-label" for="cursoHerramientas">Herramientas (opcional)</label>
+              <input class="field" id="cursoHerramientas" type="text" placeholder="Con qué se trabaja en el curso">
+            </div>
+            <div class="courses__field-group">
+              <label class="courses__field-label" for="cursoNumeroSesiones">Número de sesiones (opcional)</label>
+              <input class="field" id="cursoNumeroSesiones" type="number" min="1" placeholder="En cuántas sesiones se dicta">
+            </div>
+          </div>
+          <fieldset class="courses__temario">
+            <legend>Contenido del curso</legend>
+            <p class="courses__categories-help" id="cursoTemarioAyuda">Cada módulo se muestra en la página pública del curso. Un módulo sin título no se guarda.</p>
+            <div id="cursoTemarioModulos" aria-describedby="cursoTemarioAyuda"></div>
+            <button class="button button--outline" type="button" id="cursoTemarioAgregar">Agregar módulo</button>
+          </fieldset>
           <div class="courses__field-group" id="cursoPortadaControles" aria-busy="false">
             <label class="courses__field-label" for="cursoPortada">Portada local (opcional)</label>
             <input class="field" id="cursoPortada" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="cursoPortadaAyuda cursoPortadaEstado cursoPortadaError">
@@ -197,6 +223,7 @@
   <script src="/app/features/courses/gestionar-curso.portada.js"></script>
   <script src="/app/features/courses/gestionar-curso.categorias.js"></script>
   <script src="/app/features/courses/gestionar-curso.borrador.js"></script>
+  <script src="/app/features/courses/gestionar-curso.temario.js"></script>
   <script src="/app/features/courses/gestionar-curso.js"></script>
 </body>
 

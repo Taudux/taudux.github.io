@@ -293,19 +293,28 @@ test("a course only an admin can reach (RLS lets it through unpublished) disclos
   assert.equal(filas["Estado"], "Borrador (solo visible para administradores)");
 });
 
-test("the four Python modules render and reveal themselves without waiting on a real IntersectionObserver", async () => {
-  const curso = { id: CURSO_PYTHON_ID, titulo: "Análisis de Datos con Python", estado: "publicado" };
+test("the syllabus comes from the course row and reveals itself without a real IntersectionObserver", async () => {
+  const curso = {
+    id: CURSO_PYTHON_ID,
+    titulo: "Análisis de Datos con Python",
+    estado: "publicado",
+    temario: [
+      { titulo: "Estructuras de Pandas", subtitulo: "Fundamentos.", temas: ["Series", "DataFrame"] },
+      { titulo: "Estadística descriptiva", subtitulo: "Resumir con rigor.", temas: ["Media", "Mediana"] },
+    ],
+  };
   const { elements, ready } = createDetailHarness({ obtenerCursoPorId: async () => ({ ok: true, data: curso }) });
   await ready;
 
   assert.equal(elements.cursoTemarioSeccion.hidden, false);
-  assert.equal(elements.cursoTemarioLista.children.length, 4);
+  assert.equal(elements.cursoTemarioLista.children.length, 2);
+  assert.match(elements.cursoTemarioLista.children[0].textContent, /Estructuras de Pandas/);
   elements.cursoTemarioLista.children.forEach((modulo) => {
     assert.ok(modulo.classNames.has("is-visible"), "sin IntersectionObserver en el harness, el fallback debe revelar todo");
   });
 });
 
-test("a course with no matching TEMARIOS_EXTRA entry never shows a syllabus section, even with everything else filled in", async () => {
+test("a course with no temario loaded never shows a syllabus section, even with everything else filled in", async () => {
   const curso = {
     id: "44444444-4444-4444-8444-444444444444",
     titulo: "Curso sin temario cargado todavía",
@@ -322,4 +331,72 @@ test("a course with no matching TEMARIOS_EXTRA entry never shows a syllabus sect
 
   assert.equal(elements.cursoTemarioSeccion.hidden, true);
   assert.equal(elements.cursoTemarioLista.children.length, 0);
+});
+
+/*
+  La columna es jsonb y el CHECK de 0020 solo garantiza que sea un arreglo: la
+  forma interna puede ser cualquier cosa. Estos dos casos son los que hacían
+  explotar el render antes de blindarlo.
+*/
+test("a malformed temario degrades to no section instead of throwing", async () => {
+  for (const temario of ["no soy un arreglo", 42, [null], [{ subtitulo: "sin título" }], []]) {
+    const curso = {
+      id: "88888888-8888-4888-8888-888888888888",
+      titulo: "Curso con temario roto",
+      estado: "publicado",
+      temario,
+    };
+    const { elements, ready } = createDetailHarness({
+      search: `?id=${curso.id}`,
+      obtenerCursoPorId: async () => ({ ok: true, data: curso }),
+    });
+    await ready;
+
+    assert.equal(elements.cursoTemarioSeccion.hidden, true, `temario: ${JSON.stringify(temario)}`);
+    assert.equal(elements.cursoContenido.hidden, false, "el resto de la página sigue viéndose");
+  }
+});
+
+test("a module whose temas is missing or not an array still renders its title", async () => {
+  const curso = {
+    id: "99999999-9999-4999-8999-999999999999",
+    titulo: "Curso con módulo sin temas",
+    estado: "publicado",
+    temario: [{ titulo: "Módulo pelado" }, { titulo: "Módulo con basura", temas: "no soy arreglo" }],
+  };
+  const { elements, ready } = createDetailHarness({
+    search: `?id=${curso.id}`,
+    obtenerCursoPorId: async () => ({ ok: true, data: curso }),
+  });
+  await ready;
+
+  assert.equal(elements.cursoTemarioSeccion.hidden, false);
+  assert.equal(elements.cursoTemarioLista.children.length, 2);
+  assert.match(elements.cursoTemarioLista.children[0].textContent, /Módulo pelado/);
+});
+
+test("the four content fields from migration 0020 each render as their own row, and vanish when empty", async () => {
+  const curso = {
+    id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    titulo: "Curso con contexto completo",
+    estado: "publicado",
+    numero_sesiones: 4,
+    dirigido_a: "Principiantes",
+    requisitos: "Ninguno",
+    herramientas: "Python y Pandas",
+  };
+  const { elements, ready } = createDetailHarness({
+    search: `?id=${curso.id}`,
+    obtenerCursoPorId: async () => ({ ok: true, data: curso }),
+  });
+  await ready;
+
+  const filas = Object.fromEntries(
+    elements.cursoInfoTabla.children.map((fila) => [fila.children[0].textContent, fila.children[1].textContent])
+  );
+  assert.equal(filas["Sesiones"], "4 sesiones");
+  assert.equal(filas["Dirigido a"], "Principiantes");
+  assert.equal(filas["Requisitos previos"], "Ninguno");
+  assert.equal(filas["Herramientas"], "Python y Pandas");
+  assert.equal(filas["Cupo"], undefined, "sin cupo cargado, la fila no aparece vacía");
 });

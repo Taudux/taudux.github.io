@@ -4,79 +4,13 @@
   gate real (`obtenerCursoPorId` no filtra por estado); un curso no publicado
   llega como `data: null`, indistinguible de uno inexistente.
 
-  Las secciones sin columna propia en `cursos` (temario, dirigido a, requisitos,
-  herramientas) no se inventan ni se muestran vacías: si el curso no tiene
-  entrada en TEMARIOS_EXTRA, la sección completa queda oculta. Se borra esta
-  constante cuando ese contenido pase a vivir en la base.
+  Nada se inventa ni se muestra vacío: un curso sin temario cargado oculta esa
+  sección entera, y cada fila de información general desaparece si su campo no
+  tiene dato. Todo el contenido viene de la fila del curso (migración 0020).
 
   Depende de auth.service.js (navbar), telemetry/operaciones.js,
   portadas.constantes.js, cursos.service.js y curso-presentacion.js.
 */
-
-const TEMARIOS_EXTRA = {
-  "da175f1c-cae5-45f9-889c-f09a17aa10ed": {
-    modulos: [
-      {
-        titulo: "Estructuras de Pandas e importación de datos",
-        subtitulo: "Fundamentos de la manipulación de datos tabulares en Python.",
-        temas: [
-          "Objetos Series y DataFrame",
-          "Objetos Index (índices)",
-          "Reindexación y eliminación de entradas",
-          "Indexado, selección y filtrado",
-          "Aritmética y alineación de datos",
-          "Ordenamiento y ranking",
-          "Índices con valores duplicados",
-          "Importación de datos desde archivos",
-        ],
-      },
-      {
-        titulo: "Estadística descriptiva",
-        subtitulo: "Cómo resumir y comprender un conjunto de datos con rigor.",
-        temas: [
-          "Tipos de datos (nominal, ordinal, discreto, continuo)",
-          "Tendencia central: media, mediana y moda",
-          "Asimetría y coeficiente de asimetría de Pearson",
-          "Variabilidad: varianza, desviación estándar, rango e IQR",
-          "Coeficiente de variación",
-          "Cuartiles, percentiles y deciles",
-          "Tablas de frecuencia",
-          "Correlación y covarianza",
-        ],
-      },
-      {
-        titulo: "Preparación y limpieza de datos",
-        subtitulo: "De datos crudos y desordenados a datos listos para analizar.",
-        temas: [
-          "Detección y filtrado de datos faltantes",
-          "Imputación de valores (media, mediana y moda)",
-          "Eliminación de duplicados",
-          "Transformación con funciones y mapeo",
-          "Reemplazo de valores y renombrado de ejes",
-          "Discretización y binning",
-          "Detección y filtrado de outliers",
-          "Permutación y muestreo aleatorio",
-          "Creación de variables dummy",
-        ],
-      },
-      {
-        titulo: "Visualización con Matplotlib y Seaborn",
-        subtitulo: "Comunicar hallazgos con el gráfico correcto para cada tipo de dato.",
-        temas: [
-          "Qué graficar según el tipo de variable",
-          "Histogramas y curvas de densidad",
-          "Barras y conteo de categorías",
-          "Diagrama de caja y bigotes (boxplot)",
-          "Diagrama de violín",
-          "Diagrama de dispersión",
-          "Distribución acumulada (ECDF)",
-          "Mapa de calor de correlaciones",
-          "Caso integrador de práctica",
-        ],
-      },
-    ],
-  },
-};
 
 async function iniciarCursoDetalle() {
   document.documentElement.classList.remove("no-js");
@@ -170,6 +104,10 @@ function pintarInfoGeneral(curso) {
   }
 
   agregarFilaInfo(tabla, "Duración por sesión", curso.duracion_horas ? `${curso.duracion_horas} horas` : null);
+  agregarFilaInfo(tabla, "Sesiones", curso.numero_sesiones ? `${curso.numero_sesiones} sesiones` : null);
+  agregarFilaInfo(tabla, "Dirigido a", curso.dirigido_a);
+  agregarFilaInfo(tabla, "Requisitos previos", curso.requisitos);
+  agregarFilaInfo(tabla, "Herramientas", curso.herramientas);
   agregarFilaInfo(tabla, "Cupo", curso.cupo_maximo ? `${curso.cupo_maximo} lugares` : null);
   agregarFilaInfo(tabla, "Costo", formatearCosto(curso.costo));
   agregarFilaInfo(tabla, "Instructor", curso.instructor);
@@ -213,12 +151,17 @@ function agregarFilaInfo(tabla, etiqueta, valor) {
 }
 
 function pintarTemario(curso) {
-  const extra = TEMARIOS_EXTRA[curso.id];
-  if (!extra) return;
+  // La columna es jsonb sin validación de forma interna (CHECK
+  // cursos_temario_es_arreglo solo garantiza el contenedor), así que acá se
+  // descarta cualquier módulo sin título en vez de pintar una tarjeta vacía.
+  const modulos = Array.isArray(curso.temario)
+    ? curso.temario.filter((modulo) => modulo && modulo.titulo)
+    : [];
+  if (!modulos.length) return;
 
   const seccion = document.getElementById("cursoTemarioSeccion");
   const lista = document.getElementById("cursoTemarioLista");
-  extra.modulos.forEach((modulo, indice) => {
+  modulos.forEach((modulo, indice) => {
     lista.appendChild(crearModuloTemario(modulo, indice + 1));
   });
   seccion.hidden = false;
@@ -240,11 +183,12 @@ function crearModuloTemario(modulo, numero) {
 
   const subtitulo = document.createElement("p");
   subtitulo.className = "curso-detalle__modulo-subtitle";
-  subtitulo.textContent = modulo.subtitulo;
+  subtitulo.textContent = modulo.subtitulo || "";
 
   const temas = document.createElement("ul");
   temas.className = "curso-detalle__modulo-topics";
-  modulo.temas.forEach((tema) => {
+  const listaTemas = Array.isArray(modulo.temas) ? modulo.temas : [];
+  listaTemas.filter(Boolean).forEach((tema) => {
     const item = document.createElement("li");
     item.textContent = tema;
     temas.appendChild(item);

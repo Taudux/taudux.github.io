@@ -16,7 +16,10 @@
   el módulo se prueba sin DOM. El cableado vive en gestionar-curso.js.
 */
 
-const VERSION_BORRADOR = 1;
+// v2: el payload sumó el temario y los campos de contenido (migración 0020).
+// Un borrador v1 guardado antes de ese cambio se descarta en vez de restaurarse
+// sobre un formulario que ya no le corresponde.
+const VERSION_BORRADOR = 2;
 const PREFIJO_BORRADOR = "taudux:borrador:curso:";
 const CLAVE_BORRADOR_NUEVO = "new";
 const VIGENCIA_BORRADOR_MS = 24 * 60 * 60 * 1000;

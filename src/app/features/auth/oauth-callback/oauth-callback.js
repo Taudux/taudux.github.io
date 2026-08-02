@@ -63,11 +63,12 @@ async function procesarCallbackOauth() {
     return;
   }
 
-  const destino = destinoDespuesDeAuth();
+  // A diferencia del login por correo, Google siempre aterriza en home: no
+  // respeta ningún `next` guardado (ver oauth-google.test.js).
   limpiarDestinoAuth();
   // Saca el ?code= del historial antes de navegar al destino final.
   history.replaceState(null, "", window.location.pathname);
-  window.location.replace(destino);
+  window.location.replace("/");
 }
 
 procesarCallbackOauth();

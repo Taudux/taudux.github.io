@@ -15,6 +15,10 @@ const oauthCallbackHtml = fs.readFileSync(
   path.join(ROOT, "src/app/features/auth/oauth-callback/index.html"),
   "utf8"
 );
+const oauthCallbackJs = fs.readFileSync(
+  path.join(ROOT, "src/app/features/auth/oauth-callback/oauth-callback.js"),
+  "utf8"
+);
 
 /* Bloque A — el servicio, corrido vía vm con un supabaseClient falso. */
 
@@ -119,4 +123,19 @@ test("login/index.html ya no manda ?code= a reset-password a mano", () => {
 
 test("login/index.html carga auth-callback-guard.js en el <head>", () => {
   assert.match(loginHtml, /<head>[\s\S]*auth-callback-guard\.js[\s\S]*<\/head>/);
+});
+
+/* Bloque D — con Google el destino siempre es home, sin importar ningún
+   `next` guardado (a diferencia del login por correo, que sí lo respeta). */
+
+test("oauth-callback.js ya no consulta el destino guardado (next)", () => {
+  assert.doesNotMatch(oauthCallbackJs, /destinoDespuesDeAuth\(/);
+});
+
+test("oauth-callback.js aterriza siempre en home tras un login exitoso", () => {
+  assert.match(oauthCallbackJs, /window\.location\.replace\("\/"\)/);
+});
+
+test("oauth-callback.js sigue limpiando el destino guardado", () => {
+  assert.match(oauthCallbackJs, /limpiarDestinoAuth\(/);
 });

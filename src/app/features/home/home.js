@@ -200,9 +200,38 @@ function configurarCarruseles() {
   });
 }
 
+// Precarga nombre, correo y teléfono si hay sesión iniciada. "Empresa" se deja
+// afuera a propósito: no existe esa columna en `perfiles`, no hay de dónde
+// traerla. Solo llena campos vacíos, por si el usuario ya empezó a escribir
+// antes de que resuelva la sesión.
+async function precargarFormularioContacto(formulario) {
+  const session = await obtenerSesion();
+  if (!session) return;
+
+  const perfil = await obtenerPerfil(session);
+  const nombreCompleto = [perfil?.nombre, perfil?.apellidos].filter(Boolean).join(" ");
+
+  const campoNombre = formulario.elements.nombre;
+  if (campoNombre && !campoNombre.value && nombreCompleto) {
+    campoNombre.value = nombreCompleto;
+  }
+
+  const campoEmail = formulario.elements.email;
+  if (campoEmail && !campoEmail.value && session.user.email) {
+    campoEmail.value = session.user.email;
+  }
+
+  const campoTelefono = formulario.elements.telefono;
+  if (campoTelefono && !campoTelefono.value && perfil?.telefono) {
+    campoTelefono.value = perfil.telefono;
+  }
+}
+
 function configurarFormularioContacto() {
   const formulario = document.getElementById("contactForm");
   if (!formulario) return;
+
+  precargarFormularioContacto(formulario);
 
   formulario.addEventListener("submit", async (evento) => {
     evento.preventDefault();

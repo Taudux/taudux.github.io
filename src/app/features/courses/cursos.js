@@ -129,7 +129,9 @@ function crearTarjetaCurso(curso) {
   if (curso.descripcion) {
     const desc = document.createElement("p");
     desc.className = "courses__card-description";
-    desc.textContent = curso.descripcion;
+    // Mismo marcado que la pantalla de detalle: sin esto la tarjeta mostraría
+    // los asteriscos crudos de una descripción con énfasis.
+    agregarTextoConNegritas(desc, curso.descripcion);
     cuerpo.appendChild(desc);
   }
 

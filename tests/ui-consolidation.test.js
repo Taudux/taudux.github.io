@@ -7,6 +7,13 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "..");
 const read = (relativePath) => fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 
+// La descripción de la tarjeta se arma con <strong> y nodos de texto sueltos
+// (agregarTextoConNegritas), no con una asignación directa a textContent.
+class TextNode {
+  constructor(data) { this.data = data; }
+  get textContent() { return this.data; }
+}
+
 class Element {
   constructor(tagName) {
     this.tagName = tagName.toUpperCase();
@@ -17,8 +24,17 @@ class Element {
     this.classList = { add: (...names) => { this.className += ` ${names.join(" ")}`; } };
     this.hidden = false;
     this.disabled = false;
-    this.textContent = "";
+    this._textContent = "";
   }
+
+  // Como en el DOM: leer concatena el subárbol, escribir lo reemplaza. Un
+  // elemento sin hijos se comporta igual que antes de este cambio.
+  get textContent() {
+    if (this.children.length === 0) return this._textContent;
+    return this.children.map((child) => child.textContent).join("");
+  }
+
+  set textContent(value) { this._textContent = value; }
 
   get childElementCount() { return this.children.length; }
   append(...children) { this.children.push(...children); children.forEach((child) => { child.parent = this; }); }
@@ -68,6 +84,7 @@ function createCatalogHarness({ admin = false, authenticated = true, course: cur
     document: {
       getElementById: (id) => elements[id],
       createElement: (tag) => new Element(tag),
+      createTextNode: (text) => new TextNode(text),
     },
     obtenerSesion: async () => {
       calls.sessions += 1;
@@ -84,6 +101,18 @@ function createCatalogHarness({ admin = false, authenticated = true, course: cur
     urlLoginConDestino: () => { calls.loginUrls += 1; return "/login"; },
   };
   window.window = window;
+  // agregarTextoConNegritas se ejercita de verdad, no se stubea: es lo que evita
+  // que la tarjeta muestre los asteriscos crudos de una descripción con énfasis.
+  // Los formateadores sí siguen stubeados, así que se reponen después de cargar
+  // el módulo real, que los define.
+  const formateadoresStub = {
+    etiquetaModalidad: context.etiquetaModalidad,
+    formatearRangoFechas: context.formatearRangoFechas,
+    formatearHorario: context.formatearHorario,
+    formatearCosto: context.formatearCosto,
+  };
+  vm.runInNewContext(read("src/app/features/courses/curso-presentacion.js"), context);
+  Object.assign(context, formateadoresStub);
   vm.runInNewContext(read("src/app/core/telemetry/operaciones.js"), context);
   vm.runInNewContext(read("src/app/features/courses/cursos.js"), context);
   return { calls, course, elements, window };
@@ -120,6 +149,27 @@ test("public course details behave identically without an authentication gate", 
     assert.equal(window.location.href, `/app/features/courses/detalle-curso.html?id=${encodeURIComponent(course.id)}`);
     assert.deepEqual(calls.toasts, []);
   }
+});
+
+test("a card description with **emphasis** renders a real <strong>, never the raw asterisks", async () => {
+  const curso = {
+    id: "da175f1c-cae5-45f9-889c-f09a17aa10ed",
+    titulo: "Análisis de Datos con Python",
+    descripcion: "Está diseñado para formar **analistas de datos** competentes.",
+    modalidad: "en_linea",
+    costo: 0,
+  };
+  const { elements, window } = createCatalogHarness({ course: curso });
+  await window.tauduxCursosCatalog.ready;
+
+  const desc = find(elements.cursosLista, (element) => element.className === "courses__card-description");
+  assert.ok(desc, "la tarjeta debe pintar la descripción");
+  assert.equal(desc.textContent, "Está diseñado para formar analistas de datos competentes.");
+  assert.doesNotMatch(desc.textContent, /\*\*/, "los asteriscos son marcado, no texto para el usuario");
+
+  const negrita = desc.children.find((child) => child.tagName === "STRONG");
+  assert.ok(negrita, "el énfasis tiene que ser un <strong> real");
+  assert.equal(negrita.textContent, "analistas de datos");
 });
 
 test("every course card links to its own detail page, with an honest aria-label", async () => {

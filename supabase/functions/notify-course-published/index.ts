@@ -3,14 +3,19 @@ import {
   PAGINA_DESTINATARIOS,
   PRESUPUESTO_MS_DEFAULT,
   allowedOrigin,
+  construirLotePush,
   construirLoteResend,
   debePausar,
   esEmailValido,
+  esTokenExpoValido,
   resolverModoAutorizacion,
   siguienteCursor,
+  tokensNoRegistrados,
+  trocearLotePush,
 } from "./anuncios.mjs";
 
 const RESEND_BATCH_DELAY_MS = 600;
+const EXPO_PUSH_ENDPOINT = "https://exp.host/--/api/v2/push/send";
 
 function corsHeaders(origin) {
   const result = { "Content-Type": "application/json; charset=utf-8", "Vary": "Origin" };
@@ -49,10 +54,70 @@ async function enviarLote(dependencies, resendApiKey, mensajes) {
   }
 }
 
+// Expo caps a request at 100 messages, so a page that yields more tokens than
+// that goes out in several chunks. A partial failure stops the page: the cursor
+// has not advanced yet, so the retry replays this page from its start.
+async function enviarLotePush(dependencies, mensajes) {
+  const tandas = trocearLotePush(mensajes);
+  const muertos = [];
+  for (const tanda of tandas) {
+    let response;
+    try {
+      response = await dependencies.fetchImpl(EXPO_PUSH_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tanda),
+      });
+    } catch {
+      return { ok: false, reason: "expo_request_exception", muertos };
+    }
+    if (!response.ok) {
+      return { ok: false, reason: `expo_push_failed_${response.status}`.slice(0, 160), muertos };
+    }
+    let cuerpo = null;
+    try {
+      cuerpo = await response.json();
+    } catch {
+      // A 2xx we cannot parse still delivered the batch. Losing the tickets only
+      // costs us this round of dead-token cleanup, so it is not worth a retry.
+      cuerpo = null;
+    }
+    muertos.push(...tokensNoRegistrados(tanda, cuerpo));
+    await dependencies.sleep(RESEND_BATCH_DELAY_MS);
+  }
+  return { ok: true, muertos };
+}
+
+// Dropping tokens Expo reported as gone is housekeeping, not part of delivering
+// the announcement: the rest of the page did go out. A failure here is logged
+// and swallowed so it can never fail an announcement that actually succeeded.
+async function olvidarTokensMuertos(serviceClient, dependencies, tokens) {
+  if (tokens.length === 0) return;
+  try {
+    const { error } = await serviceClient.from("push_devices").delete().in("expo_push_token", tokens);
+    if (error) {
+      dependencies.logger.error(JSON.stringify({
+        event: "push_device_cleanup_failed",
+        tokens: tokens.length,
+      }));
+    }
+  } catch {
+    dependencies.logger.error(JSON.stringify({
+      event: "push_device_cleanup_exception",
+      tokens: tokens.length,
+    }));
+  }
+}
+
 async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
   const { inicio, presupuestoMs, siteUrl, remitente, resendApiKey } = contexto;
   const counters = emptyCounters();
   counters.claimed = 1;
+  // Everything below the channel split is shared: the pagination loop, the time
+  // budget, the cursor and the closing handshake. Only who we ask for the page,
+  // how we filter it, and where we send it change.
+  const esPush = job.canal === "push";
+  const rpcDestinatarios = esPush ? "destinatarios_push_curso_anuncio" : "destinatarios_curso_anuncio";
   let cursor = job.ultimo_destinatario ?? null;
 
   for (;;) {
@@ -67,7 +132,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       return { counters, stop: true };
     }
 
-    const page = await serviceClient.rpc("destinatarios_curso_anuncio", {
+    const page = await serviceClient.rpc(rpcDestinatarios, {
       desde: cursor,
       limite: PAGINA_DESTINATARIOS,
     });
@@ -84,20 +149,36 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
     }
 
     const destinatarios = Array.isArray(page.data) ? page.data : [];
-    const validos = destinatarios.filter((row) => esEmailValido(row?.email));
+    const validos = esPush
+      ? destinatarios.filter((row) => esTokenExpoValido(row?.expo_push_token))
+      : destinatarios.filter((row) => esEmailValido(row?.email));
+    // The page length, not the valid count, decides the last page: the push RPC
+    // left-joins on purpose, so a page of users without the app is short on
+    // tokens but still a full page of scanned users.
     const isLastPage = destinatarios.length < PAGINA_DESTINATARIOS;
 
     if (validos.length > 0) {
-      const mensajes = construirLoteResend({
-        titulo: job.titulo,
-        cursoId: job.curso_id,
-        destinatarios: validos,
-        siteUrl,
-        remitente,
-      });
-
-      const resultado = await enviarLote(dependencies, resendApiKey, mensajes);
-      await dependencies.sleep(RESEND_BATCH_DELAY_MS);
+      let resultado;
+      if (esPush) {
+        const mensajes = construirLotePush({
+          titulo: job.titulo,
+          cursoId: job.curso_id,
+          destinatarios: validos,
+          siteUrl,
+        });
+        resultado = await enviarLotePush(dependencies, mensajes);
+        await olvidarTokensMuertos(serviceClient, dependencies, resultado.muertos ?? []);
+      } else {
+        const mensajes = construirLoteResend({
+          titulo: job.titulo,
+          cursoId: job.curso_id,
+          destinatarios: validos,
+          siteUrl,
+          remitente,
+        });
+        resultado = await enviarLote(dependencies, resendApiKey, mensajes);
+        await dependencies.sleep(RESEND_BATCH_DELAY_MS);
+      }
       if (!resultado.ok) {
         const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
           p_curso_id: job.curso_id,

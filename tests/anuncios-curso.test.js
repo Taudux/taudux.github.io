@@ -232,18 +232,30 @@ function notifyRequest(options = {}) {
 
 async function createHarness(options = {}) {
   const { createNotifyCoursePublishedHandler } = await endpoint;
-  const calls = { rpc: [], logs: [], fetches: [] };
+  const calls = { rpc: [], logs: [], fetches: [], deletes: [] };
   const jobs = [...(options.jobs ?? [])];
   const pages = [...(options.pages ?? [])];
   let fetchCallCount = 0;
 
   const serviceClient = {
+    from(table) {
+      return {
+        delete() {
+          return {
+            async in(column, values) {
+              calls.deletes.push({ table, column, values });
+              return { error: options.deleteError || null };
+            },
+          };
+        },
+      };
+    },
     async rpc(name, args) {
       calls.rpc.push({ name, args });
       if (name === "claim_curso_anuncio") {
         return { data: jobs.length ? [jobs.shift()] : [], error: options.claimError || null };
       }
-      if (name === "destinatarios_curso_anuncio") {
+      if (name === "destinatarios_curso_anuncio" || name === "destinatarios_push_curso_anuncio") {
         const page = pages.length ? pages.shift() : [];
         return { data: page, error: options.pageError || null };
       }
@@ -301,7 +313,16 @@ async function createHarness(options = {}) {
       calls.fetches.push({ url, body: init.body });
       const statuses = options.fetchStatuses ?? [200];
       const status = statuses[Math.min(fetchCallCount - 1, statuses.length - 1)];
-      return { ok: status >= 200 && status < 300, status };
+      // Expo answers with one ticket per message; Resend's body is never read.
+      const tickets = options.expoTickets?.[fetchCallCount - 1] ?? null;
+      return {
+        ok: status >= 200 && status < 300,
+        status,
+        async json() {
+          if (tickets === null) return {};
+          return { data: tickets };
+        },
+      };
     },
     sleep: async () => {},
     logger: {
@@ -433,5 +454,165 @@ test("el evento de log final nunca contiene un correo", async () => {
   assert.ok(calls.logs.length > 0);
   for (const log of calls.logs) {
     assert.doesNotMatch(log.value, /@/);
+  }
+});
+
+function jobPush(overrides = {}) {
+  return {
+    curso_id: CURSO_ID,
+    canal: "push",
+    titulo: "Curso X",
+    claim_token: CLAIM_TOKEN,
+    claim_generation: 1,
+    ultimo_destinatario: null,
+    attempt_count: 1,
+    ...overrides,
+  };
+}
+
+test("un anuncio de canal push va a Expo y no toca Resend", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [200],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(response.status, 200);
+  const body = await payload(response);
+  assert.equal(body.sent, 1);
+  assert.equal(body.failures, 0);
+  assert.equal(body.recipients, 3);
+
+  assert.equal(calls.fetches.length, 1);
+  assert.match(calls.fetches[0].url, /exp\.host/);
+  assert.doesNotMatch(calls.fetches[0].url, /resend/);
+  const mensajes = JSON.parse(calls.fetches[0].body);
+  assert.equal(mensajes.length, 3);
+  assert.equal(mensajes[0].channelId, "course-announcements");
+
+  // Pide destinatarios push, no los de correo.
+  assert.ok(calls.rpc.some((call) => call.name === "destinatarios_push_curso_anuncio"));
+  assert.ok(!calls.rpc.some((call) => call.name === "destinatarios_curso_anuncio"));
+  assert.equal(calls.rpc.filter((call) => call.name === "completar_curso_anuncio").length, 1);
+});
+
+test("el canal push descarta los tokens null que produce el left join", async () => {
+  const conHuecos = [
+    { id: makeId(1), expo_push_token: "ExponentPushToken[vivo-1]" },
+    { id: makeId(2), expo_push_token: null },
+    { id: makeId(3), expo_push_token: "ExponentPushToken[vivo-2]" },
+  ];
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [conHuecos],
+    fetchStatuses: [200],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  const body = await payload(response);
+  // Sólo dos tokens se envían, pero el cursor avanza sobre las TRES filas: el
+  // usuario sin app ya fue escaneado y no debe revisitarse.
+  assert.equal(body.recipients, 2);
+  const mensajes = JSON.parse(calls.fetches[0].body);
+  assert.equal(mensajes.length, 2);
+  const avanzar = calls.rpc.find((call) => call.name === "avanzar_curso_anuncio");
+  assert.equal(avanzar.args.p_ultimo, makeId(3));
+});
+
+test("una página con más de 100 tokens se trocea en varios requests a Expo", async () => {
+  // 60 usuarios con dos dispositivos cada uno: 120 tokens de una sola página.
+  const multiDispositivo = Array.from({ length: 60 }, (_, index) => [
+    { id: makeId(index + 1), expo_push_token: `ExponentPushToken[u${index}-a]` },
+    { id: makeId(index + 1), expo_push_token: `ExponentPushToken[u${index}-b]` },
+  ]).flat();
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [multiDispositivo],
+    fetchStatuses: [200, 200],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  const body = await payload(response);
+  assert.equal(body.recipients, 120);
+  assert.equal(calls.fetches.length, 2, "Expo rechaza más de 100 mensajes por request");
+  assert.equal(JSON.parse(calls.fetches[0].body).length, 100);
+  assert.equal(JSON.parse(calls.fetches[1].body).length, 20);
+});
+
+test("un token DeviceNotRegistered se borra de push_devices sin reintentar el anuncio", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [200],
+    expoTickets: [[
+      { status: "ok", id: "ticket-1" },
+      { status: "error", details: { error: "DeviceNotRegistered" } },
+      { status: "error", details: { error: "MessageRateExceeded" } },
+    ]],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  const body = await payload(response);
+
+  // La app desinstalada de un usuario no es un fallo del anuncio: los otros dos
+  // mensajes salieron, así que el anuncio completa igual.
+  assert.equal(body.sent, 1);
+  assert.equal(body.failures, 0);
+  assert.ok(!calls.rpc.some((call) => call.name === "reintentar_curso_anuncio"));
+
+  assert.equal(calls.deletes.length, 1);
+  assert.equal(calls.deletes[0].table, "push_devices");
+  assert.equal(calls.deletes[0].column, "expo_push_token");
+  // MessageRateExceeded es transitorio: ese token sigue vivo y no se borra.
+  assert.deepEqual(calls.deletes[0].values, ["ExponentPushToken[user2]"]);
+});
+
+test("si falla el borrado de tokens muertos el anuncio igual completa", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(2)],
+    fetchStatuses: [200],
+    deleteError: { message: "boom" },
+    expoTickets: [[
+      { status: "ok", id: "ticket-1" },
+      { status: "error", details: { error: "DeviceNotRegistered" } },
+    ]],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  const body = await payload(response);
+  // La limpieza es housekeeping: no puede tumbar un anuncio que sí se envió.
+  assert.equal(body.sent, 1);
+  assert.equal(body.failures, 0);
+  assert.ok(!calls.rpc.some((call) => call.name === "reintentar_curso_anuncio"));
+});
+
+test("un fallo HTTP de Expo reintenta el anuncio sin completarlo", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [500],
+  });
+  const response = await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  const body = await payload(response);
+  assert.equal(body.sent, 0);
+  assert.equal(body.failures, 1);
+  assert.ok(!calls.rpc.some((call) => call.name === "completar_curso_anuncio"));
+  const reintentar = calls.rpc.find((call) => call.name === "reintentar_curso_anuncio");
+  assert.ok(reintentar);
+  assert.match(reintentar.args.p_sanitized_error, /expo/);
+});
+
+test("el log del canal push nunca filtra un token de Expo", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [200],
+    expoTickets: [[
+      { status: "ok", id: "ticket-1" },
+      { status: "error", details: { error: "DeviceNotRegistered" } },
+      { status: "ok", id: "ticket-3" },
+    ]],
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.ok(calls.logs.length > 0);
+  for (const log of calls.logs) {
+    assert.doesNotMatch(log.value, /ExponentPushToken/);
   }
 });

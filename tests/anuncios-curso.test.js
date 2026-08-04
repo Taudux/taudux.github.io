@@ -25,6 +25,13 @@ function destinatariosDePagina(count, offset = 0) {
   }));
 }
 
+function destinatariosPushDePagina(count, offset = 0) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: makeId(offset + index + 1),
+    expo_push_token: `ExponentPushToken[user${offset + index + 1}]`,
+  }));
+}
+
 test("resolverModoAutorizacion: admin válido, origin ajeno, secreto cron, y secreto ausente", async () => {
   const { resolverModoAutorizacion } = await anunciosModule;
 
@@ -122,6 +129,82 @@ test("siguienteCursor devuelve el último id o el cursor original si no hay fila
   const destinatarios = destinatariosDePagina(2);
   assert.equal(siguienteCursor(destinatarios, null), destinatarios[1].id);
   assert.equal(siguienteCursor([], "cursor-anterior"), "cursor-anterior");
+});
+
+test("esTokenExpoValido acepta tokens de Expo y rechaza el null del left join", async () => {
+  const { esTokenExpoValido } = await anunciosModule;
+  assert.equal(esTokenExpoValido("ExponentPushToken[P1psCoMfxPxlVbLTJUuTss]"), true);
+  // La RPC hace left join contra push_devices: un usuario sin la app instalada
+  // llega hasta acá con el token en null. Ése es el caso que este filtro existe
+  // para descartar, igual que esEmailValido descarta correos rotos.
+  assert.equal(esTokenExpoValido(null), false);
+  assert.equal(esTokenExpoValido(undefined), false);
+  assert.equal(esTokenExpoValido(""), false);
+  assert.equal(esTokenExpoValido("FCM[algo]"), false);
+  assert.equal(esTokenExpoValido("ExponentPushToken[]"), false);
+  assert.equal(esTokenExpoValido("ExponentPushToken[sin-cierre"), false);
+});
+
+test("construirLotePush arma mensajes de Expo con el canal y el curso en data", async () => {
+  const { construirLotePush } = await anunciosModule;
+  const destinatarios = destinatariosPushDePagina(3);
+  const lote = construirLotePush({
+    titulo: "Curso de Testing",
+    cursoId: CURSO_ID,
+    destinatarios,
+    siteUrl: "https://taudux.com",
+  });
+  assert.equal(lote.length, 3);
+  for (const [index, mensaje] of lote.entries()) {
+    assert.equal(mensaje.to, destinatarios[index].expo_push_token);
+    assert.match(mensaje.title, /Curso de Testing/);
+    // El canal lo crea la app con importancia MAX; sin este id Android manda la
+    // notificación al canal por defecto y pierde prioridad y vibración.
+    assert.equal(mensaje.channelId, "course-announcements");
+    assert.equal(mensaje.data.cursoId, CURSO_ID);
+  }
+});
+
+test("construirLotePush no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
+  const { construirLotePush } = await anunciosModule;
+  const [mensaje] = construirLotePush({
+    titulo: "Curso de Testing",
+    cursoId: CURSO_ID,
+    destinatarios: destinatariosPushDePagina(1),
+    siteUrl: "https://taudux.com",
+  });
+  assert.doesNotMatch(mensaje.title, /\b(querés|podés|dejá|tenés|sabés)\b/i);
+  assert.doesNotMatch(mensaje.body, /\b(querés|podés|dejá|tenés|sabés)\b/i);
+});
+
+test("trocearLotePush parte en tandas de 100, que es el máximo que acepta Expo", async () => {
+  const { trocearLotePush, MAX_MENSAJES_EXPO } = await anunciosModule;
+  assert.equal(MAX_MENSAJES_EXPO, 100);
+  // Una página son 100 usuarios, pero un usuario puede tener varios
+  // dispositivos: 250 tokens salen de una sola página y no entran en un request.
+  const mensajes = Array.from({ length: 250 }, (_, index) => ({ to: `t${index}` }));
+  const tandas = trocearLotePush(mensajes);
+  assert.deepEqual(tandas.map((tanda) => tanda.length), [100, 100, 50]);
+  assert.deepEqual(tandas.flat(), mensajes);
+  assert.deepEqual(trocearLotePush([]), []);
+});
+
+test("tokensNoRegistrados extrae sólo los tokens que Expo reporta como muertos", async () => {
+  const { tokensNoRegistrados } = await anunciosModule;
+  const mensajes = [{ to: "token-vivo" }, { to: "token-muerto" }, { to: "token-lento" }];
+  const respuesta = {
+    data: [
+      { status: "ok", id: "ticket-1" },
+      { status: "error", message: "...", details: { error: "DeviceNotRegistered" } },
+      { status: "error", message: "...", details: { error: "MessageRateExceeded" } },
+    ],
+  };
+  // Sólo DeviceNotRegistered significa "app desinstalada". MessageRateExceeded
+  // es transitorio: borrar ese token perdería un dispositivo que sigue vivo.
+  assert.deepEqual(tokensNoRegistrados(mensajes, respuesta), ["token-muerto"]);
+  assert.deepEqual(tokensNoRegistrados(mensajes, { data: [] }), []);
+  assert.deepEqual(tokensNoRegistrados(mensajes, {}), []);
+  assert.deepEqual(tokensNoRegistrados(mensajes, null), []);
 });
 
 async function payload(response) {

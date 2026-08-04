@@ -8,7 +8,17 @@ export const MAX_ANUNCIOS_POR_INVOCACION = 2;
 export const PAGINA_DESTINATARIOS = 100;
 export const PRESUPUESTO_MS_DEFAULT = 40000;
 
+// Expo rejects requests carrying more than 100 messages. A page is 100 *users*,
+// but one user may have several devices, so a single page can yield more tokens
+// than fit in one request.
+export const MAX_MENSAJES_EXPO = 100;
+
+// The Android channel the app creates with MAX importance. Without it Android
+// files the notification under the default channel and drops the priority.
+export const ANDROID_CHANNEL_ID = "course-announcements";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EXPO_TOKEN_RE = /^ExponentPushToken\[[^\]\s]+\]$/;
 
 export function allowedOrigin(origin) {
   if (!origin || origin === "null") return false;
@@ -68,6 +78,49 @@ export function construirLoteResend({ titulo, cursoId, destinatarios, siteUrl, r
       `<a href="${unsubscribeUrl}">deja de recibirlos aquí</a>.</p>`,
     headers: { "List-Unsubscribe": `<${unsubscribeUrl}>` },
   }));
+}
+
+// The push counterpart of esEmailValido. Its main job is discarding the null
+// tokens produced by the left join in destinatarios_push_curso_anuncio: users
+// without the app installed still come back as rows, on purpose, so the
+// pagination contract keeps working.
+export function esTokenExpoValido(token) {
+  return typeof token === "string" && EXPO_TOKEN_RE.test(token);
+}
+
+export function construirLotePush({ titulo, cursoId, destinatarios, siteUrl }) {
+  void siteUrl;
+  return destinatarios.map((destinatario) => ({
+    to: destinatario.expo_push_token,
+    title: `Nuevo curso: ${titulo}`,
+    body: `Ya puedes verlo en el catálogo de Taudux.`,
+    channelId: ANDROID_CHANNEL_ID,
+    // The app reads this to open the course straight from the notification.
+    data: { cursoId },
+  }));
+}
+
+export function trocearLotePush(mensajes, maximo = MAX_MENSAJES_EXPO) {
+  const tandas = [];
+  for (let inicio = 0; inicio < mensajes.length; inicio += maximo) {
+    tandas.push(mensajes.slice(inicio, inicio + maximo));
+  }
+  return tandas;
+}
+
+// Expo answers with one ticket per message, positionally. Only
+// DeviceNotRegistered means "the app is gone" and justifies dropping the token;
+// every other error (rate limits, oversized payloads) is transient, and deleting
+// on those would lose a device that is still alive.
+export function tokensNoRegistrados(mensajes, respuesta) {
+  const tickets = Array.isArray(respuesta?.data) ? respuesta.data : [];
+  const muertos = [];
+  for (const [index, ticket] of tickets.entries()) {
+    if (ticket?.details?.error !== "DeviceNotRegistered") continue;
+    const token = mensajes[index]?.to;
+    if (typeof token === "string" && token.length > 0) muertos.push(token);
+  }
+  return muertos;
 }
 
 export function debePausar(elapsedMs, presupuestoMs = PRESUPUESTO_MS_DEFAULT) {

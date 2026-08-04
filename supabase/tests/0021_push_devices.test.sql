@@ -167,16 +167,24 @@ select pg_temp.assert_true(
 update public.push_devices
 set platform = 'hijacked'
 where user_id = '30000000-0000-4000-8000-000000000002';
+-- The verification must bypass RLS. Assertion 7 just proved user 1 cannot see
+-- user 2's rows, so reading them as user 1 yields NULL no matter whether the
+-- update was blocked, and assert_true treats NULL as a failure.
+reset role;
 select pg_temp.assert_true(
   (select platform = 'android' from public.push_devices
    where user_id = '30000000-0000-4000-8000-000000000002'
      and expo_push_token = 'ExponentPushToken[user-b-token]'),
   'a user cannot update another user''s device row'
 );
+set role authenticated;
 
 -- 9. A user cannot delete another user's row.
 delete from public.push_devices
 where user_id = '30000000-0000-4000-8000-000000000002';
+-- Same reason as assertion 8: the survivor check only means something when it
+-- runs with RLS bypassed.
+reset role;
 select pg_temp.assert_true(
   exists (
     select 1 from public.push_devices
@@ -185,6 +193,7 @@ select pg_temp.assert_true(
   ),
   'a user cannot delete another user''s device row'
 );
+set role authenticated;
 
 -- 10. A user can delete their own row.
 delete from public.push_devices

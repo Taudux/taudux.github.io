@@ -364,7 +364,7 @@ test("modo cron válido sin nada para reclamar devuelve 200 con contadores en ce
 
 test("modo cron con un anuncio de dos páginas envía ambas y completa una vez", async () => {
   const { handler, calls } = await createHarness({
-    jobs: [{ curso_id: CURSO_ID, titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
     pages: [destinatariosDePagina(100), destinatariosDePagina(30, 100)],
     fetchStatuses: [200, 200],
   });
@@ -387,7 +387,7 @@ test("modo cron con un anuncio de dos páginas envía ambas y completa una vez",
 test("la segunda página falla y se reintenta sin completar; el cursor corresponde a la primera página", async () => {
   const primeraPagina = destinatariosDePagina(100);
   const { handler, calls } = await createHarness({
-    jobs: [{ curso_id: CURSO_ID, titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
     pages: [primeraPagina, destinatariosDePagina(30, 100)],
     fetchStatuses: [200, 500],
   });
@@ -404,7 +404,7 @@ test("la segunda página falla y se reintenta sin completar; el cursor correspon
 
 test("presupuesto de tiempo agotado antes de la segunda página pausa en vez de seguir", async () => {
   const { handler, calls } = await createHarness({
-    jobs: [{ curso_id: CURSO_ID, titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
     pages: [destinatariosDePagina(100), destinatariosDePagina(30, 100)],
     fetchStatuses: [200, 200],
     nowValues: [0, 0, 0, 41000, 41000, 41000, 41000, 41000, 41000, 41000],
@@ -427,7 +427,7 @@ test("un fallo al persistir avanzar_curso_anuncio corta el anuncio y no completa
   */
   const primeraPagina = destinatariosDePagina(100);
   const { handler, calls } = await createHarness({
-    jobs: [{ curso_id: CURSO_ID, titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
     pages: [primeraPagina, destinatariosDePagina(30, 100)],
     fetchStatuses: [200, 200],
     avanzarResult: false,
@@ -446,7 +446,7 @@ test("un fallo al persistir avanzar_curso_anuncio corta el anuncio y no completa
 
 test("el evento de log final nunca contiene un correo", async () => {
   const { handler, calls } = await createHarness({
-    jobs: [{ curso_id: CURSO_ID, titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
     pages: [destinatariosDePagina(5)],
     fetchStatuses: [200],
   });
@@ -597,6 +597,87 @@ test("un fallo HTTP de Expo reintenta el anuncio sin completarlo", async () => {
   const reintentar = calls.rpc.find((call) => call.name === "reintentar_curso_anuncio");
   assert.ok(reintentar);
   assert.match(reintentar.args.p_sanitized_error, /expo/);
+});
+
+// Regresión del incidente del 2026-08-04: las cuatro funciones de la cola
+// filtran su UPDATE por `canal = p_canal` (0022:374), con default 'email'. El
+// edge function no mandaba p_canal, así que para un job push el UPDATE buscaba
+// la fila email, no coincidía con nada, devolvía false, y el código lo leía como
+// fallo. La fila quedaba en 'processing' y el claim por rancidez la reenviaba
+// cada 5 minutos: llegó a attempt_count = 201 en producción.
+function argsDe(calls, nombre) {
+  const call = calls.rpc.find((entry) => entry.name === nombre);
+  assert.ok(call, `se esperaba una llamada a ${nombre}`);
+  return call.args;
+}
+
+test("un job push manda p_canal 'push' al avanzar y al completar", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [200],
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "avanzar_curso_anuncio").p_canal, "push");
+  assert.equal(argsDe(calls, "completar_curso_anuncio").p_canal, "push");
+});
+
+test("un job email manda p_canal 'email' explícito en vez de confiar en el default", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [{ curso_id: CURSO_ID, canal: "email", titulo: "Curso X", claim_token: CLAIM_TOKEN, claim_generation: 1, ultimo_destinatario: null, attempt_count: 1 }],
+    pages: [destinatariosDePagina(5)],
+    fetchStatuses: [200],
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "avanzar_curso_anuncio").p_canal, "email");
+  assert.equal(argsDe(calls, "completar_curso_anuncio").p_canal, "email");
+});
+
+test("un job push que falla al enviar manda p_canal 'push' al reintentar", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [500],
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "reintentar_curso_anuncio").p_canal, "push");
+});
+
+test("un job push sin presupuesto manda p_canal 'push' al pausar", async () => {
+  // Página llena (100) para que no sea la última y el loop vuelva a evaluar el
+  // presupuesto; el reloj salta al segundo ciclo, igual que el test de email.
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(100), destinatariosPushDePagina(30, 100)],
+    fetchStatuses: [200, 200],
+    nowValues: [0, 0, 0, 41000, 41000, 41000, 41000, 41000, 41000, 41000],
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "pausar_curso_anuncio").p_canal, "push");
+});
+
+test("un job push cuyo lookup de destinatarios falla manda p_canal 'push' al reintentar", async () => {
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [[]],
+    pageError: { message: "boom" },
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "reintentar_curso_anuncio").p_canal, "push");
+});
+
+test("un job push que no logra persistir el cursor manda p_canal 'push' al reintentar", async () => {
+  // Éste es el camino exacto del incidente: avanzar_curso_anuncio devolvía
+  // false porque el UPDATE no encontraba la fila, y el reintento fallaba igual.
+  const { handler, calls } = await createHarness({
+    jobs: [jobPush()],
+    pages: [destinatariosPushDePagina(3)],
+    fetchStatuses: [200],
+    avanzarResult: false,
+  });
+  await handler(notifyRequest({ origin: undefined, authorization: undefined, cronSecret: CRON_SECRET }));
+  assert.equal(argsDe(calls, "avanzar_curso_anuncio").p_canal, "push");
+  assert.equal(argsDe(calls, "reintentar_curso_anuncio").p_canal, "push");
 });
 
 test("el log del canal push nunca filtra un token de Expo", async () => {

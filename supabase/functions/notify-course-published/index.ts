@@ -126,6 +126,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
         p_curso_id: job.curso_id,
         p_claim_token: job.claim_token,
         p_claim_generation: job.claim_generation,
+        p_canal: job.canal,
       });
       counters.paused = 1;
       if (pausa.error || pausa.data !== true) counters.failures++;
@@ -142,6 +143,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
         p_claim_token: job.claim_token,
         p_claim_generation: job.claim_generation,
         p_sanitized_error: "recipients_lookup_failed",
+        p_canal: job.canal,
       });
       counters.failures = 1;
       if (retry.error || retry.data !== true) counters.failures++;
@@ -185,6 +187,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
           p_claim_token: job.claim_token,
           p_claim_generation: job.claim_generation,
           p_sanitized_error: resultado.reason,
+          p_canal: job.canal,
         });
         counters.failures = 1;
         if (retry.error || retry.data !== true) counters.failures++;
@@ -200,6 +203,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       p_claim_generation: job.claim_generation,
       p_ultimo: nuevoCursor,
       p_enviados: validos.length,
+      p_canal: job.canal,
     });
     if (avance.error || avance.data !== true) {
       // Si el cursor no quedó persistido, seguir en memoria haría que la
@@ -211,6 +215,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
         p_claim_token: job.claim_token,
         p_claim_generation: job.claim_generation,
         p_sanitized_error: "advance_cursor_failed",
+        p_canal: job.canal,
       });
       counters.failures = 1;
       if (retry.error || retry.data !== true) counters.failures++;
@@ -223,6 +228,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
         p_curso_id: job.curso_id,
         p_claim_token: job.claim_token,
         p_claim_generation: job.claim_generation,
+        p_canal: job.canal,
       });
       counters.sent = 1;
       if (completar.error || completar.data !== true) counters.failures++;

@@ -5,8 +5,12 @@ const { pathToFileURL } = require("node:url");
 
 const ANUNCIOS_PATH = path.resolve("supabase/functions/notify-course-published/anuncios.mjs");
 const FUNCTION_PATH = path.resolve("supabase/functions/notify-course-published/index.ts");
+const PLANTILLA_PATH = path.resolve("supabase/functions/_shared/plantillas/nuevoCurso.ts");
+const ENVIAR_PUSH_PATH = path.resolve("supabase/functions/_shared/enviarPush.ts");
 const anunciosModule = import(pathToFileURL(ANUNCIOS_PATH).href);
 const endpoint = import(pathToFileURL(FUNCTION_PATH).href);
+const plantillaModule = import(pathToFileURL(PLANTILLA_PATH).href);
+const enviarPushModule = import(pathToFileURL(ENVIAR_PUSH_PATH).href);
 
 const ORIGIN = "https://taudux.com";
 const PROJECT_URL = "https://yqkvgfqplmbbcebrivpt.supabase.co";
@@ -85,16 +89,16 @@ test("esEmailValido acepta direcciones normales y rechaza inválidas", async () 
   assert.equal(esEmailValido("con espacio@example.com"), false);
 });
 
-test("construirLoteResend arma un lote con baja y asunto correctos", async () => {
-  const { construirLoteResend } = await anunciosModule;
+test("paraEmail arma un lote con baja y asunto correctos", async () => {
+  const { paraEmail } = await plantillaModule;
   const destinatarios = destinatariosDePagina(3);
-  const lote = construirLoteResend({
+  const lote = destinatarios.map((destinatario) => paraEmail({
     titulo: "Curso de Testing",
     cursoId: CURSO_ID,
-    destinatarios,
+    destinatario,
     siteUrl: "https://taudux.com",
     remitente: "Taudux <avisos@taudux.com>",
-  });
+  }));
   assert.equal(lote.length, 3);
   for (const [index, mensaje] of lote.entries()) {
     assert.deepEqual(mensaje.to, [destinatarios[index].email]);
@@ -105,12 +109,12 @@ test("construirLoteResend arma un lote con baja y asunto correctos", async () =>
   }
 });
 
-test("construirLoteResend no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
-  const { construirLoteResend } = await anunciosModule;
-  const [mensaje] = construirLoteResend({
+test("paraEmail no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
+  const { paraEmail } = await plantillaModule;
+  const mensaje = paraEmail({
     titulo: "Curso de Testing",
     cursoId: CURSO_ID,
-    destinatarios: destinatariosDePagina(1),
+    destinatario: destinatariosDePagina(1)[0],
     siteUrl: "https://taudux.com",
     remitente: "Taudux <avisos@taudux.com>",
   });
@@ -145,15 +149,15 @@ test("esTokenExpoValido acepta tokens de Expo y rechaza el null del left join", 
   assert.equal(esTokenExpoValido("ExponentPushToken[sin-cierre"), false);
 });
 
-test("construirLotePush arma mensajes de Expo con el canal y el curso en data", async () => {
-  const { construirLotePush } = await anunciosModule;
+test("paraPush arma mensajes de Expo con el canal y el curso en data", async () => {
+  const { paraPush } = await plantillaModule;
   const destinatarios = destinatariosPushDePagina(3);
-  const lote = construirLotePush({
+  const lote = destinatarios.map((destinatario) => paraPush({
     titulo: "Curso de Testing",
     cursoId: CURSO_ID,
-    destinatarios,
+    destinatario,
     siteUrl: "https://taudux.com",
-  });
+  }));
   assert.equal(lote.length, 3);
   for (const [index, mensaje] of lote.entries()) {
     assert.equal(mensaje.to, destinatarios[index].expo_push_token);
@@ -165,12 +169,12 @@ test("construirLotePush arma mensajes de Expo con el canal y el curso en data", 
   }
 });
 
-test("construirLotePush no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
-  const { construirLotePush } = await anunciosModule;
-  const [mensaje] = construirLotePush({
+test("paraPush no usa voseo rioplatense: el resto del sitio es español neutro", async () => {
+  const { paraPush } = await plantillaModule;
+  const mensaje = paraPush({
     titulo: "Curso de Testing",
     cursoId: CURSO_ID,
-    destinatarios: destinatariosPushDePagina(1),
+    destinatario: destinatariosPushDePagina(1)[0],
     siteUrl: "https://taudux.com",
   });
   assert.doesNotMatch(mensaje.title, /\b(querés|podés|dejá|tenés|sabés)\b/i);
@@ -178,7 +182,7 @@ test("construirLotePush no usa voseo rioplatense: el resto del sitio es español
 });
 
 test("trocearLotePush parte en tandas de 100, que es el máximo que acepta Expo", async () => {
-  const { trocearLotePush, MAX_MENSAJES_EXPO } = await anunciosModule;
+  const { trocearLotePush, MAX_MENSAJES_EXPO } = await enviarPushModule;
   assert.equal(MAX_MENSAJES_EXPO, 100);
   // Una página son 100 usuarios, pero un usuario puede tener varios
   // dispositivos: 250 tokens salen de una sola página y no entran en un request.
@@ -190,7 +194,7 @@ test("trocearLotePush parte en tandas de 100, que es el máximo que acepta Expo"
 });
 
 test("tokensNoRegistrados extrae sólo los tokens que Expo reporta como muertos", async () => {
-  const { tokensNoRegistrados } = await anunciosModule;
+  const { tokensNoRegistrados } = await enviarPushModule;
   const mensajes = [{ to: "token-vivo" }, { to: "token-muerto" }, { to: "token-lento" }];
   const respuesta = {
     data: [

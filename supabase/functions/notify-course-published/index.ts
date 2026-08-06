@@ -3,19 +3,17 @@ import {
   PAGINA_DESTINATARIOS,
   PRESUPUESTO_MS_DEFAULT,
   allowedOrigin,
-  construirLotePush,
-  construirLoteResend,
   debePausar,
   esEmailValido,
   esTokenExpoValido,
   resolverModoAutorizacion,
   siguienteCursor,
-  tokensNoRegistrados,
-  trocearLotePush,
 } from "./anuncios.mjs";
+import { enviarEmail } from "../_shared/enviarEmail.ts";
+import { enviarPush } from "../_shared/enviarPush.ts";
+import { paraEmail, paraPush } from "../_shared/plantillas/nuevoCurso.ts";
 
 const RESEND_BATCH_DELAY_MS = 600;
-const EXPO_PUSH_ENDPOINT = "https://exp.host/--/api/v2/push/send";
 
 function corsHeaders(origin) {
   const result = { "Content-Type": "application/json; charset=utf-8", "Vary": "Origin" };
@@ -33,59 +31,6 @@ function firstRow(data) {
 
 function emptyCounters() {
   return { claimed: 0, sent: 0, paused: 0, failures: 0, recipients: 0 };
-}
-
-async function enviarLote(dependencies, resendApiKey, mensajes) {
-  try {
-    const response = await dependencies.fetchImpl("https://api.resend.com/emails/batch", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(mensajes),
-    });
-    if (!response.ok) {
-      return { ok: false, reason: `resend_batch_failed_${response.status}`.slice(0, 160) };
-    }
-    return { ok: true };
-  } catch {
-    return { ok: false, reason: "resend_request_exception" };
-  }
-}
-
-// Expo caps a request at 100 messages, so a page that yields more tokens than
-// that goes out in several chunks. A partial failure stops the page: the cursor
-// has not advanced yet, so the retry replays this page from its start.
-async function enviarLotePush(dependencies, mensajes) {
-  const tandas = trocearLotePush(mensajes);
-  const muertos = [];
-  for (const tanda of tandas) {
-    let response;
-    try {
-      response = await dependencies.fetchImpl(EXPO_PUSH_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tanda),
-      });
-    } catch {
-      return { ok: false, reason: "expo_request_exception", muertos };
-    }
-    if (!response.ok) {
-      return { ok: false, reason: `expo_push_failed_${response.status}`.slice(0, 160), muertos };
-    }
-    let cuerpo = null;
-    try {
-      cuerpo = await response.json();
-    } catch {
-      // A 2xx we cannot parse still delivered the batch. Losing the tickets only
-      // costs us this round of dead-token cleanup, so it is not worth a retry.
-      cuerpo = null;
-    }
-    muertos.push(...tokensNoRegistrados(tanda, cuerpo));
-    await dependencies.sleep(RESEND_BATCH_DELAY_MS);
-  }
-  return { ok: true, muertos };
 }
 
 // Dropping tokens Expo reported as gone is housekeeping, not part of delivering
@@ -162,23 +107,23 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
     if (validos.length > 0) {
       let resultado;
       if (esPush) {
-        const mensajes = construirLotePush({
+        const mensajes = validos.map((destinatario) => paraPush({
           titulo: job.titulo,
           cursoId: job.curso_id,
-          destinatarios: validos,
+          destinatario,
           siteUrl,
-        });
-        resultado = await enviarLotePush(dependencies, mensajes);
+        }));
+        resultado = await enviarPush(dependencies, mensajes);
         await olvidarTokensMuertos(serviceClient, dependencies, resultado.muertos ?? []);
       } else {
-        const mensajes = construirLoteResend({
+        const mensajes = validos.map((destinatario) => paraEmail({
           titulo: job.titulo,
           cursoId: job.curso_id,
-          destinatarios: validos,
+          destinatario,
           siteUrl,
           remitente,
-        });
-        resultado = await enviarLote(dependencies, resendApiKey, mensajes);
+        }));
+        resultado = await enviarEmail(dependencies, resendApiKey, mensajes);
         await dependencies.sleep(RESEND_BATCH_DELAY_MS);
       }
       if (!resultado.ok) {

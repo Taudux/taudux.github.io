@@ -42,15 +42,16 @@ function cursoListoParaPublicar(curso, estadoDestino) {
   return Array.isArray(curso.dias_semana) && curso.dias_semana.length > 0;
 }
 
-// Migración 0018: publicar siempre reencola el aviso por correo, incluso si
-// el curso ya fue anunciado antes. Estos son los tres textos posibles del
-// diálogo de confirmación simple que antecede a ese envío masivo.
+// Migración 0018: publicar siempre reencola el aviso, incluso si el curso ya
+// fue anunciado antes. Migración 0026: ese aviso ahora es solo push, nunca
+// correo. Estos son los tres textos posibles del diálogo de confirmación
+// simple que antecede a ese envío masivo.
 const TEXTO_AVISO_NUEVO =
-  "Se enviará un aviso por correo a todos los usuarios suscritos. Tienes 10 minutos para archivarlo si te arrepientes.";
+  "Se enviará una notificación push a todos los usuarios suscritos que tengan la app instalada.";
 const TEXTO_AVISO_REENVIO =
-  "Este curso ya fue anunciado antes. Al publicarlo se volverá a enviar el correo a todos los suscritos, incluidos los que ya lo recibieron.";
+  "Este curso ya fue anunciado antes. Al publicarlo se volverá a enviar la notificación push a todos los suscritos, incluidos los que ya la recibieron.";
 const TEXTO_AVISO_DESCONOCIDO =
-  "No pudimos verificar si este curso ya fue anunciado. Al publicarlo se enviará un aviso por correo.";
+  "No pudimos verificar si este curso ya fue anunciado. Al publicarlo se enviará una notificación push a todos los usuarios suscritos.";
 
 /*
   No bloquea ni publica en silencio si la consulta falla: usa el texto
@@ -178,10 +179,11 @@ function crearAdministradorCursos({
     Archivar es reversible y no manda nada, así que —a diferencia de eliminar—
     no pasa por ningún diálogo: solo el candado de mutación en vuelo y el
     toast de resultado. Publicar sí abre el diálogo simple de confirm-dialog.js
-    (sin tipeo) porque, desde la 0018, publicar siempre reencola el aviso por
-    correo aunque el curso ya haya sido anunciado antes; el candado se toma
-    recién después de que el admin confirme, para que cancelar no deje la
-    lista trabada. La tarjeta no desaparece, así que el foco vuelve al mismo
+    (sin tipeo) porque, desde la 0018, publicar siempre reencola el aviso
+    (solo push desde la 0026) aunque el curso ya haya sido anunciado antes;
+    el candado se toma recién después de que el admin confirme, para que
+    cancelar no deje la lista trabada. La tarjeta no desaparece, así que el
+    foco vuelve al mismo
     botón tras refrescar.
   */
   async function confirmarCambioEstado(curso, boton) {

@@ -626,10 +626,10 @@ async function actualizarEstadoCurso(id, estado) {
 }
 
 /*
-  Consulta si un curso ya envió su aviso de publicación por correo (solo
-  admins, vía RPC security definer de la migración 0018). El cliente nunca
-  lee curso_anuncios directo: la tabla tiene revoke all desde 0015. Primera
-  llamada .rpc() de este servicio.
+  Consulta si un curso ya envió su aviso de publicación push (solo admins,
+  vía RPC security definer de la migración 0018; el envío era por correo
+  antes de la 0026). El cliente nunca lee curso_anuncios directo: la tabla
+  tiene revoke all desde 0015. Primera llamada .rpc() de este servicio.
 */
 async function cursoYaAnunciado(id) {
   if (typeof id !== "string" || !id.trim()) {

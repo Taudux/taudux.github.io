@@ -398,7 +398,8 @@ test("archiving an incomplete course is never blocked by the weekday guard", asy
 });
 
 // --- Migración 0018: publicar siempre reencola el aviso, así que ahora pasa
-// por el diálogo de confirmación simple (sin tipeo) antes de mutar nada. ---
+// por el diálogo de confirmación simple (sin tipeo) antes de mutar nada.
+// Migración 0026: ese aviso es solo push, ya no correo. ---
 
 test("publishing from the panel opens the confirmation dialog with the first-time wording", async () => {
   const { administrador, lista, calls } = createHarness({
@@ -410,7 +411,9 @@ test("publishing from the panel opens the confirmation dialog with the first-tim
 
   assert.equal(calls.confirmaciones.length, 1);
   assert.equal(calls.confirmaciones[0].titulo, "Publicar curso");
-  assert.match(calls.confirmaciones[0].mensaje, /Se enviará un aviso por correo/);
+  assert.match(calls.confirmaciones[0].mensaje, /Se enviará una notificación push/);
+  assert.doesNotMatch(calls.confirmaciones[0].mensaje, /correo/i);
+  assert.doesNotMatch(calls.confirmaciones[0].mensaje, /10 minutos/);
   assert.equal(calls.confirmaciones[0].textoEsperado, undefined, "publicar no exige tipeo");
   assert.deepEqual(calls.consultasAnuncio, [BORRADOR.id]);
   assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]]);
@@ -427,6 +430,7 @@ test("publishing an already-announced course uses the resend wording, not the fi
   assert.equal(calls.confirmaciones.length, 1);
   assert.match(calls.confirmaciones[0].mensaje, /ya fue anunciado antes/);
   assert.match(calls.confirmaciones[0].mensaje, /todos los suscritos/);
+  assert.doesNotMatch(calls.confirmaciones[0].mensaje, /correo/i);
   assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]]);
 });
 
@@ -440,6 +444,7 @@ test("a failed announcement check falls back to the conservative wording without
 
   assert.equal(calls.confirmaciones.length, 1);
   assert.match(calls.confirmaciones[0].mensaje, /No pudimos verificar/);
+  assert.doesNotMatch(calls.confirmaciones[0].mensaje, /correo/i);
   assert.deepEqual(calls.cambiosEstado, [[BORRADOR.id, "publicado"]], "el fallo del RPC no bloquea la publicación");
 });
 

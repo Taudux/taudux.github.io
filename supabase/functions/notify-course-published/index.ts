@@ -67,6 +67,20 @@ function argsDelClaim(job) {
   };
 }
 
+// The primary failure (recipients lookup, send, or cursor advance) always
+// counts as one. If the bookkeeping retry call itself also fails too, that's
+// a second, distinct failure: the row is now stuck until the next staleness
+// reclaim, not just scheduled for a normal backoff retry.
+async function fallar(serviceClient, job, counters, motivo) {
+  const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
+    ...argsDelClaim(job),
+    p_sanitized_error: motivo,
+  });
+  counters.failures = 1;
+  if (retry.error || retry.data !== true) counters.failures++;
+  return { counters, stop: true };
+}
+
 async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
   const { inicio, presupuestoMs, siteUrl, remitente, resendApiKey } = contexto;
   const counters = emptyCounters();
@@ -91,13 +105,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       limite: PAGINA_DESTINATARIOS,
     });
     if (page.error) {
-      const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-        ...argsDelClaim(job),
-        p_sanitized_error: "recipients_lookup_failed",
-      });
-      counters.failures = 1;
-      if (retry.error || retry.data !== true) counters.failures++;
-      return { counters, stop: true };
+      return fallar(serviceClient, job, counters, "recipients_lookup_failed");
     }
 
     const destinatarios = Array.isArray(page.data) ? page.data : [];
@@ -132,13 +140,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
         await dependencies.sleep(RESEND_BATCH_DELAY_MS);
       }
       if (!resultado.ok) {
-        const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-          ...argsDelClaim(job),
-          p_sanitized_error: resultado.reason,
-        });
-        counters.failures = 1;
-        if (retry.error || retry.data !== true) counters.failures++;
-        return { counters, stop: true };
+        return fallar(serviceClient, job, counters, resultado.reason);
       }
       counters.recipients += validos.length;
     }
@@ -154,13 +156,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       // próxima invocación retome desde el valor viejo de la BD y reenvíe
       // esta página entera. Cortamos acá, igual que ante un fallo de Resend:
       // el reintento parte del mismo punto que ya está guardado.
-      const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-        ...argsDelClaim(job),
-        p_sanitized_error: "advance_cursor_failed",
-      });
-      counters.failures = 1;
-      if (retry.error || retry.data !== true) counters.failures++;
-      return { counters, stop: true };
+      return fallar(serviceClient, job, counters, "advance_cursor_failed");
     }
     cursor = nuevoCursor;
 

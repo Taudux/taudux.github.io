@@ -124,14 +124,12 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
           titulo: job.titulo,
           cursoId: job.curso_id,
           destinatario,
-          siteUrl,
         }));
         resultado = await enviarPush(dependencies, mensajes);
         await olvidarTokensMuertos(serviceClient, dependencies, resultado.muertos ?? []);
       } else {
         const mensajes = validos.map((destinatario) => paraEmail({
           titulo: job.titulo,
-          cursoId: job.curso_id,
           destinatario,
           siteUrl,
           remitente,

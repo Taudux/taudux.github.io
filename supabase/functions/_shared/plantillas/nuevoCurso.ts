@@ -20,8 +20,7 @@
 // files the notification under the default channel and drops the priority.
 export const ANDROID_CHANNEL_ID = "course-announcements";
 
-export function paraEmail({ titulo, cursoId, destinatario, siteUrl, remitente }) {
-  void cursoId;
+export function paraEmail({ titulo, destinatario, siteUrl, remitente }) {
   const unsubscribeUrl = `${siteUrl}/app/features/portal/#correo`;
   const catalogoUrl = `${siteUrl}/app/features/courses/cursos.html`;
   return {
@@ -39,8 +38,7 @@ export function paraEmail({ titulo, cursoId, destinatario, siteUrl, remitente })
   };
 }
 
-export function paraPush({ titulo, cursoId, destinatario, siteUrl }) {
-  void siteUrl;
+export function paraPush({ titulo, cursoId, destinatario }) {
   return {
     to: destinatario.expo_push_token,
     title: `Nuevo curso: ${titulo}`,

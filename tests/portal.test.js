@@ -508,6 +508,29 @@ test("auth.service.js and perfil.service.js select avisos_curso_nuevo, or the ch
   assert.match(perfilServicio, /\.select\(\s*"[^"]*avisos_curso_nuevo[^"]*"\s*\)/);
 });
 
+test("the email preference section no longer promises delivery by correo: it's push-only now", () => {
+  /*
+    0026_anuncio_solo_push.sql cambió el envío de publicación de curso a
+    solo push; el panel de admin ya se actualizó. Esta era la última copia
+    del portal de cuenta que seguía prometiendo correo. La sección conserva
+    su id "correo" y otros identificadores con esa raíz (routing/URL
+    fragment, wiring de JS: fuera de alcance), así que esta comprobación se
+    limita al texto visible en vez de al markup completo, que sí contendría
+    "correo" dentro de ids como formCorreo o correoStatus.
+  */
+  const html = read("src/app/features/portal/index.html");
+  const markup = markupSeccion(html, "correo");
+
+  const titulo = markup.match(/<h2[^>]*>([^<]*)<\/h2>/)[1];
+  const intro = markup.match(/portal__section-intro">([^<]*)<\/p>/)[1];
+  const etiquetaCheckbox = markup.match(/<span>([^<]*)<\/span>/)[1];
+  const nota = markup.match(/portal__field-note">([^<]*)<\/p>/)[1];
+
+  [titulo, intro, etiquetaCheckbox, nota].forEach((texto) => {
+    assert.doesNotMatch(texto, /correo/i, `el texto visible no debe mencionar "correo": "${texto}"`);
+  });
+});
+
 test("portal.js converts the DB's snake_case avisos_curso_nuevo into the checkbox's camelCase field", () => {
   /*
     Bug real encontrado probando en el navegador: la BD devuelve

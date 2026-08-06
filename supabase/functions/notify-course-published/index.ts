@@ -54,6 +54,19 @@ async function olvidarTokensMuertos(serviceClient, dependencies, tokens) {
   }
 }
 
+// The bundle every queue transition RPC keys its update by. Missing p_canal
+// here was exactly the 2026-08-04 incident: a push job's transition matched
+// zero rows against the SQL default of 'email', read as failure, and the
+// five-minute staleness reclaim kept resending it — attempt_count hit 201.
+function argsDelClaim(job) {
+  return {
+    p_curso_id: job.curso_id,
+    p_claim_token: job.claim_token,
+    p_claim_generation: job.claim_generation,
+    p_canal: job.canal,
+  };
+}
+
 async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
   const { inicio, presupuestoMs, siteUrl, remitente, resendApiKey } = contexto;
   const counters = emptyCounters();
@@ -67,12 +80,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
 
   for (;;) {
     if (debePausar(dependencies.now() - inicio, presupuestoMs)) {
-      const pausa = await serviceClient.rpc("pausar_curso_anuncio", {
-        p_curso_id: job.curso_id,
-        p_claim_token: job.claim_token,
-        p_claim_generation: job.claim_generation,
-        p_canal: job.canal,
-      });
+      const pausa = await serviceClient.rpc("pausar_curso_anuncio", argsDelClaim(job));
       counters.paused = 1;
       if (pausa.error || pausa.data !== true) counters.failures++;
       return { counters, stop: true };
@@ -84,11 +92,8 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
     });
     if (page.error) {
       const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-        p_curso_id: job.curso_id,
-        p_claim_token: job.claim_token,
-        p_claim_generation: job.claim_generation,
+        ...argsDelClaim(job),
         p_sanitized_error: "recipients_lookup_failed",
-        p_canal: job.canal,
       });
       counters.failures = 1;
       if (retry.error || retry.data !== true) counters.failures++;
@@ -128,11 +133,8 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       }
       if (!resultado.ok) {
         const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-          p_curso_id: job.curso_id,
-          p_claim_token: job.claim_token,
-          p_claim_generation: job.claim_generation,
+          ...argsDelClaim(job),
           p_sanitized_error: resultado.reason,
-          p_canal: job.canal,
         });
         counters.failures = 1;
         if (retry.error || retry.data !== true) counters.failures++;
@@ -143,12 +145,9 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
 
     const nuevoCursor = siguienteCursor(destinatarios, cursor);
     const avance = await serviceClient.rpc("avanzar_curso_anuncio", {
-      p_curso_id: job.curso_id,
-      p_claim_token: job.claim_token,
-      p_claim_generation: job.claim_generation,
+      ...argsDelClaim(job),
       p_ultimo: nuevoCursor,
       p_enviados: validos.length,
-      p_canal: job.canal,
     });
     if (avance.error || avance.data !== true) {
       // Si el cursor no quedó persistido, seguir en memoria haría que la
@@ -156,11 +155,8 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
       // esta página entera. Cortamos acá, igual que ante un fallo de Resend:
       // el reintento parte del mismo punto que ya está guardado.
       const retry = await serviceClient.rpc("reintentar_curso_anuncio", {
-        p_curso_id: job.curso_id,
-        p_claim_token: job.claim_token,
-        p_claim_generation: job.claim_generation,
+        ...argsDelClaim(job),
         p_sanitized_error: "advance_cursor_failed",
-        p_canal: job.canal,
       });
       counters.failures = 1;
       if (retry.error || retry.data !== true) counters.failures++;
@@ -169,12 +165,7 @@ async function procesarAnuncio(serviceClient, dependencies, job, contexto) {
     cursor = nuevoCursor;
 
     if (isLastPage) {
-      const completar = await serviceClient.rpc("completar_curso_anuncio", {
-        p_curso_id: job.curso_id,
-        p_claim_token: job.claim_token,
-        p_claim_generation: job.claim_generation,
-        p_canal: job.canal,
-      });
+      const completar = await serviceClient.rpc("completar_curso_anuncio", argsDelClaim(job));
       counters.sent = 1;
       if (completar.error || completar.data !== true) counters.failures++;
       return { counters, stop: false };

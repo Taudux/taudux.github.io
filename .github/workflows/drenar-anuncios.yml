@@ -1,24 +1,33 @@
-# Respaldo del drenado de la cola de anuncios de curso nuevo. El disparo
-# principal ahora vive en pg_cron dentro de Supabase (migración
-# 0019_drenar_anuncios_pg_cron.sql), cada 5 minutos: no depende de un runner
-# compartido de GitHub. Este workflow existe por si pg_cron falla — de ahí la
-# cadencia horaria en vez de cada 15 minutos — y como disparo manual desde la
-# pestaña Actions cuando haga falta forzar un envío.
+# Disparo MANUAL del drenado de la cola de anuncios de curso nuevo. Sirve para
+# forzar un envío o para verificar un despliegue del edge function sin esperar
+# al próximo ciclo automático.
 #
-# Motivo del cambio: los cron programados de GitHub en runners compartidos son
-# best-effort y en la práctica se saltearon ~7 de cada 8 corridas, dejando el
-# aviso llegar en ~2 horas en vez de los 10-25 minutos de diseño. Dos
-# schedulers concurrentes no duplican envíos: claim_curso_anuncio usa
-# `for update skip locked` con fencing por claim_token/claim_generation.
+# El drenado automático vive por completo en pg_cron dentro de Supabase
+# (migración 0019_drenar_anuncios_pg_cron.sql), cada 5 minutos. Este workflow
+# ya NO tiene `schedule`: es una herramienta manual, no un respaldo automático.
 #
-# GitHub deshabilita los workflows programados de un repo sin actividad
-# durante 60 días. Si este cron deja de correr, reactivalo con un clic desde
-# la pestaña Actions.
+# Por qué se sacó el cron programado (2026-08-06). GitHub Actions demostró dos
+# modos de falla distintos en este mismo workflow:
+#
+#   1. Corridas salteadas: los cron programados en runners compartidos son
+#      best-effort y en la práctica se saltearon ~7 de cada 8 corridas.
+#   2. Runner no asignado: "The job was not acquired by Runner of type hosted
+#      even after multiple attempts", tras ~15 minutos de reintentos.
+#
+# Contra eso, pg_cron corre dentro de la base y se verificó con 20 corridas
+# consecutivas exitosas, exactamente cada 5 minutos, cada una en milisegundos.
+# El respaldo horario llegaba 12 veces más tarde que pg_cron y era el único
+# componente que fallaba.
+#
+# El costo real no era la corrida perdida — pg_cron ya cubría el envío — sino
+# que cada falla de infraestructura de GitHub se ve idéntica a una caída de
+# producción, y cuesta un diagnóstico completo descartarla.
+#
+# Nota: al no haber `schedule`, ya no aplica la desactivación automática que
+# GitHub hace de los workflows programados en repos sin actividad por 60 días.
 name: Drenar anuncios de curso nuevo
 
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch: {}
 
 jobs:

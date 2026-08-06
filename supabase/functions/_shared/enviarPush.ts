@@ -12,10 +12,8 @@
 
 export const EXPO_PUSH_ENDPOINT = "https://exp.host/--/api/v2/push/send";
 
-// Deliberate duplicate of the misleadingly-named RESEND_BATCH_DELAY_MS in
-// notify-course-published/index.ts, used there for email pacing. Same value,
-// same name, kept on purpose — renaming it is a paso-3 decision.
-const RESEND_BATCH_DELAY_MS = 600;
+// Paces the delay between Expo push chunk requests, in ms.
+const EXPO_CHUNK_DELAY_MS = 600;
 
 // Expo rejects requests carrying more than 100 messages. A page is 100 *users*,
 // but one user may have several devices, so a single page can yield more tokens
@@ -74,7 +72,7 @@ export async function enviarPush(dependencies, mensajes) {
       cuerpo = null;
     }
     muertos.push(...tokensNoRegistrados(tanda, cuerpo));
-    await dependencies.sleep(RESEND_BATCH_DELAY_MS);
+    await dependencies.sleep(EXPO_CHUNK_DELAY_MS);
   }
   return { ok: true, muertos };
 }

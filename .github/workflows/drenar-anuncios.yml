@@ -25,7 +25,7 @@
 #
 # Nota: al no haber `schedule`, ya no aplica la desactivación automática que
 # GitHub hace de los workflows programados en repos sin actividad por 60 días.
-name: Drenar anuncios de curso nuevo
+name: Drenar anuncios (manual · el automático es pg_cron)
 
 on:
   workflow_dispatch: {}

@@ -1,7 +1,13 @@
 # Checkout determinista en cualquier plataforma. Sin esto, core.autocrlf=true
-# en Windows entrega los archivos con CRLF, y el test de integridad de
-# migraciones (tests/portadas-curso.service.test.js) hashea los bytes crudos del
-# disco: un clon fresco en Windows rompía las 18 migraciones de una.
+# en Windows entrega los archivos con CRLF y los mismos archivos quedan con
+# bytes distintos según quién clone: diffs contaminados con el archivo entero,
+# y cualquier herramienta que lea bytes crudos del disco (hashes, comparaciones,
+# scripts SQL) leyendo algo distinto en cada máquina.
+#
+# El motivo histórico fue concreto: un clon fresco en Windows rompió de una las
+# 18 migraciones que entonces se verificaban por hash. Ese manifiesto ya no
+# existe (ver el comentario al tope de tests/portadas-curso.service.test.js),
+# pero el pin sigue siendo necesario por la razón general.
 * text=auto eol=lf
 
 # Los binarios quedan fuera de toda normalización: git no debe tocarles un byte.

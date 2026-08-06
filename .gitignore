@@ -10,3 +10,7 @@ openspec/
 
 # Supabase local state
 supabase/.temp/
+
+# Basura del sistema operativo
+.DS_Store
+Thumbs.db

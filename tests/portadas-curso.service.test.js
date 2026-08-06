@@ -19,34 +19,32 @@ const FORM_PATH = "src/app/features/courses/gestionar-curso.js";
 const FORM_COVER_PATH = "src/app/features/courses/gestionar-curso.portada.js";
 const FORM_CATEGORIES_PATH = "src/app/features/courses/gestionar-curso.categorias.js";
 const FORM_HTML_PATH = "src/app/features/courses/editar-curso.html";
-const EXPECTED_MIGRATION_HASHES = Object.freeze({
-  "0001_crear_perfiles.sql": "26ceb164a9867a458f0b146dba7a875f3326ac273c9e6ca478f77a70db7033b7",
-  "0002_perfil_telefono.sql": "8f42344006b42ab8babc7c6fb854dcf353a25785296c8b390978b0b78522992c",
-  "0003_perfil_solo_confirmados.sql": "a7fdb9b4efdef11a4919654e4c4678afd696ed705d8ddae70fbb66e28ea8d9a2",
-  "0004_crear_cursos.sql": "57c5a4bf73d6c64bbe7ca391c238de058d603885ff36a7e79190e0739fd74a30",
-  "0005_cursos_lectura_publica.sql": "f8ca0ec8f3c1eb023b99791a419c79c8226e17ac78f56c633196315971074bb3",
-  "0006_cursos_detalles.sql": "12981517187212fb28a7068b59820c03d96f398678e4cdca70c74caa94306dd1",
-  "0007_cursos_recurrentes.sql": "5240c6f7c81d1d475168d513c0002bab8d780408668a911aef0bf91b11929855",
-  "0008_cursos_proximamente.sql": "3e384a48eb1ffd49fb14d2884853c0b71eea8f68da1808564e9a0d0b8bb15931",
-  "0009_cursos_categoria_valida.sql": "a5959b843cd51bb9eba28161932aab4a4f96ca36fd2e19aabcc231fa9e68705d",
-  "0010_normalizar_categorias_cursos.sql": "dd9dee6da65b5fa1d264a5c2ab878109404be973b2eb46d40e6ae4f101a0b099",
-  "0011_portadas_cursos_storage.sql": "d95ee0e59eb896c76f43b9a8f276b19748341566830816b7eb3a655981d22bea",
-  "0012_secure_course_cover_cleanup.sql": "cb449a48c4dfcfad4da34dd0272fbe87bc1d30656a53b660e5e8c53abf63ac59",
-  "0013_course_cover_bucket_limit.sql": "fd494b4351906300aa10f0c5ee66b8dc2f02f7b4f853517dd9d357f8e2dae48f",
-  "0014_cursos_estado.sql": "990a1c009b0911a28a631197c6d1b0caf0a1b7db4f662dea9e343852a4ca3036",
-  "0015_avisos_curso_nuevo.sql": "7db5575eef1aa96862932b228939aa7a92558a67d4a7f6aa7cdd161e73acdf5c",
-  "0016_completar_anuncio_libera_claim.sql": "81d1cf37f2441338dcb63495115f2d921e5b69eec5c478881815dd4df600cf8f",
-  "0017_perfil_google_metadata.sql": "a64e430f11cb991d4c2fb92758a671ced142fba8bf738df58c40a2e244136f34",
-  "0018_republicar_reanuncia.sql": "87cb89a3c3d23f72dc3db65c9b99266eaa97f132f4a818d3677cb3cbeff64f27",
-  "0019_drenar_anuncios_pg_cron.sql": "db7d70e9fdf99e1b8d16a6f1e97bac72d3ece8ae304cbf4fcebcc5fa2d9900d9",
-  "0020_cursos_contenido.sql": "f386615d9d939e65d082b9d9697460dd4b91208e2d3d24994f36c414f1f9d8eb",
-  "0021_push_devices.sql": "c3e12f3997f97054dc0ca9510492cce744e340b1827f233d6e4329e109830855",
-  "0022_anuncios_canal_push.sql": "a06fb8880c5eddcf138b2716accab9b3398779259bfe5ef1d1a4bbdb3f47d410",
-  "0023_drenar_canal_push.sql": "b1ad76eaa160d22d18b43a9885d3250be6a82a5b699b9ab421ed82e104fb6842",
-  "0024_anuncio_inmediato.sql": "f63a78c62412fb5fbede1b5fa775bf9ac67d02592de8f601f4414152b24f5182",
-  "0025_push_devices_instalacion.sql": "aa746156d296b8b9ee9a55b65a9ce057fd016cbefc60e12d1146158652f12186",
-  "0026_anuncio_solo_push.sql": "7ad5fb2c4b448fe391ee3d0ff18ee7b20062d812745e1e9fd236bcdb10741912",
-});
+/*
+  No hay manifiesto de hashes de migraciones acá, y es a propósito: no lo
+  vuelvas a agregar.
+
+  Existió uno (un SHA-256 por archivo de supabase/migrations/) desde el commit
+  424cf87, y su motivo era puntual: atestiguar que los archivos mudados de
+  .kiro/supabase/migrations/ a supabase/migrations/ habían llegado byte a byte
+  idénticos y sin dejar ninguno atrás. Esa mudanza terminó hace rato.
+
+  Sobrevivió a su propósito y sólo cobraba peaje. En 20 commits de este archivo
+  nunca detectó una edición no autorizada: la única vez que reflejó un cambio a
+  una migración existente (0009) era un comentario en español. En cambio sí dio
+  un falso positivo de 18 migraciones de golpe en un clon fresco en Windows, por
+  CRLF, que hubo que apagar con .gitattributes. Y 13 de esos 20 commits eran
+  puro trámite de tres líneas, arrastrando este test de portadas a cambios sobre
+  push devices o login con Google.
+
+  Tampoco era la barrera que aparentaba: el hash no distinguía una migración ya
+  aplicada en producción de una que no, y se satisfacía pegando el hash nuevo —
+  exactamente lo que pasó con 0009. Contra editar una migración ya aplicada, lo
+  que protege es el runbook, no un test.
+
+  Lo que sí se garantiza abajo es el LAYOUT, derivado del disco: numeración
+  contigua desde 0001 sin huecos, versiones únicas y nada de subdirectorios.
+  Agregar una migración no requiere tocar este archivo.
+*/
 const SERVICE_SOURCE = fs.readFileSync(SERVICE_PATH, "utf8");
 const FUNCTION_SOURCE = fs.readFileSync(FUNCTION_PATH, "utf8");
 const MIGRATION_SOURCE = fs.readFileSync(MIGRATION_PATH, "utf8");
@@ -816,24 +814,25 @@ test("Edge exact duplicate succeeds, Storage failure is sanitized, and unexpecte
 });
 
 test("migration layout and 0011/0012 contracts remain fail-closed", () => {
-  const expectedFiles = Object.keys(EXPECTED_MIGRATION_HASHES);
+  // Todo se deriva del disco: agregar una migración no obliga a tocar este
+  // archivo. Ver el comentario largo al tope sobre por qué ya no hay hashes.
   const entries = fs.readdirSync(MIGRATIONS_PATH, { withFileTypes: true });
   assert.ok(entries.every((entry) => entry.isFile()), "migration directory must contain only files");
   const actualFiles = entries.map((entry) => entry.name).sort();
-  assert.deepEqual(actualFiles, expectedFiles);
 
+  // La contigüidad es la garantía que de verdad importa: atrapa un hueco por
+  // borrado y atrapa que dos ramas hayan creado el mismo número.
   const versions = actualFiles.map((file) => file.slice(0, 4));
   assert.equal(new Set(versions).size, versions.length, "migration versions must be unique");
-  assert.deepEqual(versions, Array.from({ length: 26 }, (_, index) => String(index + 1).padStart(4, "0")));
+  assert.deepEqual(
+    versions,
+    Array.from({ length: actualFiles.length }, (_, index) => String(index + 1).padStart(4, "0")),
+    "migration versions must run contiguously from 0001 with no gaps",
+  );
 
   if (fs.existsSync(OLD_MIGRATIONS_PATH)) {
     const oldSqlFiles = fs.readdirSync(OLD_MIGRATIONS_PATH).filter((file) => file.endsWith(".sql"));
     assert.deepEqual(oldSqlFiles, [], "old migration directory must not retain SQL files");
-  }
-
-  for (const [file, expectedHash] of Object.entries(EXPECTED_MIGRATION_HASHES)) {
-    const bytes = fs.readFileSync(path.join(MIGRATIONS_PATH, file));
-    assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedHash, file);
   }
 
   assert.equal(MIGRATION_PATH, "supabase/migrations/0011_portadas_cursos_storage.sql");

@@ -901,7 +901,10 @@ test("static contracts preserve scope, dynamic server import, CORS, and tested f
   assert.match(FUNCTION_SOURCE, /globalThis\.Deno.*Deno\.serve/s);
   assert.doesNotMatch(FUNCTION_SOURCE, /ERROR_RATE_THRESHOLDS_PERCENT|errorRateThresholdsPercent/);
   assert.match(FUNCTION_SOURCE, /https:\/\/taudux\.com/);
-  assert.match(FUNCTION_SOURCE, /https:\/\/taudux\.github\.io/);
+  // taudux.github.io salió del allowlist: nunca sirvió el sitio (devuelve 404,
+  // el deploy es Vercel) y el repo dejó de llamarse así. Se blinda su ausencia
+  // para que no vuelva a colarse un origen muerto.
+  assert.doesNotMatch(FUNCTION_SOURCE, /taudux\.github\.io/);
   assert.match(FUNCTION_SOURCE, /localhost.*127\.0\.0\.1/s);
   assert.doesNotMatch(FUNCTION_SOURCE, /Access-Control-Allow-Origin[^\n]+\*/);
   assert.doesNotMatch(MIGRATION_SOURCE, /create\s+policy[\s\S]*storage\.objects/i);

@@ -2,7 +2,7 @@
 // async que no sea inyectado. Reusada tanto por index.ts como por los tests
 // de Node.
 
-export const PRODUCTION_ORIGINS = new Set(["https://taudux.com", "https://taudux.github.io"]);
+export const PRODUCTION_ORIGINS = new Set(["https://taudux.com"]);
 
 export const MAX_ANUNCIOS_POR_INVOCACION = 2;
 export const PAGINA_DESTINATARIOS = 100;

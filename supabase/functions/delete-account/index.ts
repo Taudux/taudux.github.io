@@ -9,7 +9,7 @@
   no se lee en absoluto, así que no hay forma de pedir el borrado de otra cuenta.
 */
 
-const PRODUCTION_ORIGINS = new Set(["https://taudux.com", "https://taudux.github.io"]);
+const PRODUCTION_ORIGINS = new Set(["https://taudux.com"]);
 
 function allowedOrigin(origin) {
   if (!origin || origin === "null") return false;

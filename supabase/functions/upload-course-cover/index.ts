@@ -2,7 +2,7 @@ import { contentPath, inspectGeneratedCover, MAX_FILE_BYTES } from "./validation
 
 const BUCKET = "course-covers";
 const MAX_BODY_BYTES = MAX_FILE_BYTES + 64 * 1024;
-const PRODUCTION_ORIGINS = new Set(["https://taudux.com", "https://taudux.github.io"]);
+const PRODUCTION_ORIGINS = new Set(["https://taudux.com"]);
 
 class ClientError extends Error {
   constructor(status, code) {

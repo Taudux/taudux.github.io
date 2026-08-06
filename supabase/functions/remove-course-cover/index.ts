@@ -3,7 +3,7 @@ const MAX_BODY_BYTES = 8 * 1024;
 const MAX_CLEANUP_JOBS = 3;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MANAGED_PATH = /^sha256\/[0-9a-f]{64}\.(?:jpg|png|webp)$/;
-const PRODUCTION_ORIGINS = new Set(["https://taudux.com", "https://taudux.github.io"]);
+const PRODUCTION_ORIGINS = new Set(["https://taudux.com"]);
 
 function allowedOrigin(origin) {
   if (!origin || origin === "null") return false;

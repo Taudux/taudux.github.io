@@ -24,13 +24,13 @@ sin la extensión `.html`.
 
 | Ruta | Qué hay |
 |---|---|
-| `src/app/core/` | Capa de datos y servicios, un directorio por dominio (`auth`, `cursos`, `perfil`, `categorias`, `supabase`, `telemetry`). Sufijo `.service.js`. |
+| `src/app/core/` | Capa de datos y servicios, un directorio por dominio (`auth`, `cursos`, `perfil`, `categorias`, `supabase`, `telemetry`, `analytics`). Sufijo `.service.js`. |
 | `src/app/features/` | Una carpeta por área de la app (`auth`, `courses`, `portal`, `legal`, `home`, `detector`). |
 | `src/app/shared/` | Primitivas de presentación (`button`, `toast`, `confirm-dialog`, `navbar`, `panel`, `field`…). |
-| `supabase/migrations/` | 26 migraciones SQL, numeración contigua desde `0001`. |
+| `supabase/migrations/` | 27 migraciones SQL, numeración contigua desde `0001`. |
 | `supabase/functions/` | Edge functions Deno, más `_shared/` reutilizable entre ellas. |
-| `supabase/tests/` | 11 tests SQL contra bases desechables. |
-| `tests/` | 23 tests JS con el runner integrado de Node. |
+| `supabase/tests/` | 12 tests SQL contra bases desechables. |
+| `tests/` | 24 tests JS con el runner integrado de Node. |
 
 ### Tres decisiones que no se adivinan
 
@@ -107,3 +107,14 @@ cubría— pero cada una se veía idéntica a una caída de producción.
   en los secrets de las edge functions.
 - Las sesiones usan `sessionStorage`, no `localStorage`: viven por pestaña y
   terminan al cerrarla.
+- **GA4 arranca con un Measurement ID placeholder** (`G-XXXXXXX` en
+  `src/app/core/analytics/ga4.js`) — no manda datos hasta reemplazarlo por el
+  ID real de la propiedad. Deliberadamente **no** se carga en
+  `reset-password/`, `confirm/` ni `oauth-callback/`: esas páginas pueden
+  llevar un token de sesión en la URL, y GA4 mandaría `location.href`
+  completo a Google como parte de su pageview automático.
+- **`eventos_negocio` (migración `0027`) no tiene foreign key a
+  `auth.users`, a propósito.** Registra altas/bajas de cuenta y debe
+  sobrevivir al hard delete de `delete-account`; una FK haría que el propio
+  trigger de baja abortara el borrado que está registrando. El `usuario_ref`
+  queda como un uuid desnormalizado, sin PII.

@@ -88,12 +88,52 @@ export function createDeleteAccountHandler(overrides = {}) {
       const serviceClient = await dependencies.createServiceClient({ projectUrl, serviceRole });
 
       /*
+        Registro de la baja ANTES del borrado, mientras la cuenta todavía
+        existe: es sólo enriquecimiento (marca origen='autoservicio'). El
+        trigger perfiles_registrar_baja (migración 0027) ya garantiza la fila
+        vía cascada, atómicamente, así que un fallo acá NO aborta el borrado
+        — el usuario tiene derecho a irse aunque falle la analítica.
+      */
+      let eventoBajaId = null;
+      try {
+        const { data: eventoData, error: eventoError } = await serviceClient
+          .from("eventos_negocio")
+          .insert({ tipo: "baja_cuenta", usuario_ref: userData.user.id, origen: "autoservicio" })
+          .select("id")
+          .single();
+        if (eventoError) throw eventoError;
+        eventoBajaId = eventoData?.id ?? null;
+      } catch {
+        dependencies.logger.error(JSON.stringify({ event: "delete_account", code: "evento_baja_failed" }));
+      }
+
+      /*
         Hard delete deliberado. Con soft delete la fila de auth.users sobrevive
         con deleted_at, y el ON DELETE CASCADE de perfiles.id nunca se dispara:
         el perfil quedaría vivo y huérfano.
+
+        Try/catch propio (no el de afuera): deleteUser puede fallar
+        RESOLVIENDO con { error } o RECHAZANDO la promesa (timeout de red,
+        excepción del SDK). Los dos casos son "el borrado no ocurrió" y los
+        dos deben compensar la baja registrada arriba — si sólo el primero
+        compensara, un reject dejaría una fila baja_cuenta huérfana para una
+        cuenta que sigue existiendo.
       */
-      const { error: deleteError } = await serviceClient.auth.admin.deleteUser(userData.user.id);
-      if (deleteError) return finish(500, "internal_error", { ok: false, code: "internal_error" }, origin);
+      try {
+        const { error: deleteError } = await serviceClient.auth.admin.deleteUser(userData.user.id);
+        if (deleteError) throw deleteError;
+      } catch {
+        if (eventoBajaId !== null) {
+          try {
+            await serviceClient.from("eventos_negocio").delete().eq("id", eventoBajaId);
+          } catch {
+            // Compensación best-effort: si también falla, queda un evento
+            // huérfano — inaceptable en silencio, pero no hay nada más
+            // seguro que hacer acá que devolver el error real al usuario.
+          }
+        }
+        return finish(500, "internal_error", { ok: false, code: "internal_error" }, origin);
+      }
 
       return finish(200, "delete_ok", { ok: true }, origin);
     } catch {

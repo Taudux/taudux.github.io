@@ -34,7 +34,7 @@ async function payload(response) {
 
 async function createHarness(options = {}) {
   const { createDeleteAccountHandler } = await endpoint;
-  const calls = { deleted: [], logs: [] };
+  const calls = { deleted: [], logs: [], eventosInsertados: [], eventosCompensados: [], orden: [] };
   const user = Object.hasOwn(options, "user") ? options.user : { id: USER_ID };
 
   const env = {
@@ -63,11 +63,39 @@ async function createHarness(options = {}) {
       auth: {
         admin: {
           async deleteUser(...args) {
+            calls.orden.push("deleteUser");
             calls.deleted.push(args);
+            if (options.deleteThrows) throw new Error("network timeout");
             if (options.deleteError) return { data: null, error: { message: "boom" } };
             return { data: { user: null }, error: null };
           },
         },
+      },
+      from(table) {
+        return {
+          insert(row) {
+            calls.eventosInsertados.push({ table, row });
+            return {
+              select() {
+                return {
+                  async single() {
+                    calls.orden.push("evento");
+                    if (options.eventoError) return { data: null, error: { message: "evento boom" } };
+                    return { data: { id: 99 }, error: null };
+                  },
+                };
+              },
+            };
+          },
+          delete() {
+            return {
+              eq: (column, value) => {
+                calls.eventosCompensados.push({ table, column, value });
+                return Promise.resolve({ data: null, error: null });
+              },
+            };
+          },
+        };
       },
     }),
     ...(options.overrides ?? {}),
@@ -179,4 +207,53 @@ test("every outcome is logged as one structured line", async () => {
   assert.equal(calls.logs[0].event, "delete_account");
   assert.equal(calls.logs[0].code, "delete_ok");
   assert.equal(calls.logs[0].status, 200);
+});
+
+test("the baja_cuenta event is recorded in eventos_negocio before the account is deleted", async () => {
+  const { handler, calls } = await createHarness();
+  const response = await handler(deletionRequest());
+  assert.equal(response.status, 200);
+  assert.equal(calls.eventosInsertados.length, 1);
+  assert.equal(calls.eventosInsertados[0].table, "eventos_negocio");
+  assert.deepEqual(calls.eventosInsertados[0].row, {
+    tipo: "baja_cuenta",
+    usuario_ref: USER_ID,
+    origen: "autoservicio",
+  });
+  assert.deepEqual(calls.orden, ["evento", "deleteUser"], "the event must be written before deleteUser runs");
+});
+
+test("if deleteUser fails, the just-recorded event is compensated (deleted) since the account survives", async () => {
+  const { handler, calls } = await createHarness({ deleteError: true });
+  const response = await handler(deletionRequest());
+  assert.equal(response.status, 500);
+  assert.equal(calls.eventosInsertados.length, 1);
+  assert.deepEqual(calls.eventosCompensados, [{ table: "eventos_negocio", column: "id", value: 99 }]);
+});
+
+test("if deleteUser throws instead of resolving with an error, the event is still compensated", async () => {
+  /*
+    A rejected promise (network timeout, an unexpected SDK exception) is a
+    different failure shape than deleteUser resolving with { error }, and it
+    must be handled the same way: the account was NOT deleted, so the
+    baja_cuenta event recorded above is no longer true and must be removed.
+  */
+  const { handler, calls } = await createHarness({ deleteThrows: true });
+  const response = await handler(deletionRequest());
+  assert.equal(response.status, 500);
+  assert.deepEqual(await payload(response), { ok: false, code: "internal_error" });
+  assert.equal(calls.eventosInsertados.length, 1);
+  assert.deepEqual(calls.eventosCompensados, [{ table: "eventos_negocio", column: "id", value: 99 }]);
+});
+
+test("if recording the event fails, the account is still deleted: the right to leave never depends on analytics", async () => {
+  const { handler, calls } = await createHarness({ eventoError: true });
+  const response = await handler(deletionRequest());
+  assert.equal(response.status, 200);
+  assert.deepEqual(await payload(response), { ok: true });
+  assert.equal(calls.deleted.length, 1, "deleteUser must still run");
+  assert.equal(calls.eventosCompensados.length, 0, "nothing to compensate: the event was never recorded");
+  assert.equal(calls.logs.length, 2, "the swallowed event failure gets its own diagnostic line");
+  assert.equal(calls.logs[0].code, "evento_baja_failed");
+  assert.equal(calls.logs[1].code, "delete_ok");
 });

@@ -14,6 +14,12 @@
   <link rel="stylesheet" href="/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/app/shared/field/field.css">
   <link rel="stylesheet" href="/app/features/auth/auth.css">
+  <!--
+    GA4 NO se carga acá a propósito: esta página puede recibir un token de
+    confirmación en window.location.hash (access_token/type=signup), y GA4
+    mandaría location.href completo como page_location. Ver el mismo
+    comentario en reset-password/index.html.
+  -->
 </head>
 
 <body>

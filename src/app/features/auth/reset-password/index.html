@@ -14,6 +14,14 @@
   <link rel="stylesheet" href="/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/app/shared/field/field.css">
   <link rel="stylesheet" href="/app/features/auth/auth.css">
+  <!--
+    GA4 NO se carga acá a propósito: esta página puede recibir un token de
+    recuperación en window.location.hash (formato legacy #access_token=...),
+    y GA4 manda automáticamente location.href completo como page_location en
+    su pageview. El hash no se limpia hasta el submit exitoso (ver
+    reset-password.js), así que el token quedaría expuesto a un tercero
+    mientras el formulario está en pantalla.
+  -->
 </head>
 
 <body>

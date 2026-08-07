@@ -14,6 +14,12 @@
   <link rel="stylesheet" href="/app/shared/panel/panel.css">
   <link rel="stylesheet" href="/app/shared/field/field.css">
   <link rel="stylesheet" href="/app/features/auth/auth.css">
+  <!--
+    GA4 NO se carga acá a propósito: esta página aterriza con ?code= de OAuth
+    en la URL. Ver el mismo comentario en reset-password/index.html — misma
+    precaución, aunque acá el código solo no basta para tomar la sesión sin
+    el code_verifier guardado en el navegador.
+  -->
 </head>
 
 <body>

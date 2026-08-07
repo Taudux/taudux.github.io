@@ -19,6 +19,9 @@ const oauthCallbackJs = fs.readFileSync(
   path.join(ROOT, "src/app/features/auth/oauth-callback/oauth-callback.js"),
   "utf8"
 );
+const { reactivarBotonesTrasBfcache } = require(
+  path.join(ROOT, "src/app/features/auth/auth-ui.js")
+);
 
 /* Bloque A — el servicio, corrido vía vm con un supabaseClient falso. */
 
@@ -96,6 +99,51 @@ for (const [nombre, html] of [
     assert.match(html, /class="auth__separator" role="separator"/);
   });
 }
+
+/*
+  Bloque B-bis — el botón de Google (y cualquier otro que use
+  establecerBotonOcupado) no debe quedar trabado al volver del bfcache tras el
+  redirect completo a Google. reactivarBotonesTrasBfcache se ejecuta de
+  verdad, con un document falso, en vez de inspeccionar el código fuente como
+  texto: un contrato por regex no distingue establecerBotonOcupado(boton,
+  true) de (boton, false), ni detecta un guard de persisted invertido.
+*/
+
+function crearBotonFalso(disabledInicial) {
+  const atributos = { "aria-busy": disabledInicial ? "true" : "false" };
+  return {
+    disabled: disabledInicial,
+    setAttribute(nombre, valor) {
+      atributos[nombre] = String(valor);
+    },
+    getAttribute(nombre) {
+      return atributos[nombre];
+    },
+  };
+}
+
+test("reactivarBotonesTrasBfcache reactiva un botón trabado cuando persisted es true", () => {
+  const boton = crearBotonFalso(true);
+  const documentoFalso = { querySelectorAll: () => [boton] };
+
+  reactivarBotonesTrasBfcache({ persisted: true }, documentoFalso);
+
+  assert.equal(boton.disabled, false);
+  assert.equal(boton.getAttribute("aria-busy"), "false");
+});
+
+test("reactivarBotonesTrasBfcache no toca el DOM cuando persisted es false (carga normal)", () => {
+  const boton = crearBotonFalso(true);
+  const documentoFalso = {
+    querySelectorAll: () => {
+      throw new Error("no debería consultar el DOM si persisted es false");
+    },
+  };
+
+  reactivarBotonesTrasBfcache({ persisted: false }, documentoFalso);
+
+  assert.equal(boton.disabled, true, "el botón no debió tocarse");
+});
 
 test("oauth-callback/index.html carga los scripts en el mismo orden que el resto de auth", () => {
   const orden = [

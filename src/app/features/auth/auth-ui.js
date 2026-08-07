@@ -175,6 +175,24 @@ function establecerBotonOcupado(boton, ocupado) {
   boton.setAttribute("aria-busy", String(ocupado));
 }
 
+/*
+  pageshow con persisted:true es la señal de que la página volvió del
+  bfcache (botón Atrás tras un redirect completo, ej. "Continuar con
+  Google"): el navegador restaura el DOM tal cual quedó al salir, sin volver
+  a correr este script. Un botón que establecerBotonOcupado dejó disabled
+  porque se asumió "si esto sigue vivo es porque el redirect falló" (ver
+  login.js/signup.js) queda inutilizable para siempre sin este reset.
+
+  Recibe documento como parámetro (en vez de leer el global) para poder
+  ejecutarse de verdad en los tests, sin necesitar un DOM real.
+*/
+function reactivarBotonesTrasBfcache(evento, documento) {
+  if (!evento.persisted) return;
+  documento.querySelectorAll('button[aria-busy="true"]').forEach((boton) => {
+    establecerBotonOcupado(boton, false);
+  });
+}
+
 function normalizarTelefonoE164(prefijo, numero) {
   const codigoPais = prefijo.replace(/\D/g, "");
   const numeroNacional = numero.replace(/\D/g, "");
@@ -260,10 +278,13 @@ if (typeof document !== "undefined") {
       if (campo.dataset.authErrorAssociated) limpiarErroresCamposAuth();
     });
   });
+
+  window.addEventListener("pageshow", (evento) => reactivarBotonesTrasBfcache(evento, document));
 }
 
 if (typeof module === "object" && module.exports) {
   module.exports = {
     estadoCoincidenciaContrasenas,
+    reactivarBotonesTrasBfcache,
   };
 }

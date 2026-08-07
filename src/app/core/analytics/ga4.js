@@ -9,12 +9,10 @@
   la tabla eventos_negocio de Supabase (migración 0027), que sobrevive al
   borrado de la cuenta y no depende de que el navegador siga ejecutando JS.
 
-  TODO: reemplazar GA4_MEASUREMENT_ID por el ID real en cuanto se cree la
-  propiedad de GA4. Hasta entonces gtag.js falla en silencio (no rompe la
-  página, simplemente no manda datos).
+  Propiedad "Taudux" / stream "taudux.com", creada el 2026-08-07.
 */
 
-const GA4_MEASUREMENT_ID = "G-XXXXXXX";
+const GA4_MEASUREMENT_ID = "G-JDE7X7GFE5";
 
 window.dataLayer = window.dataLayer || [];
 function gtag() {

@@ -172,10 +172,62 @@
     form.elements.confirmar.value = "";
   }
 
+  /*
+    Cuenta sin identidad email (entró sólo con Google): no hay "contraseña
+    actual" que pedir. En vez de inventar un mecanismo de re-autenticación
+    nuevo, se reusa recuperarContrasena() — el mismo correo que ya manda
+    forgot-password/ — para que el usuario cree una contraseña y a partir de
+    ahí use el portal como cualquier cuenta con contraseña. No baja el piso de
+    seguridad: es la misma prueba de control del buzón que forgot-password ya
+    exige hoy para tomar cualquier cuenta con contraseña.
+  */
+  function configurarEnvioEnlaceContrasena({ boton, estado, email }) {
+    if (!boton || !estado) return;
+
+    boton.addEventListener("click", async () => {
+      const textoOriginal = boton.textContent;
+      boton.disabled = true;
+      boton.textContent = boton.dataset.loadingText || "Enviando…";
+      try {
+        const resultado = await recuperarContrasena(email);
+        estado.textContent = resultado.ok
+          ? `Te enviamos un enlace a ${email}. Ábrelo para crear tu contraseña.`
+          : resultado.mensaje;
+        if (!resultado.ok) mostrarToast(resultado.mensaje, "error");
+      } finally {
+        boton.textContent = textoOriginal;
+        boton.disabled = false;
+      }
+    });
+  }
+
+  /*
+    El resto de esta función (requisitos, coincidencia y el submit con
+    signInWithPassword) queda sin ramificar a propósito: con tieneContrasena
+    en false el form nunca se muestra y su campo actual queda disabled, así
+    que ese código simplemente no llega a ejecutarse por interacción del
+    usuario. Ramificarlo también duplicaría lógica sin necesidad.
+  */
   function configurarFormularioContrasena(session) {
     const form = document.getElementById("formContrasena");
     const estado = document.getElementById("contrasenaStatus");
     if (!form || !estado) return;
+
+    const aviso = document.getElementById("avisoSinContrasena");
+    const tieneContrasena = puedeUsarContrasena(session.user);
+
+    form.hidden = !tieneContrasena;
+    form.elements.actual.required = tieneContrasena;
+    form.elements.actual.disabled = !tieneContrasena;
+    if (aviso) aviso.hidden = tieneContrasena;
+
+    if (!tieneContrasena) {
+      configurarEnvioEnlaceContrasena({
+        boton: document.getElementById("botonEnlaceContrasena"),
+        estado: document.getElementById("avisoSinContrasenaEstado"),
+        email: session.user.email,
+      });
+    }
 
     configurarRequisitosContrasena(
       document.getElementById("contrasenaNueva"),
@@ -277,6 +329,11 @@
     correo tipeado en el diálogo. El toast del diálogo se emite recién cuando la
     promesa resuelve, porque el top layer del <dialog> taparía cualquier toast
     lanzado antes.
+
+    Una cuenta sin identidad email no tiene esa primera barrera para dar: en su
+    lugar se le ofrece crear una contraseña por el mismo enlace de
+    recuperarContrasena() (ver configurarEnvioEnlaceContrasena) y recién
+    entonces vuelve a intentar el borrado con el camino normal.
   */
   function configurarEliminarCuenta(session) {
     const boton = document.getElementById("botonMostrarEliminarCuenta");
@@ -284,10 +341,30 @@
     const estado = document.getElementById("eliminarCuentaStatus");
     if (!boton || !form || !estado) return;
 
+    const aviso = document.getElementById("avisoSinContrasenaEliminar");
+    const botonEnlace = document.getElementById("botonEnlaceEliminarCuenta");
+    const tieneContrasena = puedeUsarContrasena(session.user);
+
+    form.elements.contrasena.required = tieneContrasena;
+    form.elements.contrasena.disabled = !tieneContrasena;
+
+    if (!tieneContrasena) {
+      configurarEnvioEnlaceContrasena({
+        boton: botonEnlace,
+        estado: document.getElementById("avisoSinContrasenaEliminarEstado"),
+        email: session.user.email,
+      });
+    }
+
     boton.addEventListener("click", () => {
-      form.hidden = false;
       boton.hidden = true;
-      form.elements.contrasena.focus();
+      if (tieneContrasena) {
+        form.hidden = false;
+        form.elements.contrasena.focus();
+      } else if (aviso) {
+        aviso.hidden = false;
+        if (botonEnlace) botonEnlace.focus();
+      }
     });
 
     form.addEventListener("submit", async (evento) => {

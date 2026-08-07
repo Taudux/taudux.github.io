@@ -104,6 +104,14 @@
                 <p class="portal__field-note">El correo no se puede cambiar desde aquí. ¿Necesitas ayuda? <a href="/#contacto">Contáctanos</a>.</p>
               </div>
 
+              <div class="portal__form" id="avisoSinContrasena" hidden>
+                <p class="portal__section-intro">Tu cuenta todavía no tiene contraseña porque entras con Google. Para crear una, te enviaremos un enlace a tu correo.</p>
+                <div class="portal__form-actions">
+                  <button type="button" class="button button--outline" id="botonEnlaceContrasena" data-loading-text="Enviando…">Enviarme un enlace</button>
+                </div>
+                <p class="portal__field-note" id="avisoSinContrasenaEstado" role="status" aria-live="polite"></p>
+              </div>
+
               <form id="formContrasena" class="portal__form" novalidate>
                 <p class="portal__status" id="contrasenaStatus" role="alert" tabindex="-1" hidden></p>
 
@@ -160,6 +168,14 @@
                 <h3 class="portal__danger-title">Eliminar cuenta</h3>
                 <p class="portal__section-intro">Se borran tu cuenta y tu perfil de forma permanente. Esta acción no se puede deshacer.</p>
                 <button type="button" class="button button--outline portal__danger-button" id="botonMostrarEliminarCuenta">Eliminar cuenta</button>
+
+                <div class="portal__form" id="avisoSinContrasenaEliminar" hidden>
+                  <p class="portal__section-intro">Para eliminar tu cuenta necesitamos confirmar que eres tú con una contraseña. Tu cuenta todavía no tiene una: te enviaremos un enlace para crearla.</p>
+                  <div class="portal__form-actions">
+                    <button type="button" class="button button--outline" id="botonEnlaceEliminarCuenta" data-loading-text="Enviando…">Enviarme un enlace</button>
+                  </div>
+                  <p class="portal__field-note" id="avisoSinContrasenaEliminarEstado" role="status" aria-live="polite"></p>
+                </div>
 
                 <form id="formEliminarCuenta" class="portal__form" novalidate hidden>
                   <p class="portal__status" id="eliminarCuentaStatus" role="alert" tabindex="-1" hidden></p>
@@ -232,6 +248,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/app/core/supabase/supabase-client.js"></script>
   <script src="/app/core/auth/auth.service.js"></script>
+  <script src="/app/core/auth/auth-identidades.js"></script>
   <script src="/app/core/perfil/perfil.service.js"></script>
   <script src="/app/features/auth/auth-ui.js"></script>
   <script src="/app/shared/navbar/navbar.js"></script>

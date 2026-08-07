@@ -252,8 +252,19 @@ async function verificarEnlaceCorreo(tokenHash, tipo) {
   return { ok: true, data };
 }
 
+/*
+  data.tiene_contrasena queda en user_metadata porque identities NO se
+  actualiza acá: Supabase sólo agrega una identidad "email" al hacer signUp o
+  al vincular un proveedor explícitamente, nunca al llamar updateUser con
+  password sobre una cuenta OAuth-only. Sin esta marca, una cuenta Google que
+  recién creó su contraseña seguiría viéndose "sin contraseña" para siempre
+  (ver auth-identidades.js), porque identities seguiría listando sólo google.
+*/
 async function cambiarContrasena(nuevaPassword) {
-  const { error } = await supabaseClient.auth.updateUser({ password: nuevaPassword });
+  const { error } = await supabaseClient.auth.updateUser({
+    password: nuevaPassword,
+    data: { tiene_contrasena: true },
+  });
   if (error) {
     return { ok: false, codigo: error.code, mensaje: traducirErrorAuth(error) };
   }
